@@ -25,7 +25,7 @@ npm install
 4. Start the server
 
 ```sh
-npm start
+npm run dev
 ```
 
 Now, the server is running at `http://localhost:8000`

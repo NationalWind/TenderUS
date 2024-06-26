@@ -1,5 +1,7 @@
+import { NextFunction, Request, Response } from "express";
+
 const authMiddeware = {
-  checkIfRightUser: (req, res, next) => {
+  checkIfRightUser: (req: Request, res: Response, next: NextFunction) => {
     const validation = "do something";
     if (validation) {
       next();
