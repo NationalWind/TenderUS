@@ -1,9 +1,12 @@
-import express from "express";
+import express from "express"
+import bodyParser from "body-parser";
 import "dotenv/config";
 import authRouter from "./routers/authRouter";
 
 const app = express();
 
-app.use("/api/auth", authRouter);
+app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 
-app.listen(process.env.PORT, async () => console.log("Server is running..."));
+app.use("/api/auth", authRouter)
+
+app.listen(process.env.PORT, () => console.log("Server is running..."))

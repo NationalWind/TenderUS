@@ -4,8 +4,10 @@ import authMiddeware from "../middlewares/authMiddleware";
 
 const authRouter = express.Router();
 
-authRouter.get("/getInfo", authMiddeware.checkIfRightUser, authController.getInfo);
+authRouter.get("/account/:id", authMiddeware.checkUser, authController.getAccount);
 authRouter.post("/register", authController.register);
 authRouter.post("/login", authController.login);
+authRouter.post("/changePassword", authController.changePassword);
+authRouter.post("/resetPassword", authController.resetPassword);
 
 export default authRouter;
