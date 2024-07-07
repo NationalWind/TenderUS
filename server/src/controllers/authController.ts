@@ -3,13 +3,14 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import db from "../lib/db";
 import { Account, Role } from "@prisma/client";
-import { getAuth } from "../lib/firebase";
+import { AdmGetAuth } from "../lib/firebase";
+
 
 const authController = {
-  // GET /api/auth/accout/:id
+  // GET /api/auth/account
   getAccount: async (req: Request, res: Response) => {
     try {
-      const { id } = req.params;
+      const { id } = req.body.id;
       const account = await db.account.findUnique({ where: { id } });
       res.status(200).json(account);
     } catch (error) {
@@ -17,24 +18,25 @@ const authController = {
       res.status(500).json({ message: "Something went wrong" });
     }
   },
+
   // POST /api/auth/register
   register: async (req: Request, res: Response) => {
     try {
       const data: Omit<Account, "id"> & { token?: string } = req.body;
 
-      if (!data.token) {
+      if (!data.username || !data.password || !data.token) {
         res.status(400).json({ message: "Bad request" });
         return;
       }
 
+      const decodedToken = await AdmGetAuth().verifyIdToken(data.token);
       const takenUsername = await db.account.count({ where: { username: data.username } });
+
       if (takenUsername) {
         res.status(409).json({ message: "This username has already taken" });
       } else {
-        // TODO: email or phone validation
-        const decodedToken = await getAuth().verifyIdToken(data.token);
         if (data.email) {
-          if (decodedToken.email !== data.email) {
+          if (decodedToken.email !== data.email || !decodedToken.email_verified) {
             res.status(403).json({ message: "No permission" });
             return;
           }

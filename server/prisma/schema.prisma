@@ -20,3 +20,19 @@ model Account {
   phone    String?
   role     Role
 }
+
+model Like {
+  doc_id   String  @id @default(auto()) @map("_id") @db.ObjectId
+  id       String
+  likedID  String
+
+  @@unique([id, likedID])
+}
+
+model Pass_A {
+  doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  id        String
+  passedID  String
+
+  @@unique([id, passedID])
+}
