@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "764421053085",
+    "project_id": "tenderus-ad9e3",
+    "storage_bucket": "tenderus-ad9e3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764421053085:android:675a3236f0b7812d251274",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJuEKjeT71GU8YQW1fSq87D40c48zX5_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
