@@ -1,6 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { v4 as uuid } from "uuid";
+import { getAuth } from "firebase-admin/auth";
+
+import admin from "firebase-admin";
+
+import * as serviceAccount from "./keep-this-private-but-not-in-this-project.json";
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
+});
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -33,4 +42,5 @@ const firebase = {
   },
 };
 
+export { getAuth };
 export default firebase;

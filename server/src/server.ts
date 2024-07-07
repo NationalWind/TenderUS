@@ -5,7 +5,10 @@ import authRouter from "./routers/authRouter";
 
 const app = express();
 
+
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
+
+app.use(express.json());
 
 app.use("/api/auth", authRouter)
 
