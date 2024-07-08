@@ -7,7 +7,9 @@ import { getMessaging } from "../lib/firebase";
 const MatchFCM = async (username: string) => {
   const foundAccount = await db.account.findUnique({ where: { username: username } });
 
-  const registrationToken = foundAccount!.FCMRegToken!;
+  if (foundAccount!.FCMRegToken === null) return;
+
+  const registrationToken = foundAccount!.FCMRegToken;
 
   const message = {
     data: {
