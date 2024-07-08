@@ -67,9 +67,20 @@ const authController = {
   // POST /api/auth/login
   login: async (req: Request, res: Response) => {
     try {
-      const data: { username: string; password: string } = req.body;
+      interface LoginRequest {
+        username: string;
+        password: string;
+        FCMRegToken: string;
+      }
+      const data: LoginRequest = req.body;
+      if (!data.username || !data.password || !data.FCMRegToken) {
+        res.status(400).json({ message: "Bad request" });
+        return;
+      }
+
       const foundAccount = await db.account.findUnique({ where: { username: data.username } });
       if (foundAccount) {
+        await db.account.update({ where: { username: data.username }, data: { FCMRegToken: data.FCMRegToken } });
         const isMatched = await bcrypt.compare(data.password, foundAccount.password);
         if (isMatched) {
           const token = jwt.sign(foundAccount, process.env.JWT_KEY as string);

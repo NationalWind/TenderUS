@@ -19,6 +19,7 @@ model Account {
   email    String?
   phone    String?
   role     Role
+  FCMRegToken String?
 }
 
 model Like {
