@@ -2,7 +2,9 @@
 
 # To use
 This is implemented to run on a real android device and can be tested by connecting to your android device thru wifi in developer mode.
-The client and server in this test are connected thru a wlan. Need to allocate the server an ip address (static one recommended).
+The client and server in this test are connected thru a wlan. Need to allocate the server an ip address in the wlan.
 
 ## Change in the code
 Change the phoneNumber variable, change the server ip address for the client to connect to.
+Change Firebase's config to the team's common firebase project.
+Note to allow nodejs runtime in firewall settings.
