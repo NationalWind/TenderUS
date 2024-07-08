@@ -4,14 +4,11 @@ import jwt from "jsonwebtoken";
 const authMiddeware = {
   checkUser: (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
       const { token } = req.body;
-      const decoded = jwt.verify(token, process.env.JWT_KEY as string) as { id: string };
-      if (decoded.id === id) {
-        next();
-      } else {
-        res.status(403).json({ message: "No permission" });
-      }
+      const decoded = jwt.verify(token, process.env.JWT_KEY as string) as { username: string };
+      req.body.id = decoded.username;
+      delete req.body.token;
+      next();
     } catch {
       res.status(500).json({ message: "Invalid token" });
     }
