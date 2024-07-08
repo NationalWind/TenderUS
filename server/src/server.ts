@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import "dotenv/config";
 import authRouter from "./routers/authRouter";
 import swipeRouter from "./routers/swipeRouter";
+import { AdmGetAuth } from "./lib/firebase";
 
 const app = express();
 
