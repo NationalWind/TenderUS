@@ -6,7 +6,7 @@ import { getAuth as AdmGetAuth } from "firebase-admin/auth";
 //ADMIN
 import admin from "firebase-admin";
 
-import * as serviceAccount from "./keep-this-private-but-not-in-this-project.json";
+import * as serviceAccount from "../../keep-this-secret.json";
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
@@ -15,12 +15,12 @@ admin.initializeApp({
 
 //APP
 const firebaseConfig = {
-  apiKey: "AIzaSyCzBAIo1d2xkRGl8fIQpMHu9iIVmfw1nsI",
-  authDomain: "tenderus-611c8.firebaseapp.com",
-  projectId: "tenderus-611c8",
-  storageBucket: "tenderus-611c8.appspot.com",
-  messagingSenderId: "585038214587",
-  appId: "1:585038214587:web:58a13de448d8f24fc1809e"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
