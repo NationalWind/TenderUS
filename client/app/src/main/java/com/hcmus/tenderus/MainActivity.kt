@@ -11,7 +11,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
+import com.hcmus.tenderus.ui.SplashScreen
+import com.hcmus.tenderus.ui.OnboardingScreen1
+//import com.hcmus.tenderus.ui.OnboardingScreen2
+//import com.hcmus.tenderus.ui.OnboardingScreen3
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,11 +26,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TenderUSTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+                NavHost(navController, startDestination = "splash") {
+                    composable("splash") { SplashScreen(navController = navController) }
+                    composable("onboarding1") { OnboardingScreen1(navController = navController) }
+//                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
+//                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
                 }
             }
         }
