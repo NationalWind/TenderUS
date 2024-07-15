@@ -1,5 +1,3 @@
-// settings.gradle.kts
-
 pluginManagement {
     repositories {
         google {
@@ -12,12 +10,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-    plugins {
-        id("com.android.application") version "8.5.0" apply false
-        id("org.jetbrains.kotlin.android") version "1.8.0" apply false
-    }
 }
-
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -26,5 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TenderUS"
+rootProject.name = "TenderUS-App"
 include(":app")
+ 
