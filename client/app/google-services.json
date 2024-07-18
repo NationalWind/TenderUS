@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "865723374399",
+    "project_id": "tenderus---app",
+    "storage_bucket": "tenderus---app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:865723374399:android:88ea2d24b6b050f56d118a",
+        "android_client_info": {
+          "package_name": "com.hcmus.tenderus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4sD4mxD-V-oYqUiWAVB8powusyr_Vyfc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

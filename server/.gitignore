@@ -1,4 +1,5 @@
 /node_modules
 /dist
-keep-this-secret.json
+/cert
+download-from-firebase-project-settings-service-accounts.json
 .env

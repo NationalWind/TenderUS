@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.hcmus.tenderus" />
+                  <option name="mobileSdkAppId" value="1:865723374399:android:88ea2d24b6b050f56d118a" />
+                  <option name="projectId" value="tenderus---app" />
+                  <option name="projectNumber" value="865723374399" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

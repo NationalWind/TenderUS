@@ -6,7 +6,7 @@ import { getAuth as AdmGetAuth } from "firebase-admin/auth";
 //ADMIN
 import admin from "firebase-admin";
 
-import * as serviceAccount from "../../keep-this-secret.json";
+import * as serviceAccount from "../../download-from-firebase-project-settings-service-accounts.json";
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)

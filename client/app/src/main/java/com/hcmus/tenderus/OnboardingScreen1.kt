@@ -15,6 +15,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.model.User
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun OnboardingScreen1(navController: NavController) {
@@ -42,7 +45,8 @@ fun OnboardingScreen1(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { navController.navigate("onboarding2") },
+            onClick = {
+                navController.navigate("onboarding2") },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Next")
