@@ -56,7 +56,7 @@ const authController = {
         delete data.token
 
         const account = await db.account.create({ data });
-        res.status(200).json(account);
+        res.status(200).json({ message: "OK" });
       }
     } catch (error) {
       console.log(error);
@@ -130,7 +130,7 @@ const authController = {
           where: { username: data.username },
           data: { password: newPassword },
         });
-        res.status(200).json(account);
+        res.status(200).json({ message: "OK" });
       } else {
         res.json({ message: "Username not found" });
       }

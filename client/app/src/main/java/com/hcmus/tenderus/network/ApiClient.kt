@@ -35,6 +35,10 @@ object ApiClient {
         create(SyncSignUpWithSMS::class.java)
     }
 
+    val SyncSignUpWithEmailApi by lazy {
+        create(SyncSignUpWithEmail::class.java)
+    }
+
     private fun getUnsafeOkHttpClient(): OkHttpClient? {
         return try {
             // Create a trust manager that does not validate certificate chains
