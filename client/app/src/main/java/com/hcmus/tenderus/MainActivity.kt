@@ -58,11 +58,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "emailsend") {
+                NavHost(navController, startDestination = "splash") {
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
-//                    composable("emailsend") { EmailSend(firebaseEmailAuth, navController = navController) }
-//                    composable("emailsync") { EmailSync(firebaseEmailAuth) }
+//                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
+//                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
 //                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
                 }
@@ -72,13 +72,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun EmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
+fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
     var user by remember { mutableStateOf(User("tenten", "toleron", "ng.nguynv@gmail.com", "ahohe")) }
     val scope = rememberCoroutineScope()
     Button(onClick = {
         scope.launch {
             try {
-                firebaseEmailAuth.signUpAndSendEmail(user.email, user.password)
+                firebaseEmailAuth.sendEmail(user.email)
                 navController.navigate("emailsync")
             } catch (e: Exception) {
                 Log.d("EmailSend", e.toString())
@@ -90,16 +90,16 @@ fun EmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController
     }
 }
 @Composable
-fun EmailSync(firebaseEmailAuth: FirebaseEmailAuth) {
-    var user by remember { mutableStateOf(User("tenten", "toleron", "ng.nguynv@gmail.com", "ahohe")) }
+fun ExampleEmailSync(firebaseEmailAuth: FirebaseEmailAuth) {
+    var user by remember { mutableStateOf(User("tenten", "toleron", "ng.nguynv@gmail.com")) }
     val scope = rememberCoroutineScope()
     var text by remember { mutableStateOf("Sync Email") }
 
     Text(text)
     LaunchedEffect(Unit) {
         try {
-            firebaseEmailAuth.confirmAndSync(user)
-            text = "Signing Up Successfully!!!"
+            firebaseEmailAuth.confirmAndSync(user, "RESET_PASSWORD")
+            text = "Reset thy password Successfully!!!"
         } catch (e: Exception) {
             Log.d("EmailSync", e.toString())
         }
