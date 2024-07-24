@@ -1,21 +1,11 @@
-package com.hcmus.tenderus.firebase
+package com.hcmus.tenderus.utils.firebase
 
 import android.app.Activity
 import android.util.Log
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import com.google.firebase.*
 import com.google.firebase.auth.*
 import com.hcmus.tenderus.model.User
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpWithSMSApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 
