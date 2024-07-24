@@ -5,13 +5,16 @@ import android.util.Log
 import com.google.firebase.*
 import com.google.firebase.auth.*
 import com.hcmus.tenderus.model.User
-import com.hcmus.tenderus.network.ApiClient.SyncSignUpWithSMSApi
+import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
+import com.hcmus.tenderus.network.ApiClient.SyncPasswordResetApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 
-class FirebaseSMSAuth(private val act: Activity) {
+class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity) {
     private val TAG = "Firebase Auth SMS"
-    private val auth = Firebase.auth
     private var storedVerificationId: String = ""
     private lateinit var resendToken: PhoneAuthProvider.ForceResendingToken
 
@@ -69,8 +72,8 @@ class FirebaseSMSAuth(private val act: Activity) {
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    suspend fun confirmAndSync(user: User, sms: String) {
-        val credential = PhoneAuthProvider.getCredential(storedVerificationId, sms)
+    suspend fun confirmAndSync(user: User, otp: String, syncFor: String) {
+        val credential = PhoneAuthProvider.getCredential(storedVerificationId, otp)
 
         val result = auth.signInWithCredential(credential).await()
         // Sign in success, update UI with the signed-in user's information
@@ -79,7 +82,13 @@ class FirebaseSMSAuth(private val act: Activity) {
         val mUser = result.user
         val tokenResult = mUser!!.getIdToken(true).await()
         user.token = tokenResult.token!!
-        SyncSignUpWithSMSApi.sync(user)
+        if (syncFor == "SIGN_UP") {
+            SyncSignUpApi.sync(user)
+        } else if (syncFor == "RESET_PASSWORD") {
+            SyncPasswordResetApi.sync(user)
+        } else {
+            throw Exception("Invalid syncFor")
+        }
 
         Log.d(TAG, "Sync:success")
     }

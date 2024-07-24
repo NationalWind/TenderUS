@@ -31,8 +31,12 @@ object ApiClient {
         return retrofit.create(service)
     }
 
-    val SyncSignUpWithSMSApi by lazy {
-        create(SyncSignUpWithSMS::class.java)
+    val SyncSignUpApi by lazy {
+        create(SyncSignUp::class.java)
+    }
+
+    val SyncPasswordResetApi by lazy {
+        create(SyncPasswordReset::class.java)
     }
 
     private fun getUnsafeOkHttpClient(): OkHttpClient? {

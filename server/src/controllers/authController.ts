@@ -41,6 +41,7 @@ const authController = {
             res.status(403).json({ message: "No permission" });
             return;
           }
+          await AdmGetAuth().updateUser(decodedToken.uid, { emailVerified: false });
         } else if (data.phone) {
           if (decodedToken.phone_number !== data.phone) {
             res.status(403).json({ message: "No permission" });
@@ -56,7 +57,7 @@ const authController = {
         delete data.token
 
         const account = await db.account.create({ data });
-        res.status(200).json(account);
+        res.status(200).json({ message: "OK" });
       }
     } catch (error) {
       console.log(error);
@@ -110,6 +111,7 @@ const authController = {
             res.status(400).json({ message: "No email match with this username" });
             return;
           }
+          await AdmGetAuth().updateUser(decodedToken.uid, { emailVerified: false });
         } else if (data.phone) {
           if (decodedToken.phone_number !== data.phone) {
             res.status(403).json({ message: "No permission" });
@@ -130,7 +132,7 @@ const authController = {
           where: { username: data.username },
           data: { password: newPassword },
         });
-        res.status(200).json(account);
+        res.status(200).json({ message: "OK" });
       } else {
         res.json({ message: "Username not found" });
       }
