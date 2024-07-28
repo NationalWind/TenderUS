@@ -1,4 +1,4 @@
-package com.hcmus.tenderus.firebase
+package com.hcmus.tenderus.utils.firebase
 
 import android.app.Activity
 import android.util.Log
