@@ -36,3 +36,15 @@ model Pass_A {
 
   @@unique([id, passedID])
 }
+
+model Message {
+  doc_id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  sender     String
+  receiver   String
+  msgID      Int
+  msgType    String
+  content    String
+  createdAt  DateTime
+
+  @@unique([sender, receiver, msgID(sort: desc)])
+}

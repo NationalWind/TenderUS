@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import "dotenv/config";
 import authRouter from "./routers/authRouter";
 import swipeRouter from "./routers/swipeRouter";
+import messageRouter from "./routers/messageRouter";
 import { AdmGetAuth } from "./lib/firebase";
 import https from "https";
 import fs from "node:fs";
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRouter);
 app.use("/api/swipe", swipeRouter);
+app.use("/api/message", messageRouter);
 
 const options = {
   key: fs.readFileSync("cert/key.pem"),
