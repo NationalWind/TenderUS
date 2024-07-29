@@ -19,6 +19,7 @@ model Account {
   email    String?
   phone    String?
   role     Role
+  FCMRegToken String?
 }
 
 model Like {
@@ -46,5 +47,5 @@ model Message {
   content    String
   createdAt  DateTime
 
-  @@unique([sender, receiver, msgID(sort: desc)])
+  @@unique([sender, receiver, msgID(sort: Desc)])
 }

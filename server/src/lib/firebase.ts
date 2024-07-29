@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { v4 as uuid } from "uuid";
 import { getAuth as AdmGetAuth } from "firebase-admin/auth";
+import { getMessaging } from "firebase-admin/messaging";
 
 //ADMIN
 import admin from "firebase-admin";
@@ -49,6 +50,6 @@ const firebase = {
 
 
 
-export { AdmGetAuth };
+export { AdmGetAuth, getMessaging };
 
 export default firebase;
