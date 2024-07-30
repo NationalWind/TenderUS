@@ -3,3 +3,4 @@
 /cert
 download-from-firebase-project-settings-service-accounts.json
 .env
+*.swp

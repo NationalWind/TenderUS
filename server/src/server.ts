@@ -4,7 +4,7 @@ import "dotenv/config";
 import authRouter from "./routers/authRouter";
 import swipeRouter from "./routers/swipeRouter";
 import messageRouter from "./routers/messageRouter";
-import { AdmGetAuth } from "./lib/firebase";
+import { AdmGetAuth, firebaseFCM } from "./lib/firebase";
 import https from "https";
 import fs from "node:fs";
 

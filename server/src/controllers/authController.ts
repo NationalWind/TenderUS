@@ -153,6 +153,17 @@ const authController = {
     }
   },
 
+  // POST /api/auth/signOut
+  signOut: async (req: Request, res: Response) => {
+    try {
+      const { username } = req.body;
+      await db.account.update({ where: { username: username }, data: { FCMRegToken: null } });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  },
+
   // POST /api/auth/changePassword
   // changePassword: async (req: Request, res: Response) => {
   //   try {

@@ -48,8 +48,28 @@ const firebase = {
   },
 };
 
+const firebaseFCM = {
+  sendFCM: async (/*avatarIconURL: string, */registrationToken: string, payload: string) => {
+    if (!registrationToken) {
+      console.log("The user hasn't logged in yet");
+      return;
+    }
+    const message = {
+      data: {
+        message: payload
+      },
+      token: registrationToken
+    };
+
+    // Send a message to the device corresponding to the provided
+    // registration token.
+    console.log(await getMessaging().send(message))
+  }
+
+}
 
 
-export { AdmGetAuth, getMessaging };
+
+export { AdmGetAuth, getMessaging, firebase, firebaseFCM };
 
 export default firebase;

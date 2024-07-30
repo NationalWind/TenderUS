@@ -4,12 +4,9 @@ import android.app.Activity
 import android.util.Log
 import com.google.firebase.*
 import com.google.firebase.auth.*
-import com.hcmus.tenderus.model.User
+import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
 import com.hcmus.tenderus.network.ApiClient.SyncPasswordResetApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 
@@ -72,7 +69,7 @@ class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity)
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    suspend fun confirmAndSync(user: User, otp: String, syncFor: String) {
+    suspend fun confirmAndSync(userRegistration: UserRegistration, otp: String, syncFor: String) {
         val credential = PhoneAuthProvider.getCredential(storedVerificationId, otp)
 
         val result = auth.signInWithCredential(credential).await()
@@ -81,11 +78,11 @@ class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity)
 
         val mUser = result.user
         val tokenResult = mUser!!.getIdToken(true).await()
-        user.token = tokenResult.token!!
+        userRegistration.token = tokenResult.token!!
         if (syncFor == "SIGN_UP") {
-            SyncSignUpApi.sync(user)
+            SyncSignUpApi.sync(userRegistration)
         } else if (syncFor == "RESET_PASSWORD") {
-            SyncPasswordResetApi.sync(user)
+            SyncPasswordResetApi.sync(userRegistration)
         } else {
             throw Exception("Invalid syncFor")
         }

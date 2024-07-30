@@ -20,7 +20,26 @@ model Account {
   phone    String?
   role     Role
   FCMRegToken String?
+  avatarIcon String?
 }
+
+model Profile {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  username      String   @unique
+  pictures      String[]
+  description   String
+
+  longitude     Float?
+  latitude      Float?
+
+  identity      String
+  age           Int
+  interests     String[]
+  preferedAge   Int
+  preferedDist  Int
+  showMe        String
+}
+
 
 model Like {
   doc_id   String  @id @default(auto()) @map("_id") @db.ObjectId
@@ -36,6 +55,15 @@ model Pass_A {
   passedID  String
 
   @@unique([id, passedID])
+}
+
+model Match {
+  doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  id1       String
+  id2       String
+  createdAt DateTime
+
+  @@unique([id1, id2])
 }
 
 model Message {
