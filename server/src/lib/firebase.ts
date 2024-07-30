@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { v4 as uuid } from "uuid";
 import { getAuth as AdmGetAuth } from "firebase-admin/auth";
+import { getMessaging } from "firebase-admin/messaging";
 
 //ADMIN
 import admin from "firebase-admin";
@@ -47,8 +48,28 @@ const firebase = {
   },
 };
 
+const firebaseFCM = {
+  sendFCM: async (/*avatarIconURL: string, */registrationToken: string, payload: string) => {
+    if (!registrationToken) {
+      console.log("The user hasn't logged in yet");
+      return;
+    }
+    const message = {
+      data: {
+        message: payload
+      },
+      token: registrationToken
+    };
+
+    // Send a message to the device corresponding to the provided
+    // registration token.
+    console.log(await getMessaging().send(message))
+  }
+
+}
 
 
-export { AdmGetAuth };
+
+export { AdmGetAuth, getMessaging, firebase, firebaseFCM };
 
 export default firebase;

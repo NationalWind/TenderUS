@@ -3,7 +3,7 @@ package com.hcmus.tenderus.utils.firebase
 import android.app.Activity
 import android.util.Log
 import com.google.firebase.auth.*
-import com.hcmus.tenderus.model.User
+import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
 import com.hcmus.tenderus.network.ApiClient.SyncPasswordResetApi
 
@@ -30,16 +30,16 @@ class FirebaseEmailAuth(private val auth: FirebaseAuth, private val act: Activit
 
     }
 
-    suspend fun confirmAndSync(user: User, syncFor: String) {
+    suspend fun confirmAndSync(userRegistration: UserRegistration, syncFor: String) {
         do {
             delay(1500)
             auth.currentUser!!.reload().await()
         } while (auth.currentUser!!.isEmailVerified == false)
-        user.token = auth.currentUser!!.getIdToken(true).await().token!!
+        userRegistration.token = auth.currentUser!!.getIdToken(true).await().token!!
         if (syncFor == "SIGN_UP") {
-            SyncSignUpApi.sync(user)
+            SyncSignUpApi.sync(userRegistration)
         } else if (syncFor == "RESET_PASSWORD") {
-            SyncPasswordResetApi.sync(user)
+            SyncPasswordResetApi.sync(userRegistration)
         } else {
             throw Exception("Invalid syncFor")
         }

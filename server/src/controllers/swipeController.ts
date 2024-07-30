@@ -1,8 +1,19 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import db from "../lib/db";
-import { Account, Role, Like } from "@prisma/client";
+import { Account, Role, Like, Match } from "@prisma/client";
+import { firebaseFCM } from "../lib/firebase";
 
+
+const MatchFCM = async (username: string) => {
+  const foundAccount = await db.account.findUnique({ where: { username: username } });
+
+  if (foundAccount!.FCMRegToken === null) return;
+
+  const registrationToken = foundAccount!.FCMRegToken;
+
+  await firebaseFCM.sendFCM(registrationToken, "You have a new match!");
+};
 
 // POST /like {token: String, likedID: String}
 const swipeController = {
@@ -25,7 +36,10 @@ const swipeController = {
       var match = false;
       if (checked) {
         match = true;
+        await db.match.create({ data: { id1: data.id, id2: data.likedID, createdAt: new Date() } });
+        MatchFCM(data.likedID);
       }
+
       res.status(200).json({ match });
     } catch (error) {
       console.log(error);

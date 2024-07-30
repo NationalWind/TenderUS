@@ -38,6 +38,10 @@ object ApiClient {
     val SyncPasswordResetApi by lazy {
         create(SyncPasswordReset::class.java)
     }
+    val LoginApi by lazy {
+        create(Login::class.java)
+    }
+
 
     private fun getUnsafeOkHttpClient(): OkHttpClient? {
         return try {

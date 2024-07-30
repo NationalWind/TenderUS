@@ -1,9 +1,9 @@
 package com.hcmus.tenderus.model
 
-data class User(
+data class UserLogin (
     var username: String = "",
     var password: String = "",
     var email: String = "",
     var phone: String = "",
-    var token: String = ""
+    var FCMRegToken: String = ""
 )
