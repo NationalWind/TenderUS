@@ -2,16 +2,18 @@ package com.hcmus.tenderus.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
 
@@ -26,7 +28,7 @@ fun OnboardingScreen1(navController: NavController) {
             .background(Color.White)
     ) {
         Text(
-            text = "Welcome to ",
+            text = "Welcome to",
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Image(
@@ -39,14 +41,42 @@ fun OnboardingScreen1(navController: NavController) {
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(200.dp))
         Button(
             onClick = {
-                navController.navigate("onboarding2") },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+                navController.navigate("signup") // Navigate to Sign Up screen
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
         ) {
-            Text("Next")
+            Text(
+                text = "Create an account",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp)
+        ) {
+            Text(
+                text = "Already have an account?",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Sign In",
+                fontSize = 14.sp,
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable {
+                    navController.navigate("signin") // Navigate to Sign In screen
+                }
+            )
         }
     }
 }
-

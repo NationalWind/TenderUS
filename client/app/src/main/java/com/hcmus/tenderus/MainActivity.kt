@@ -43,6 +43,7 @@ import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.LoginApi
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
+import com.hcmus.tenderus.ui.screens.LoginScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -106,6 +107,7 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController, startDestination = "splash") {
                     composable("splash") { ExampleLogin(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
+                    composable("signin") { LoginScreen(navController = navController) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
