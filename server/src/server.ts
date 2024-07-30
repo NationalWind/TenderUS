@@ -4,8 +4,10 @@ import "dotenv/config";
 import authRouter from "./routers/authRouter";
 import swipeRouter from "./routers/swipeRouter";
 import messageRouter from "./routers/messageRouter";
+import recommendationRouter from "./routers/recommendationRouter";
 import { AdmGetAuth, firebaseFCM } from "./lib/firebase";
 import https from "https";
+import http from "http";
 import fs from "node:fs";
 
 const app = express();
@@ -17,10 +19,12 @@ app.use(express.json());
 app.use("/api/auth", authRouter);
 app.use("/api/swipe", swipeRouter);
 app.use("/api/message", messageRouter);
+app.use("/api/recommendation", recommendationRouter);
 
 const options = {
   key: fs.readFileSync("cert/key.pem"),
   cert: fs.readFileSync("cert/cert.pem"),
 }
 
-https.createServer(options, app).listen(process.env.PORT, () => console.log("Server is running..."));
+http.createServer(app).listen(process.env.HTTP_PORT);
+https.createServer(options, app).listen(process.env.HTTPS_PORT, () => console.log("Server is running..."));

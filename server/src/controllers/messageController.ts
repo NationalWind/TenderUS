@@ -15,7 +15,7 @@ const FCMPendingMessage = async (data: Message) => {
 };
 
 const messageController = {
-  // POST /send {message: Message}
+  // POST /api/message/ {message: Message}
   // Must post multimedia first then use this endpoint with content = url
   send: async (req: Request, res: Response) => {
     try {
@@ -44,7 +44,7 @@ const messageController = {
     }
   },
 
-  // GET /messages/:sender/:receiver
+  // GET /api/message/:sender/:receiver
   getLastMessage: async (req: Request, res: Response) => {
     try {
       const { sender, receiver } = req.params;
@@ -65,7 +65,7 @@ const messageController = {
       res.status(500).json({ message: "Something went wrong" });
     }
   },
-  // GET /messages/:sender/:receiver/:msgID
+  // GET /api/message/:sender/:receiver/:msgID
   getMessage: async (req: Request, res: Response) => {
     try {
       const { sender, receiver, msgID } = req.params;
