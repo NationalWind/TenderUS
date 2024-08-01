@@ -30,15 +30,15 @@ const recommendationController = {
             not: cur_prof.username
           },
           age: {
-            gte: cur_pref.AgeMin,
-            lte: cur_pref.AgeMax
+            gte: cur_pref.ageMin,
+            lte: cur_pref.ageMax
           }
         }
       });
 
       const recs: Profile[] = [];
       for (const user of users) {
-        if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.MaxDist * cur_pref.MaxDist) {
+        if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.maxDist * cur_pref.maxDist) {
           recs.push(user);
         }
       }
