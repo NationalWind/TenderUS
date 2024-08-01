@@ -89,7 +89,21 @@ fun LoginScreen(navController: NavController) {
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = "Login")
+            Text(text = "LOGIN")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { /* Handle login as guest logic here */ },
+            colors = ButtonDefaults.buttonColors(
+//                containerColor = Color(0xFF2196F3),
+                containerColor = Color.Gray,
+                contentColor = Color.White
+            ),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "LOGIN AS GUEST")
         }
 
         Spacer(modifier = Modifier.height(16.dp))

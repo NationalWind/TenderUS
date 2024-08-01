@@ -32,7 +32,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.Visibility
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
 import kotlinx.coroutines.delay
@@ -72,6 +71,7 @@ fun SignUpScreen1(navController: NavController) {
             Text(
                 "Can you share your phone number?",
                 fontSize = 30.sp,
+                color =  Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold,
                 lineHeight = 36.sp, // Adds space between the lines
                 textAlign = TextAlign.Center,
@@ -247,6 +247,7 @@ fun SignUpScreen3(navController: NavController) {
             Text(
                 "What is your email address?",
                 fontSize = 30.sp,
+                color =  Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold,
                 lineHeight = 36.sp, // Adds space between the lines
                 textAlign = TextAlign.Center,
@@ -319,6 +320,7 @@ fun SignUpScreen4(navController: NavController) {
             Text(
                 "Create a password",
                 fontSize = 30.sp,
+                color =  Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold,
                 lineHeight = 36.sp, // Adds space between the lines
                 textAlign = TextAlign.Center,
@@ -373,12 +375,13 @@ fun SignUpScreen4(navController: NavController) {
                 onClick = {
                     if (isPasswordValid && doPasswordsMatch) {
                         // Handle successful sign up
+                        navController.navigate("profilesetup1")
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Sign Up", color = Color.White)
+                Text("Create an account", color = Color.White)
             }
         }
     }
