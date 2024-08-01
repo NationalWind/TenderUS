@@ -44,16 +44,20 @@ fun OnboardingScreen1(navController: NavController) {
         Spacer(modifier = Modifier.height(200.dp))
         Button(
             onClick = {
-                navController.navigate("signup") // Navigate to Sign Up screen
+                navController.navigate("signup1") // Navigate to Sign Up screen
             },
-            modifier = Modifier.align(Alignment.CenterHorizontally),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(horizontal = 6.dp) // Optional padding around the button
+                .fillMaxWidth(), // Make the button fill the available width
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
         ) {
             Text(
                 text = "Create an account",
                 color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 23.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 12.dp) // Add vertical padding inside the button
             )
         }
         Spacer(modifier = Modifier.height(16.dp))

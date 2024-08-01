@@ -44,6 +44,11 @@ import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.LoginApi
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import com.hcmus.tenderus.ui.screens.LoginScreen
+import com.hcmus.tenderus.ui.screens.ProfileDetails1Screen
+import com.hcmus.tenderus.ui.screens.SignUpScreen1
+import com.hcmus.tenderus.ui.screens.SignUpScreen2
+import com.hcmus.tenderus.ui.screens.SignUpScreen3
+import com.hcmus.tenderus.ui.screens.SignUpScreen4
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -105,9 +110,16 @@ class MainActivity : ComponentActivity() {
             TenderUSTheme {
                 val navController = rememberNavController()
                 NavHost(navController, startDestination = "splash") {
-                    composable("splash") { ExampleLogin(navController = navController) }
+//                    composable("splash") { ExampleLogin(navController = navController)}
+                    composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
                     composable("signin") { LoginScreen(navController = navController) }
+                    composable("signup1") { SignUpScreen1(navController) }
+                    composable("signup2") { SignUpScreen2(navController)}
+                    composable("signup3") { SignUpScreen3(navController)}
+                    composable("signup4") { SignUpScreen4(navController) }
+                    composable("profilesetup1") { ProfileDetails1Screen(navController) }
+
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
