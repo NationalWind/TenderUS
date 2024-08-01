@@ -40,9 +40,9 @@ model Profile {
 model Preference {
   doc_id          String   @id @default(auto()) @map("_id") @db.ObjectId
   username        String   @unique
-  preferedAgeMin  Int
-  preferedAgeMax  Int
-  preferedMaxDist Int
+  AgeMin          Int
+  AgeMax          Int
+  MaxDist         Float
   showMe          String
 }
 
