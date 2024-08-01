@@ -24,6 +24,7 @@ const recommendationController = {
         return;
       }
 
+      // Preferences enforcement
       const users = await db.profile.findMany({
         where: {
           username: {
@@ -43,6 +44,7 @@ const recommendationController = {
         }
       }
 
+      // Recommend by interests
       recs.sort((a: Profile, b: Profile) => {
         const a_cur = a.interests.filter(value => cur_prof.interests.includes(value));
         const b_cur = b.interests.filter(value => cur_prof.interests.includes(value));

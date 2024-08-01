@@ -51,16 +51,12 @@ model Like {
   doc_id   String  @id @default(auto()) @map("_id") @db.ObjectId
   id       String
   likedID  String
-
-  @@unique([id, likedID])
 }
 
 model Pass_A {
   doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
   id        String
   passedID  String
-
-  @@unique([id, passedID])
 }
 
 model Match {
@@ -68,18 +64,13 @@ model Match {
   id1       String
   id2       String
   createdAt DateTime
-
-  @@unique([id1, id2])
 }
 
 model Message {
   doc_id     String  @id @default(auto()) @map("_id") @db.ObjectId
   sender     String
   receiver   String
-  msgID      Int
   msgType    String
   content    String
   createdAt  DateTime
-
-  @@unique([sender, receiver, msgID(sort: Desc)])
 }

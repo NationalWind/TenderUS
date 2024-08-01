@@ -27,20 +27,14 @@ const messageController = {
         return;
       }
 
-      const lastMsg = await db.message.findFirst({
-        where: {
-          OR: [
-            { sender: req.body.id, receiver: req.body.receiver },
-            { sender: req.body.receiver, receiver: req.body.id }
-          ]
-        }
-      });
-      const lastMsgID = lastMsg ? lastMsg.msgID : -1;
+      if (req.body.msgType !== "text" && req.body.msgType !== "image" && req.body.msgType !== "audio") {
+        res.status(400).json({ message: "Bad request: invalid message type" });
+        return;
+      }
 
       const data: Omit<Message, "doc_id"> = {
         sender: req.body.id,
         receiver: req.body.receiver,
-        msgID: lastMsgID + 1,
         msgType: req.body.msgType,
         content: req.body.content,
         createdAt: new Date(),
@@ -68,31 +62,51 @@ const messageController = {
     }
   },
 
-  // GET /api/message/:receiver?page=&limit=
+  // GET /api/message/:receiver?page_size=&doc_id=
   getMessage: async (req: Request, res: Response) => {
     try {
       const { receiver } = req.params;
-      if (!req.query.page || !req.query.limit) {
-        res.status(400).json({ message: "Bad request: missing paging parameters" });
+      if (!req.query.page_size) {
+        res.status(400).json({ message: "Bad request: missing paging parameter" });
         return;
       }
-      const page = parseInt(req.query.page as string);
-      const limit = parseInt(req.query.limit as string);
+      const page_size = parseInt(req.query.page_size as string);;
       const sender = req.body.id;
-      const messages = await db.message.findMany({
-        where: {
-          OR: [
-            { sender: sender, receiver: receiver },
-            { sender: receiver, receiver: sender },
-          ],
-        },
-        skip: page * 10,
-        take: limit
-      });
-      if (!messages) {
-        res.status(404).json({ message: "Message not found" });
-        return;
+
+      var messages: Message[] = [];
+
+      if (req.query.doc_id) {
+        messages = await db.message.findMany({
+          where: {
+            OR: [
+              { sender: sender, receiver: receiver },
+              { sender: receiver, receiver: sender },
+            ],
+          },
+          take: page_size,
+          orderBy: {
+            doc_id: "desc"
+          },
+          cursor: {
+            doc_id: req.query.doc_id as string
+          },
+
+        });
+      } else {
+        messages = await db.message.findMany({
+          where: {
+            OR: [
+              { sender: sender, receiver: receiver },
+              { sender: receiver, receiver: sender },
+            ],
+          },
+          take: page_size,
+          orderBy: {
+            doc_id: "desc"
+          }
+        });
       }
+
       res.status(200).json(messages)
     } catch (error) {
       res.status(500).json({ message: "Something went wrong" });
