@@ -50,20 +50,24 @@ const firebase = {
 
 const firebaseFCM = {
   sendFCM: async (/*avatarIconURL: string, */registrationToken: string, payload: string) => {
-    if (!registrationToken) {
-      console.log("The user hasn't logged in yet");
-      return;
-    }
-    const message = {
-      data: {
-        message: payload
-      },
-      token: registrationToken
-    };
+    try {
+      if (!registrationToken) {
+        console.log("The user hasn't logged in yet");
+        return;
+      }
+      const message = {
+        data: {
+          message: payload
+        },
+        token: registrationToken
+      };
 
-    // Send a message to the device corresponding to the provided
-    // registration token.
-    console.log(await getMessaging().send(message))
+      // Send a message to the device corresponding to the provided
+      // registration token.
+      console.log(await getMessaging().send(message))
+    } catch (error) {
+      console.log(error);
+    }
   }
 
 }

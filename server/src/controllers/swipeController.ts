@@ -23,7 +23,10 @@ const swipeController = {
         id: string;
         likedID: string;
       }
-      const data: LikeRequest = req.body;
+      const data: LikeRequest = {
+        id: req.body.id,
+        likedID: req.body.likedID,
+      }
 
       if (!data.id || !data.likedID || data.id === data.likedID) {
         res.status(400).json({ message: "Bad request" });
@@ -37,7 +40,7 @@ const swipeController = {
       if (checked) {
         match = true;
         await db.match.create({ data: { id1: data.id, id2: data.likedID, createdAt: new Date() } });
-        MatchFCM(data.likedID);
+        /*await */MatchFCM(data.likedID);
       }
 
       res.status(200).json({ match });
@@ -54,7 +57,10 @@ const swipeController = {
         id: string;
         passedID: string;
       }
-      const data: PassRequest = req.body;
+      const data: PassRequest = {
+        id: req.body.id,
+        passedID: req.body.passedID
+      }
 
       if (!data.id || !data.passedID || data.id === data.passedID) {
         res.status(400).json({ message: "Bad request" });

@@ -24,20 +24,26 @@ model Account {
 }
 
 model Profile {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  username      String   @unique
-  pictures      String[]
-  description   String
+  doc_id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  username        String   @unique
+  pictures        String[]
+  description     String
 
-  longitude     Float?
-  latitude      Float?
+  longitude       Float
+  latitude        Float
 
-  identity      String
-  age           Int
-  interests     String[]
-  preferedAge   Int
-  preferedDist  Int
-  showMe        String
+  identity        String
+  age             Int
+  interests       String[]
+}
+
+model Preference {
+  doc_id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  username        String   @unique
+  preferedAgeMin  Int
+  preferedAgeMax  Int
+  preferedMaxDist Int
+  showMe          String
 }
 
 

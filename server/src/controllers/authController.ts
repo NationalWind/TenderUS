@@ -73,7 +73,11 @@ const authController = {
         password: string;
         FCMRegToken: string;
       }
-      const data: LoginRequest = req.body;
+      const data: LoginRequest = {
+        username: req.body.username,
+        password: req.body.password,
+        FCMRegToken: req.body.FCMRegToken,
+      }
       if (!data.username || !data.password || !data.FCMRegToken) {
         res.status(400).json({ message: "Bad request" });
         return;
