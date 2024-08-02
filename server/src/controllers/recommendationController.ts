@@ -8,13 +8,13 @@ const recommendationController = {
   // GET /api/recommendation?page=&limit=
   getRecs: async (req: Request, res: Response) => {
     try {
-      if (!req.query.page || !req.query.limit) {
+      if (!req.query.page || !req.query.limit || typeof req.query.page !== "string" || typeof req.query.limit !== "string") {
         res.status(400).json({ message: "Bad request" });
         return;
       }
 
-      const page = parseInt(req.query.page as string);
-      const limit = parseInt(req.query.limit as string);
+      const page = parseInt(req.query.page);
+      const limit = parseInt(req.query.limit);
 
       const cur_pref = await db.preference.findUnique({ where: { username: req.body.id } });
       const cur_prof = await db.profile.findUnique({ where: { username: req.body.id } });

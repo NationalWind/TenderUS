@@ -97,16 +97,20 @@ const messageController = {
   loadMessage: async (req: Request, res: Response) => {
     try {
       const receiver = req.query.receiver;
-      if (!req.query.page_size || !receiver || typeof receiver !== "string") {
+      if (!req.query.page_size || !receiver || typeof receiver !== "string" || typeof req.query.page_size !== "string") {
         res.status(400).json({ message: "Bad request" });
         return;
       }
-      const page_size = parseInt(req.query.page_size as string);;
+      const page_size = parseInt(req.query.page_size);;
       const sender = req.body.id;
 
       var messages: Message[] = [];
 
       if (req.query.doc_id) {
+        if (typeof req.query.doc_id !== "string") {
+          res.status(400).json({ message: "Bad request" });
+          return;
+        }
         messages = await db.message.findMany({
           where: {
             OR: [
@@ -120,7 +124,7 @@ const messageController = {
             doc_id: "desc"
           },
           cursor: {
-            doc_id: req.query.doc_id as string
+            doc_id: req.query.doc_id
           },
 
         });
