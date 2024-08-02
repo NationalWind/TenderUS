@@ -14,7 +14,27 @@ const FCMPendingMessage = async (data: Omit<Message, "doc_id">) => {
   await firebaseFCM.sendFCM(registrationToken, "You have a new message!");
 };
 
+const pollers: { [key: string]: { res: Response, timeout: NodeJS.Timeout } } = {};
+
 const messageController = {
+  longPoll: async (req: Request, res: Response) => {
+    try {
+      const username = req.body.id;
+      if (pollers[username]) {
+        clearTimeout(pollers[username].timeout);
+      }
+      pollers[username] = {
+        res, timeout: setTimeout(() => {
+          res.status(408).json({ message: "Timeout" });
+          delete pollers[username];
+        }, 30000)
+      };
+    } catch (error) {
+      res.status(500).json({ message: "Something went wrong" });
+    }
+
+  },
+
   // POST /api/message/ {message}
   // Must post multimedia first then use this endpoint with content = url
   send: async (req: Request, res: Response) => {
@@ -54,6 +74,17 @@ const messageController = {
       }
       const message = await db.message.create({ data });
       /*await */FCMPendingMessage(data);
+
+      if (pollers[data.receiver]) {
+        clearTimeout(pollers[data.receiver].timeout);
+        try {
+          pollers[data.receiver].res.status(200).json(message);
+        } catch (error) {
+          console.log(error);
+        }
+        delete pollers[data.receiver];
+      }
+
       res.status(200).json(message);
 
     } catch (error) {
@@ -62,12 +93,12 @@ const messageController = {
     }
   },
 
-  // GET /api/message/:receiver?page_size=&doc_id=
-  getMessage: async (req: Request, res: Response) => {
+  // GET /api/message?receiver=&&page_size=&doc_id=
+  loadMessage: async (req: Request, res: Response) => {
     try {
-      const { receiver } = req.params;
-      if (!req.query.page_size) {
-        res.status(400).json({ message: "Bad request: missing paging parameter" });
+      const receiver = req.query.receiver;
+      if (!req.query.page_size || !receiver || typeof receiver !== "string") {
+        res.status(400).json({ message: "Bad request" });
         return;
       }
       const page_size = parseInt(req.query.page_size as string);;
@@ -83,6 +114,7 @@ const messageController = {
               { sender: receiver, receiver: sender },
             ],
           },
+          skip: 1,
           take: page_size,
           orderBy: {
             doc_id: "desc"
@@ -109,6 +141,7 @@ const messageController = {
 
       res.status(200).json(messages)
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "Something went wrong" });
     }
   },
