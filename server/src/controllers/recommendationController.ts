@@ -4,11 +4,54 @@ import { Account, Role, Profile, Preference } from "@prisma/client";
 import { firebaseFCM } from "../lib/firebase";
 import { parse } from "dotenv";
 
+const validGroups = ["Free Tonight", "Study Group", "Open Day", "Binge Watchers", "Self Care"]
+
 const recommendationController = {
-  // GET /api/recommendation?page=&limit=
+  // GET /api/recommendation/groups
+  getGroups: async (req: Request, res: Response) => {
+    try {
+      res.status(200).json({ groups: validGroups });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  },
+
+  // POST /api/recommendation/join { id(username): String, group: String }
+  join: async (req: Request, res: Response) => {
+    try {
+      const username: string = req.body.id;
+      if (!req.body.group || typeof req.body.group !== "string" || !validGroups.includes(req.body.group)) {
+        res.status(400).json({ message: "Bad request" });
+        return;
+      }
+      const group: string = req.body.group;
+
+
+      await db.profile.update({
+        where: { username },
+        data: {
+          groups: {
+            push: group
+          }
+        }
+      });
+
+      res.status(200).json({ message: "OK" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  },
+  // GET /api/recommendation?page=&limit=&group=
   getRecs: async (req: Request, res: Response) => {
     try {
       if (!req.query.page || !req.query.limit || typeof req.query.page !== "string" || typeof req.query.limit !== "string") {
+        res.status(400).json({ message: "Bad request" });
+        return;
+      }
+
+      if (req.query.group && typeof req.query.group !== "string") {
         res.status(400).json({ message: "Bad request" });
         return;
       }
@@ -22,6 +65,11 @@ const recommendationController = {
       if (!cur_prof || !cur_pref) {
         res.status(404).json({ message: "User requesting not found" });
         return;
+      }
+
+      if (req.query.group && !cur_prof.groups.includes(req.query.group)) {
+        res.status(403).json({ message: "You must join the group first" });
+        return
       }
 
       // Preferences enforcement
@@ -40,7 +88,13 @@ const recommendationController = {
       const recs: Profile[] = [];
       for (const user of users) {
         if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.maxDist * cur_pref.maxDist) {
-          recs.push(user);
+          if (req.query.group) {
+            if (user.groups.includes(req.query.group)) {
+              recs.push(user);
+            }
+          } else {
+            recs.push(user);
+          }
         }
       }
 

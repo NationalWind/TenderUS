@@ -35,6 +35,7 @@ model Profile {
   identity        String
   age             Int
   interests       String[]
+  groups          String[]
 }
 
 model Preference {
