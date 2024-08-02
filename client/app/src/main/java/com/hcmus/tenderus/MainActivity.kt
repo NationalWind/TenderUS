@@ -31,8 +31,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.screens.SplashScreen
 import com.hcmus.tenderus.ui.screens.OnboardingScreen1
-//import com.hcmus.tenderus.ui.screens.OnboardingScreen2
-//import com.hcmus.tenderus.ui.screens.OnboardingScreen3
+
 
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -45,6 +44,11 @@ import com.hcmus.tenderus.network.ApiClient.LoginApi
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import com.hcmus.tenderus.ui.screens.LoginScreen
 import com.hcmus.tenderus.ui.screens.ProfileDetails1Screen
+import com.hcmus.tenderus.ui.screens.ProfileDetails2Screen
+import com.hcmus.tenderus.ui.screens.ProfileDetails3Screen
+import com.hcmus.tenderus.ui.screens.ProfileDetails4Screen
+import com.hcmus.tenderus.ui.screens.SearchPreferencesScreen
+import com.hcmus.tenderus.ui.screens.SelectYourGoalsScreen
 import com.hcmus.tenderus.ui.screens.SignUpScreen1
 import com.hcmus.tenderus.ui.screens.SignUpScreen2
 import com.hcmus.tenderus.ui.screens.SignUpScreen3
@@ -119,7 +123,11 @@ class MainActivity : ComponentActivity() {
                     composable("signup3") { SignUpScreen3(navController)}
                     composable("signup4") { SignUpScreen4(navController) }
                     composable("profilesetup1") { ProfileDetails1Screen(navController) }
-
+                    composable("profilesetup2") { ProfileDetails2Screen(navController ) }
+                    composable("profilesetup3") { ProfileDetails3Screen(navController )}  // user preferences
+                    composable("filter") { SearchPreferencesScreen(navController)}
+                    composable("selGoal") { SelectYourGoalsScreen(navController)}
+                    composable("add_photos") { ProfileDetails4Screen(navController)}
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
