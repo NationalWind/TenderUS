@@ -56,13 +56,13 @@ fun DiscoverScreen(navController: NavController) {
                 Image(
                     painter = painterResource(id = R.drawable.logo1_2),
                     contentDescription = "Logo 1",
-                    modifier = Modifier.size(60.dp) // Adjust size as needed
+                    modifier = Modifier.size(80.dp) a// Adjust size as needed
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Image(
                     painter = painterResource(id = R.drawable.tim),
                     contentDescription = "Logo 2",
-                    modifier = Modifier.size(60.dp) // Adjust size as needed
+                    modifier = Modifier.size(40.dp) // Adjust size as needed
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -108,7 +108,7 @@ fun DiscoverScreen(navController: NavController) {
                     Text(
                         text = "Interested in",
                         fontSize = 16.sp,
-                        color = Color.White,
+                        color = Color.Black,
                         fontWeight = FontWeight.Bold,
                     )
 
@@ -122,7 +122,7 @@ fun DiscoverScreen(navController: NavController) {
                     Text(
                         text = "Location",
                         fontSize = 16.sp,
-                        color = Color.White,
+                        color = Color.Black,
                         fontWeight = FontWeight.Bold
                     )
 
