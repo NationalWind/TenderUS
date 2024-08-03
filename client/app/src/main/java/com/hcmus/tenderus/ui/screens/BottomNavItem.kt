@@ -7,5 +7,5 @@ sealed class BottomNavItem(val route: String, val icon: Int, val title: String) 
     object Matches : BottomNavItem("matches", R.drawable.matches_ic, "Matches")
     object Explore : BottomNavItem("explore", R.drawable.explore_ic, "Explore")
     object Chat : BottomNavItem("chat", R.drawable.chat_ic, "Chat")
-    object Message : BottomNavItem("profile", R.drawable.profile_ic, "Profile")
+    object Profile : BottomNavItem("profile", R.drawable.profile_ic, "Profile")
 }
