@@ -42,18 +42,21 @@ import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.LoginApi
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen3
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
-import com.hcmus.tenderus.ui.screens.LoginScreen
-import com.hcmus.tenderus.ui.screens.ProfileDetails1Screen
-import com.hcmus.tenderus.ui.screens.ProfileDetails2Screen
-import com.hcmus.tenderus.ui.screens.ProfileDetails3Screen
-import com.hcmus.tenderus.ui.screens.ProfileDetails4Screen
-import com.hcmus.tenderus.ui.screens.SearchPreferencesScreen
-import com.hcmus.tenderus.ui.screens.SelectYourGoalsScreen
-import com.hcmus.tenderus.ui.screens.SignUpScreen1
-import com.hcmus.tenderus.ui.screens.SignUpScreen2
-import com.hcmus.tenderus.ui.screens.SignUpScreen3
-import com.hcmus.tenderus.ui.screens.SignUpScreen4
+import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails2Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails3Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails4Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.SelectYourGoalsScreen
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen1
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen2
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen3
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen4
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -130,15 +133,18 @@ class MainActivity : ComponentActivity() {
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
                     composable("signin") { LoginScreen(navController = navController) }
                     composable("signup1") { SignUpScreen1(navController) }
-                    composable("signup2") { SignUpScreen2(navController)}
-                    composable("signup3") { SignUpScreen3(navController)}
+                    composable("signup2") { SignUpScreen2(navController) }
+                    composable("signup3") { SignUpScreen3(navController) }
                     composable("signup4") { SignUpScreen4(navController) }
                     composable("profilesetup1") { ProfileDetails1Screen(navController) }
                     composable("profilesetup2") { ProfileDetails2Screen(navController ) }
-                    composable("profilesetup3") { ProfileDetails3Screen(navController )}  // user preferences
-                    composable("filter") { SearchPreferencesScreen(navController)}
-                    composable("selGoal") { SelectYourGoalsScreen(navController)}
-                    composable("add_photos") { ProfileDetails4Screen(navController)}
+                    composable("profilesetup3") { ProfileDetails3Screen(navController ) }  // user preferences
+                    composable("filter") { SearchPreferencesScreen(navController) }
+                    composable("selGoal") { SelectYourGoalsScreen(navController) }
+                    composable("add_photos") { ProfileDetails4Screen(navController) }
+                    composable("fgpass1") { ForgotPasswordScreen1(navController) }
+                    composable("fgpass2") { ForgotPasswordScreen2(navController)}
+                    composable("fgpass3") { ForgotPasswordScreen3(navController) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }

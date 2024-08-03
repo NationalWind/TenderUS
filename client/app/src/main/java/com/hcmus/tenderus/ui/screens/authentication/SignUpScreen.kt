@@ -1,4 +1,4 @@
-package com.hcmus.tenderus.ui.screens
+package com.hcmus.tenderus.ui.screens.authentication
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -310,7 +310,7 @@ fun SignUpScreen4(navController: NavController) {
             Text(
                 "Create a password",
                 fontSize = 30.sp,
-                color =  Color(0xFFB71C1C),
+                color = Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold,
                 lineHeight = 36.sp, // Adds space between the lines
                 textAlign = TextAlign.Center,
@@ -339,6 +339,12 @@ fun SignUpScreen4(navController: NavController) {
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Confirm Password",
+                fontSize = 18.sp,
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth()
+            )
             BasicTextField(
                 value = confirmPassword,
                 onValueChange = {
