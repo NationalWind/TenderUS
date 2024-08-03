@@ -43,7 +43,7 @@ fun DiscoverScreen(navController: NavController) {
     TenderUSTheme {
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
+                .background(Color.White)
                 .fillMaxSize()
                 .padding(top = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -93,7 +93,7 @@ fun DiscoverScreen(navController: NavController) {
             Text(
                 text = location,
                 fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                color = Color.Gray,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(start = 16.dp)
@@ -108,7 +108,7 @@ fun DiscoverScreen(navController: NavController) {
                     Text(
                         text = "Interested in",
                         fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                     )
 
@@ -122,7 +122,7 @@ fun DiscoverScreen(navController: NavController) {
                     Text(
                         text = "Location",
                         fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
 
@@ -202,12 +202,11 @@ fun LocationSelection(location: String, onLocationChanged: (String) -> Unit) {
         .fillMaxWidth()
         .padding(8.dp)
         .clickable { expanded = true }
-        .background(MaterialTheme.colorScheme.surface)
+        .background(Color.White)
     ) {
         Text(
             text = if (selectedLocation.isEmpty()) "Select Location" else selectedLocation,
-            modifier = Modifier.padding(16.dp),
-            color = MaterialTheme.colorScheme.onSurface
+            modifier = Modifier.padding(16.dp)
         )
         DropdownMenu(
             expanded = expanded,
@@ -230,10 +229,7 @@ fun LocationSelection(location: String, onLocationChanged: (String) -> Unit) {
 @Composable
 fun DistanceSlider(distance: Float, onDistanceChanged: (Float) -> Unit) {
     Column {
-        Text(
-            text = "Distance: ${distance.toInt()} km",
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        Text(text = "Distance: ${distance.toInt()} km")
         Slider(
             value = distance,
             onValueChange = onDistanceChanged,
@@ -253,17 +249,11 @@ fun AgeRangeSlider(
 ) {
     Column {
         // Display the selected age range
-        Text(
-            text = "Age Range: ${startAge.toInt()} - ${endAge.toInt()}",
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        Text(text = "Age Range: ${startAge.toInt()} - ${endAge.toInt()}")
         Spacer(modifier = Modifier.height(8.dp))
 
         // Start age slider
-        Text(
-            text = "Select Start Age",
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        Text(text = "Select Start Age")
         Slider(
             value = startAge,
             onValueChange = {
@@ -276,10 +266,7 @@ fun AgeRangeSlider(
         Spacer(modifier = Modifier.height(16.dp))
 
         // End age slider
-        Text(
-            text = "Select End Age",
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        Text(text = "Select End Age")
         Slider(
             value = endAge,
             onValueChange = {
@@ -290,6 +277,7 @@ fun AgeRangeSlider(
         )
     }
 }
+
 
 
 
