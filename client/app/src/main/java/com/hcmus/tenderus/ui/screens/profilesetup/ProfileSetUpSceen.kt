@@ -7,8 +7,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import coil.compose.rememberAsyncImagePainter
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
@@ -444,9 +447,9 @@ fun ProfileDetails4Screen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(50.dp))
 
         Button(
-            onClick = { navController.navigate("nextScreen") }, // Replace with your navigation target
+            onClick = { navController.navigate("houserules") }, // Replace with your navigation target
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-            enabled = imageUris.size >= 2,
+            enabled = imageUris.size >= 0,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Continue", color = Color.White)
@@ -537,11 +540,89 @@ fun PhotoBox(imageUri: Uri?, onClick: () -> Unit) {
             }
         } else {
             Icon(
-                painter = painterResource(id = R.drawable.addimg), // Replace with your add icon resource ID
+                painter = painterResource(id = R.drawable.addimg),
                 contentDescription = "Add Image",
                 tint = Color.White,
                 modifier = Modifier.size(50.dp)
             )
+        }
+    }
+}
+
+
+@Composable
+fun HouseRulesScreen(navController: NavHostController) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        color = Color.White
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(100.dp))
+
+            Text(
+                text = "Welcome to",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color(0xFFB71C1C),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
+
+            Image(
+                painter = painterResource(id = R.drawable.logo1_2),
+                contentDescription = "logo",
+                modifier = Modifier.size(200.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp)) // Giảm khoảng cách giữa Image và Text
+
+            Text(
+                text = "Please follow these House Rules",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 12.dp), // Giảm khoảng cách padding
+            )
+
+            Text(
+                text = "Be yourself.\n" +
+                        "Make sure your photos, age, and bio are\ntrue to who you are.\n\n" +
+                        "Stay safe.\n" +
+                        "Don't be too quick to give out personal\ninformation.\n\n" +
+                        "Play it cool.\n" +
+                        "Respect others and treat them as you\nwould like to be treated.\n\n" +
+                        "Be proactive.\n" +
+                        "Always report bad behavior.",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 24.dp),
+                fontSize = 15.sp,
+                lineHeight = 22.sp
+            )
+
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate("main")
+                },
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .fillMaxWidth()
+                    .height(40.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFB71C1C)
+                )
+            ) {
+                Text(
+                    text = "I AGREE",
+                    fontSize = 18.sp,
+                    color = Color.White
+                )
+            }
         }
     }
 }

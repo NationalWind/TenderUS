@@ -394,7 +394,7 @@ fun SignUpScreen4(navController: NavController) {
             if (isSignUpSuccessful) {
                 LaunchedEffect(Unit) {
                     delay(2000L)
-                    navController.navigate("signin")
+                    navController.navigate("profilesetup1")
                 }
             }
         }

@@ -58,6 +58,7 @@ import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen1
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen2
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen3
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen4
+import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -146,6 +147,7 @@ class MainActivity : ComponentActivity() {
                     composable("fgpass1") { ForgotPasswordScreen1(navController) }
                     composable("fgpass2") { ForgotPasswordScreen2(navController)}
                     composable("fgpass3") { ForgotPasswordScreen3(navController) }
+                    composable("houserules") { HouseRulesScreen(navController) }
                     composable("main") { MainScreen(navController) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
