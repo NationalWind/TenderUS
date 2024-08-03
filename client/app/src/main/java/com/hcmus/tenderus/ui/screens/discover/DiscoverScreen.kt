@@ -56,7 +56,7 @@ fun DiscoverScreen(navController: NavController) {
                 Image(
                     painter = painterResource(id = R.drawable.logo1_2),
                     contentDescription = "Logo 1",
-                    modifier = Modifier.size(80.dp) a// Adjust size as needed
+                    modifier = Modifier.size(80.dp)// Adjust size as needed
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Image(
