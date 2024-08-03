@@ -26,9 +26,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.rememberAsyncImagePainter
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
+import androidx.compose.ui.window.Dialog
+import androidx.core.content.FileProvider
+import java.io.File
 
 @Composable
 fun ProfileDetails1Screen(navController: NavHostController) {
@@ -342,11 +346,27 @@ fun ProfileDetails3Screen(navController: NavHostController) {
 @Composable
 fun ProfileDetails4Screen(navController: NavHostController) {
     var imageUris by remember { mutableStateOf(listOf<Uri?>()) }
+    val context = LocalContext.current
+
+    var showDialog by remember { mutableStateOf(false) }
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+
     val imageUriLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
             uri?.let {
                 imageUris = imageUris.toMutableList().apply { add(uri) }
+            }
+        }
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) {
+                cameraImageUri?.let { uri ->
+                    imageUris = imageUris.toMutableList().apply { add(uri) }
+                }
             }
         }
     )
@@ -399,7 +419,7 @@ fun ProfileDetails4Screen(navController: NavHostController) {
                         if (imageUris.getOrNull(i) != null) {
                             imageUris = imageUris.toMutableList().apply { removeAt(i) }
                         } else {
-                            imageUriLauncher.launch("image/*")
+                            showDialog = true
                         }
                     })
                 }
@@ -415,7 +435,7 @@ fun ProfileDetails4Screen(navController: NavHostController) {
                         if (imageUris.getOrNull(i) != null) {
                             imageUris = imageUris.toMutableList().apply { removeAt(i) }
                         } else {
-                            imageUriLauncher.launch("image/*")
+                            showDialog = true
                         }
                     })
                 }
@@ -427,10 +447,60 @@ fun ProfileDetails4Screen(navController: NavHostController) {
         Button(
             onClick = { navController.navigate("nextScreen") }, // Replace with your navigation target
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-            enabled = imageUris.size >= 0,  // for test gui ( must >=2)
+            enabled = imageUris.size >= 2,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Continue", color = Color.White)
+        }
+    }
+
+    if (showDialog) {
+        ChooseImageSourceDialog(
+            onDismiss = { showDialog = false },
+            onGalleryClick = {
+                showDialog = false
+                imageUriLauncher.launch("image/*")
+            },
+            onCameraClick = {
+                showDialog = false
+                val photoFile = File(context.cacheDir, "camera_image.jpg")
+                val photoUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", photoFile)
+                cameraImageUri = photoUri
+                cameraLauncher.launch(photoUri)
+            }
+        )
+    }
+}
+
+@Composable
+fun ChooseImageSourceDialog(
+    onDismiss: () -> Unit,
+    onGalleryClick: () -> Unit,
+    onCameraClick: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            shadowElevation = 8.dp // Use shadowElevation instead of elevation
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Choose an option", style = MaterialTheme.typography.headlineSmall) // Use headlineSmall instead of h6
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onGalleryClick) {
+                    Text("Choose from Gallery")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = onCameraClick) {
+                    Text("Take a Picture")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            }
         }
     }
 }
@@ -455,7 +525,7 @@ fun PhotoBox(imageUri: Uri?, onClick: () -> Unit) {
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
-                    .size(50.dp)
+                    .size(24.dp)
                     .background(Color.Red, shape = CircleShape)
                     .clickable { onClick() },
                 contentAlignment = Alignment.Center
