@@ -42,6 +42,7 @@ import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.LoginApi
+import com.hcmus.tenderus.ui.screens.MainScreen
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen3
@@ -145,6 +146,7 @@ class MainActivity : ComponentActivity() {
                     composable("fgpass1") { ForgotPasswordScreen1(navController) }
                     composable("fgpass2") { ForgotPasswordScreen2(navController)}
                     composable("fgpass3") { ForgotPasswordScreen3(navController) }
+                    composable("main") { MainScreen(navController) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }

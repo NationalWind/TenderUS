@@ -84,7 +84,10 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { /* Handle login logic here */ },
+                onClick =
+                { /* Handle login logic here */
+                    navController.navigate("main")
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFB71C1C),
                     contentColor = Color.White

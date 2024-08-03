@@ -280,6 +280,7 @@ fun SignUpScreen4(navController: NavController) {
     var confirmPassword by remember { mutableStateOf(TextFieldValue("")) }
     var isPasswordValid by remember { mutableStateOf(true) }
     var doPasswordsMatch by remember { mutableStateOf(true) }
+    var isSignUpSuccessful by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -367,17 +368,34 @@ fun SignUpScreen4(navController: NavController) {
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
+            if (isSignUpSuccessful) {
+                Text(
+                    "Account created successfully!",
+                    color = Color.Blue,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+            }
             Button(
                 onClick = {
                     if (isPasswordValid && doPasswordsMatch) {
-                        // Handle successful sign up
-                        navController.navigate("profilesetup1")
+                        isSignUpSuccessful = true
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Create an account", color = Color.White)
+            }
+            if (isSignUpSuccessful) {
+                LaunchedEffect(Unit) {
+                    delay(2000L)
+                    navController.navigate("signin")
+                }
             }
         }
     }
