@@ -30,7 +30,7 @@ fun MainScreen(navController: NavController) {
             composable(BottomNavItem.Matches.route) { MatchesScreen(navController) }
             composable(BottomNavItem.Explore.route) { ExploreScreen(navController) }
             composable(BottomNavItem.Chat.route) { ChatScreen(navController) }
-            composable(BottomNavItem.Message.route) { ProfileScreen(navController) }
+            composable(BottomNavItem.Profile.route) { ProfileScreen(navController) }
         }
     }
 }

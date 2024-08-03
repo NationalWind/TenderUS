@@ -19,7 +19,7 @@ fun BottomNavigationBar(navController: NavController) {
         BottomNavItem.Matches,
         BottomNavItem.Explore,
         BottomNavItem.Chat,
-        BottomNavItem.Message
+        BottomNavItem.Profile
     )
 
     NavigationBar(
