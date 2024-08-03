@@ -1,4 +1,4 @@
-package com.hcmus.tenderus.ui.screens
+package com.hcmus.tenderus.ui.screens.authentication
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -53,12 +53,12 @@ fun LoginScreen(navController: NavController) {
                 text = "Log In",
                 fontSize = 55.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Red
+                color = Color(0xFFB71C1C)
             )
             Text(
                 text = "We missed you!",
                 fontSize = 14.sp,
-                color = Color.Red
+                color = Color(0xFFB71C1C)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -117,6 +117,7 @@ fun LoginScreen(navController: NavController) {
                     text = "Forgot password?",
                     modifier = Modifier.clickable {
                         // Handle forgot password click
+                        navController.navigate("fgpass1")
                     },
                     color = Color.Red
                 )
