@@ -48,13 +48,7 @@ import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen3
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
-import com.hcmus.tenderus.ui.screens.LoginScreen
 import com.hcmus.tenderus.ui.screens.MatchList
-import com.hcmus.tenderus.ui.screens.ProfileDetails1Screen
-import com.hcmus.tenderus.ui.screens.SignUpScreen1
-import com.hcmus.tenderus.ui.screens.SignUpScreen2
-import com.hcmus.tenderus.ui.screens.SignUpScreen3
-import com.hcmus.tenderus.ui.screens.SignUpScreen4
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
@@ -143,8 +137,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "splashs") {
-                    composable("splashs") { MatchList(matchListVM = matchListVM) }
+                NavHost(navController, startDestination = "messages") {
+                    composable("messages") { MatchList(matchListVM = matchListVM) }
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
                     composable("signin") { LoginScreen(navController = navController) }
