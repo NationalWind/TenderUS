@@ -15,6 +15,8 @@ const MatchFCM = async (username: string) => {
   await firebaseFCM.sendFCM(registrationToken, "You have a new match!");
 };
 
+const matchPollers: { [key: string]: { res: Response, timeout: NodeJS.Timeout } } = {};
+
 // POST /like {token: String, likedID: String}
 const swipeController = {
   like: async (req: Request, res: Response) => {
@@ -39,8 +41,22 @@ const swipeController = {
       var match = false;
       if (checked) {
         match = true;
-        await db.match.create({ data: { id1: data.id, id2: data.likedID, createdAt: new Date() } });
+        if (data.id > data.likedID) {
+          await db.match.create({ data: { user1: data.likedID, user2: data.id, createdAt: new Date() } });
+        } else {
+          await db.match.create({ data: { user1: data.id, user2: data.likedID, createdAt: new Date() } });
+        }
         /*await */MatchFCM(data.likedID);
+        if (matchPollers[data.likedID]) {
+          clearTimeout(matchPollers[data.likedID].timeout);
+          try {
+            matchPollers[data.likedID].res.status(200).json(data);
+          } catch (error) {
+            console.log(error);
+          }
+          delete matchPollers[data.likedID];
+        }
+
       }
 
       res.status(200).json({ match });
@@ -71,6 +87,24 @@ const swipeController = {
       res.status(200).json({ message: "Pass recorded" });
     } catch (error) {
       console.log(error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  },
+
+  // GET /swipe/polling
+  matchLongPoll: async (req: Request, res: Response) => {
+    try {
+      const username = req.body.id;
+      if (matchPollers[username]) {
+        clearTimeout(matchPollers[username].timeout);
+      }
+      matchPollers[username] = {
+        res, timeout: setTimeout(() => {
+          res.status(408).json({ message: "Timeout" });
+          delete matchPollers[username];
+        }, 30000)
+      };
+    } catch (error) {
       res.status(500).json({ message: "Something went wrong" });
     }
   }

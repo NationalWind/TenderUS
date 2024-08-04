@@ -14,19 +14,142 @@ const FCMPendingMessage = async (data: Omit<Message, "doc_id">) => {
   await firebaseFCM.sendFCM(registrationToken, "You have a new message!");
 };
 
-const pollers: { [key: string]: { res: Response, timeout: NodeJS.Timeout } } = {};
+const messagePollers: { [key: string]: { res: Response, timeout: NodeJS.Timeout } } = {};
+
 
 const messageController = {
-  longPoll: async (req: Request, res: Response) => {
+  // GET /api/message/matches
+  getMatches: async (req: Request, res: Response) => {
     try {
       const username = req.body.id;
-      if (pollers[username]) {
-        clearTimeout(pollers[username].timeout);
+
+      const matches = await db.match.aggregateRaw({
+        pipeline: [
+          {
+            $match: {
+              $or: [
+                { user1: username },
+                { user2: username }
+              ]
+            }
+          },
+
+          {
+            $addFields: {
+              id:
+              {
+                $cond: {
+                  if: { $eq: ["$user1", username] },
+                  then: "$user2",
+                  else: "$user1"
+                }
+              },
+              user1_user2: {
+                $concat: [
+                  "$user1",
+                  "_",
+                  "$user2"
+                ]
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: "Profile",
+              localField: "id",
+              foreignField: "username",
+              as: "userInfoArr"
+            }
+          },
+
+          {
+            $lookup: {
+              from: "Conversation",
+              localField: "user1_user2",
+              foreignField: "user1_user2",
+              as: "conversationArr"
+            }
+          },
+
+          {
+            $addFields: {
+              userInfo:
+              {
+                $arrayElemAt: ["$userInfoArr", 0]
+              },
+              conversation:
+              {
+                $arrayElemAt: ["$conversationArr", 0]
+              },
+            }
+          },
+          {
+            $addFields: {
+              convoID: "$conversation._id"
+            }
+          },
+          {
+            $lookup: {
+              from: "Message",
+              localField: "convoID",
+              foreignField: "conversationID",
+              pipeline: [
+                {
+                  $addFields: {
+                    _id: {
+                      $toString: "$_id"
+                    },
+                    createdAt: {
+                      $toString: "$createdAt"
+                    },
+                    conversationID: {
+                      $toString: "$conversationID"
+                    }
+                  }
+                },
+                {
+                  $limit: 20
+                }
+              ],
+              as: "messageArr",
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              username: "$userInfo.username",
+              createdAt: {
+                $toString: "$createdAt"
+              },
+              avatarIcon: "$userInfo.avatarIcon",
+              displayName: "$userInfo.displayName",
+              isActive: "$userInfo.isActive",
+              messageArr: 1
+            }
+          }
+
+
+
+        ]
+      });
+      res.status(200).json(matches);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  },
+
+  // GET /api/message/polling
+  messageLongPoll: async (req: Request, res: Response) => {
+    try {
+      const username = req.body.id;
+      if (messagePollers[username]) {
+        clearTimeout(messagePollers[username].timeout);
       }
-      pollers[username] = {
+      messagePollers[username] = {
         res, timeout: setTimeout(() => {
           res.status(408).json({ message: "Timeout" });
-          delete pollers[username];
+          delete messagePollers[username];
         }, 30000)
       };
     } catch (error) {
@@ -47,45 +170,87 @@ const messageController = {
         return;
       }
 
-      if (req.body.msgType !== "text" && req.body.msgType !== "image" && req.body.msgType !== "audio") {
+      if (req.body.msgType !== "Text" && req.body.msgType !== "Image" && req.body.msgType !== "Audio") {
         res.status(400).json({ message: "Bad request: invalid message type" });
         return;
       }
 
-      const data: Omit<Message, "doc_id"> = {
-        sender: req.body.id,
-        receiver: req.body.receiver,
-        msgType: req.body.msgType,
-        content: req.body.content,
-        createdAt: new Date(),
-      };
+
+      var user1 = req.body.id
+      var user2 = req.body.receiver
+      if (req.body.id > req.body.receiver) {
+        user1 = req.body.receiver
+        user2 = req.body.id
+      }
 
       const match = await db.match.findFirst({
         where: {
-          OR: [
-            { id1: data.sender, id2: data.receiver },
-            { id1: data.receiver, id2: data.sender }
-          ]
+          user1: user1,
+          user2: user2
         }
       });
       if (!match) {
         res.status(403).json({ message: "You haven't got a match with this user" });
         return;
       }
-      const message = await db.message.create({ data });
+      var data: Omit<Message, "doc_id">;
+      const converation = await db.conversation.findFirst({
+        where: {
+          user1_user2: user1 + "_" + user2
+        }
+      });
+
+      if (!converation) {
+        const convo = await db.conversation.create({
+          data: {
+            user1_user2: user1 + "_" + user2
+          }
+        });
+
+        data = {
+          conversationID: convo.doc_id,
+          msgID: 0,
+          sender: req.body.id,
+          receiver: req.body.receiver,
+          msgType: req.body.msgType,
+          content: req.body.content,
+          createdAt: new Date(),
+          isRead: false
+        };
+        await db.message.create({ data });
+      } else {
+        const msg = await db.message.findFirst({
+          where: {
+            conversationID: converation.doc_id
+          }
+        });
+        console.log(msg, converation, typeof (converation.doc_id))
+        data = {
+          conversationID: converation.doc_id,
+          msgID: msg!.msgID + 1,
+          sender: req.body.id,
+          receiver: req.body.receiver,
+          msgType: req.body.msgType,
+          content: req.body.content,
+          createdAt: new Date(),
+          isRead: false
+        };
+        await db.message.create({ data });
+
+      }
       /*await */FCMPendingMessage(data);
 
-      if (pollers[data.receiver]) {
-        clearTimeout(pollers[data.receiver].timeout);
+      if (messagePollers[data.receiver]) {
+        clearTimeout(messagePollers[data.receiver].timeout);
         try {
-          pollers[data.receiver].res.status(200).json(message);
+          messagePollers[data.receiver].res.status(200).json(data);
         } catch (error) {
           console.log(error);
         }
-        delete pollers[data.receiver];
+        delete messagePollers[data.receiver];
       }
 
-      res.status(200).json(message);
+      res.status(200).json(data);
 
     } catch (error) {
       console.log(error);
@@ -93,7 +258,7 @@ const messageController = {
     }
   },
 
-  // GET /api/message?receiver=&&page_size=&doc_id=
+  // GET /api/message?receiver=&&page_size=&msgID=
   loadMessage: async (req: Request, res: Response) => {
     try {
       const receiver = req.query.receiver;
@@ -105,41 +270,42 @@ const messageController = {
       const sender = req.body.id;
 
       var messages: Message[] = [];
-
-      if (req.query.doc_id) {
-        if (typeof req.query.doc_id !== "string") {
+      var user1 = sender
+      var user2 = receiver
+      if (sender > receiver) {
+        user1 = receiver
+        user2 = sender
+      }
+      const conversation = await db.conversation.findFirst({
+        where: {
+          user1_user2: user1 + "_" + user2
+        }
+      })
+      if (!conversation) {
+        res.status(200).json([]);
+        return
+      }
+      if (req.query.msgID) {
+        if (typeof req.query.msgID !== "string") {
           res.status(400).json({ message: "Bad request" });
           return;
         }
+
         messages = await db.message.findMany({
           where: {
-            OR: [
-              { sender: sender, receiver: receiver },
-              { sender: receiver, receiver: sender },
-            ],
+            conversationID: conversation.doc_id,
+            msgID: {
+              lt: parseInt(req.query.msgID)
+            }
           },
-          skip: 1,
-          take: page_size,
-          orderBy: {
-            doc_id: "desc"
-          },
-          cursor: {
-            doc_id: req.query.doc_id
-          },
-
+          take: page_size
         });
       } else {
         messages = await db.message.findMany({
           where: {
-            OR: [
-              { sender: sender, receiver: receiver },
-              { sender: receiver, receiver: sender },
-            ],
+            conversationID: conversation.doc_id
           },
-          take: page_size,
-          orderBy: {
-            doc_id: "desc"
-          }
+          take: page_size
         });
       }
 

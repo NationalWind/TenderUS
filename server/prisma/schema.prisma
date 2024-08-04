@@ -20,12 +20,14 @@ model Account {
   phone    String?
   role     Role
   FCMRegToken String?
-  avatarIcon String?
 }
 
 model Profile {
   doc_id          String   @id @default(auto()) @map("_id") @db.ObjectId
   username        String   @unique
+  displayName     String
+
+  avatarIcon      String
   pictures        String[]
   description     String
 
@@ -36,6 +38,8 @@ model Profile {
   age             Int
   interests       String[]
   groups          String[]
+
+  isActive        Boolean
 }
 
 model Preference {
@@ -52,6 +56,8 @@ model Like {
   doc_id   String  @id @default(auto()) @map("_id") @db.ObjectId
   id       String
   likedID  String
+
+  @@index(id)
 }
 
 model Pass_A {
@@ -60,18 +66,31 @@ model Pass_A {
   passedID  String
 }
 
+/// user1 < user2
 model Match {
   doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  id1       String
-  id2       String
+  user1     String
+  user2     String
   createdAt DateTime
+  @@unique([user1, user2])
+}
+
+// user1 < user2
+model Conversation {
+  doc_id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  user1_user2 String @unique
 }
 
 model Message {
-  doc_id     String  @id @default(auto()) @map("_id") @db.ObjectId
-  sender     String
-  receiver   String
-  msgType    String
-  content    String
-  createdAt  DateTime
+  doc_id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  conversationID String  @db.ObjectId
+  msgID          Int 
+  sender         String
+  receiver       String
+  msgType        String
+  content        String
+  createdAt      DateTime
+  isRead         Boolean
+
+  @@unique([conversationID, msgID(sort: Desc)])
 }

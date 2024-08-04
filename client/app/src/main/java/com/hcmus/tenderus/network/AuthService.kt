@@ -4,9 +4,10 @@ package com.hcmus.tenderus.network
 import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.model.UserRegistration
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
-data class AuthOKResponse(private val message: String)
+data class AuthOKResponse(private val token: String)
 
 interface SyncSignUp {
     @POST("api/auth/register")
@@ -32,3 +33,4 @@ interface Login {
     @POST("api/auth/login")
     suspend fun login(@Body userLogin: UserLogin): AuthOKResponse
 }
+

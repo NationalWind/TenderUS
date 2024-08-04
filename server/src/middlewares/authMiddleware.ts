@@ -7,14 +7,20 @@ const authMiddeware = {
   checkUser: (req: Request, res: Response, next: NextFunction) => {
     try {
       // "For now", a token is converted to a username, a FCMRegToken, a role
-      const { token } = req.body;
+      const bearer = req.headers.authorization;
+      if (!bearer) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      const token = bearer.substring(7);
       const decoded = jwt.verify(token, process.env.JWT_KEY as string) as { username: string, role: Role, FCMRegToken: string };
       req.body.id = decoded.username;
       req.body.role = decoded.role;
       req.body.FCMRegToken = decoded.FCMRegToken;
       delete req.body.token;
       next();
-    } catch {
+    } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "Invalid token" });
     }
   },

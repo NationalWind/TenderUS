@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.hcmus.tenderus"
-        minSdk = 24
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.datastore.core.android)
 //    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.coil.compose)
+
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
