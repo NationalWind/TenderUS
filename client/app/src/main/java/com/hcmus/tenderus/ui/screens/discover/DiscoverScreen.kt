@@ -49,23 +49,6 @@ fun DiscoverScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo1_2),
-                    contentDescription = "Logo 1",
-                    modifier = Modifier.size(80.dp)// Adjust size as needed
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.tim),
-                    contentDescription = "Logo 2",
-                    modifier = Modifier.size(35.dp) // Adjust size as needed
-                )
-            }
-            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),

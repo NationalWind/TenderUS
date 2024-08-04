@@ -75,7 +75,7 @@ fun ProfileButtons(navController: NavController) {
             isPrimary = false,
             onClick = { showDialog = true }
         )
-        Spacer(modifier = Modifier.height(220.dp))
+        Spacer(modifier = Modifier.height(100.dp))
         ProfileButton(
             text = "Log Out",
             icon = Icons.Default.ExitToApp,
