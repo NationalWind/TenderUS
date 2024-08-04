@@ -32,6 +32,8 @@ class TenderUSPushNotificationService: FirebaseMessagingService() {
             set(value) {
                 sharedPref?.edit()?.putString("token", value)?.apply()
             }
+
+        var onMessageScreen = false
     }
 
     override fun onNewToken(newToken: String) {
@@ -61,7 +63,7 @@ class TenderUSPushNotificationService: FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .build()
 
-        notificationManager.notify(notificationID, notification)
+        if (!onMessageScreen) notificationManager.notify(notificationID, notification)
         Log.d("Notification", message.data.toString())
     }
 

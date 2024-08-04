@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.hcmus.tenderus"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
 //    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.coil.compose)
 
 
 
