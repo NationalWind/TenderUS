@@ -33,7 +33,6 @@ fun SearchPreferencesScreen(navController: NavHostController) {
                 .background(Color.White)
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -171,7 +170,7 @@ fun LocationSelection(location: String, onLocationChanged: (String) -> Unit) {
         .fillMaxWidth()
         .padding(8.dp)
         .clickable { expanded = true }
-        .background(Color.White)
+        .background(Color.LightGray)
     ) {
         Text(
             text = if (selectedLocation.isEmpty()) "Select Location" else selectedLocation,
@@ -199,12 +198,20 @@ fun LocationSelection(location: String, onLocationChanged: (String) -> Unit) {
 @Composable
 fun DistanceSlider(distance: Float, onDistanceChanged: (Float) -> Unit) {
     Column {
-        Text(text = "Distance: ${distance.toInt()} km")
+        Text(
+            text = "Distance: ${distance.toInt()} km",
+            fontWeight = FontWeight.Bold
+        )
         Slider(
             value = distance,
             onValueChange = onDistanceChanged,
             valueRange = 0f..100f,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = Color(0xFFB71C1C), // Customize thumb color
+                activeTrackColor = Color(0xFFD32F2F), // Customize active track color
+                inactiveTrackColor = Color(0xFFBDBDBD) // Customize inactive track color
+            ),
         )
     }
 }
@@ -219,7 +226,10 @@ fun AgeRangeSlider(
 ) {
     Column {
         // Display the selected age range
-        Text(text = "Age Range: ${startAge.toInt()} - ${endAge.toInt()}")
+        Text(
+            text = "Age Range: ${startAge.toInt()} - ${endAge.toInt()}",
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         // Start age slider
@@ -230,7 +240,12 @@ fun AgeRangeSlider(
                 if (it < endAge) onStartAgeChanged(it)
             },
             valueRange = valueRange,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = Color(0xFFB71C1C), // Customize thumb color
+                activeTrackColor = Color(0xFFD32F2F), // Customize active track color
+                inactiveTrackColor = Color(0xFFBDBDBD) // Customize inactive track color
+            ),
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -243,7 +258,12 @@ fun AgeRangeSlider(
                 if (it > startAge) onEndAgeChanged(it)
             },
             valueRange = valueRange,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = Color(0xFFB71C1C), // Customize thumb color
+                activeTrackColor = Color(0xFFD32F2F), // Customize active track color
+                inactiveTrackColor = Color(0xFFBDBDBD) // Customize inactive track color
+            ),
         )
     }
 }
@@ -275,8 +295,6 @@ fun SelectYourGoalsScreen(navController: NavHostController) {
                 contentDescription = "Heart Icon",
                 modifier = Modifier.size(100.dp)
             )
-
-
 
             // Title
             Text(

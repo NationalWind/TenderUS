@@ -65,9 +65,6 @@ fun ProfileButtons(navController: NavController) {
                 isPrimary = false,
                 onClick = { /* Handle Edit Profile */ }
             )
-
-
-
         }
         ProfileButton(
             text = "Report App Issue",

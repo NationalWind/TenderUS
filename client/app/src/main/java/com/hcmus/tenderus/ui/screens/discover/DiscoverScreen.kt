@@ -45,7 +45,7 @@ fun DiscoverScreen(navController: NavController) {
             modifier = Modifier
                 .background(Color.White)
                 .fillMaxSize()
-                .padding(top = 16.dp),
+                .padding(top = 1.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -62,11 +62,9 @@ fun DiscoverScreen(navController: NavController) {
                 Image(
                     painter = painterResource(id = R.drawable.tim),
                     contentDescription = "Logo 2",
-                    modifier = Modifier.size(40.dp) // Adjust size as needed
+                    modifier = Modifier.size(35.dp) // Adjust size as needed
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,13 +78,18 @@ fun DiscoverScreen(navController: NavController) {
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFB71C1C)
                 )
-                IconButton(onClick = {
-                    expanded = !expanded
-                }) {
+                Box(
+                    modifier = Modifier
+                        .size(55.dp)
+                        .clickable { expanded = !expanded }
+                        .background(Color.Transparent)
+                        .padding(8.dp)
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.icon_filter),
                         contentDescription = "Filter",
-                        tint = Color(0xFFB71C1C)
+                        tint = Color(0xFFB71C1C),
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
@@ -229,12 +232,20 @@ fun LocationSelection(location: String, onLocationChanged: (String) -> Unit) {
 @Composable
 fun DistanceSlider(distance: Float, onDistanceChanged: (Float) -> Unit) {
     Column {
-        Text(text = "Distance: ${distance.toInt()} km")
+        Text(
+            text = "Distance: ${distance.toInt()} km",
+            fontWeight = FontWeight.Bold
+        )
         Slider(
             value = distance,
             onValueChange = onDistanceChanged,
             valueRange = 0f..100f,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = Color(0xFFB71C1C), // Customize thumb color
+                activeTrackColor = Color(0xFFD32F2F), // Customize active track color
+                inactiveTrackColor = Color(0xFFBDBDBD) // Customize inactive track color
+            ),
         )
     }
 }
@@ -249,7 +260,10 @@ fun AgeRangeSlider(
 ) {
     Column {
         // Display the selected age range
-        Text(text = "Age Range: ${startAge.toInt()} - ${endAge.toInt()}")
+        Text(
+            text = "Age Range: ${startAge.toInt()} - ${endAge.toInt()}",
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         // Start age slider
@@ -260,7 +274,12 @@ fun AgeRangeSlider(
                 if (it < endAge) onStartAgeChanged(it)
             },
             valueRange = valueRange,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = Color(0xFFB71C1C), // Customize thumb color
+                activeTrackColor = Color(0xFFD32F2F), // Customize active track color
+                inactiveTrackColor = Color(0xFFBDBDBD) // Customize inactive track color
+            ),
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -273,7 +292,12 @@ fun AgeRangeSlider(
                 if (it > startAge) onEndAgeChanged(it)
             },
             valueRange = valueRange,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = Color(0xFFB71C1C), // Customize thumb color
+                activeTrackColor = Color(0xFFD32F2F), // Customize active track color
+                inactiveTrackColor = Color(0xFFBDBDBD) // Customize inactive track color
+            ),
         )
     }
 }
