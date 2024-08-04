@@ -401,8 +401,4 @@ fun MatchesScreen(navController: NavController) {
 }
 
 
-@Composable
-fun ChatScreen(navController: NavController) {
-
-}
 

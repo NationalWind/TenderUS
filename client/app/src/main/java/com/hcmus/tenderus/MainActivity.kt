@@ -48,8 +48,6 @@ import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen3
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
-import com.hcmus.tenderus.ui.screens.MatchList
-import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails2Screen
@@ -62,6 +60,7 @@ import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen2
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen3
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen4
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
+import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -129,7 +128,7 @@ class MainActivity : ComponentActivity() {
         })
         Log.d(TAG, "Init")
 
-        //VM init
+//        VM init
 //        val matchListVM = MatchListVM()
 
 
