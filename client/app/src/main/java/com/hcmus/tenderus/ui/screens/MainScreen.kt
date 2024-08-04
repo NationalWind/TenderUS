@@ -42,12 +42,8 @@ fun MainScreen(navController: NavController) {
                     .padding(top = 16.dp) // Add padding as needed
                     .size(30.dp) // Adjust size as needed
             )
-
             // Main content (NavHost)
             Box(
-                modifier = Modifier
-                    .weight(1f) // Take up remaining space
-                    .padding(bottom = 56.dp) // Adjust for the height of the bottom bar
             ) {
                 NavHost(
                     navController = mainNavController,
