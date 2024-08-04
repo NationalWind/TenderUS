@@ -23,10 +23,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Send
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,9 +48,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,40 +62,14 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.ui.theme.Typography
 import com.hcmus.tenderus.network.MessageSendingRequest
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.MatchState
 import com.hcmus.tenderus.utils.subtractInMinutes
 import kotlinx.coroutines.launch
 
-@Composable
-fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
-    Row (
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onclick)
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ){
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(match.avatarIcon).build(),
-            placeholder = painterResource(R.drawable.profile_placeholder),
-            error = painterResource(R.drawable.profile_placeholder),
-            modifier = Modifier
-                .clip(shape = CircleShape)
-                .size(56.dp),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
-        Column(
-            modifier = Modifier.padding(15.dp)
-        ) {
-            Text(text = match.displayName, style = MaterialTheme.typography.titleMedium)
-            Text(text = if (match.isActive) "Online" else "Offline")
-        }
-    }
 
-}
 
 
 @Composable
@@ -121,7 +94,7 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
         Column(
             modifier = Modifier.padding(15.dp)
         ) {
-            Text(text = match.displayName, style = MaterialTheme.typography.titleMedium)
+            Text(text = match.displayName, style = Typography.titleMedium)
             Text(text = match.messageArr.first().content)
         }
         Log.d("d", match.displayName)
@@ -167,102 +140,7 @@ fun NewMatchItem(match: MatchState, onClick: () -> Unit) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BottomSheet(showBottomSheetState: MutableState<Boolean>, sheetState: SheetState, matches: SnapshotStateList<MatchState>, usernameInChat: String, matchListVM: MatchListVM) {
-    val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-    var messageTexting by remember { mutableStateOf("") }
 
-    ModalBottomSheet(
-        onDismissRequest = {
-            showBottomSheetState.value = false
-        },
-        sheetState = sheetState
-    ) {
-        // Sheet content
-
-        val idx = matches.indexOfFirst { it.username == usernameInChat }
-        Scaffold(
-            topBar = {
-                InChatTopBar(matches[idx])
-            },
-
-        ) {
-            Column(Modifier.fillMaxSize().padding(it)) {
-                Log.d("d", it.toString())
-                if (matches[idx].messageArr.isEmpty()) {
-                    Box(modifier=Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text("No messages yet", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                    }
-
-                } else {
-                    Box(modifier=Modifier.weight(1f)){
-                        LazyColumn(state = listState, reverseLayout = true) {
-                            items(matches[idx].messageArr.size) { msgIdx ->
-                                if (matches[idx].messageArr[msgIdx].msgType == "Text") {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(8.dp),
-                                        horizontalArrangement = if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Arrangement.End else Arrangement.Start
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .widthIn(max = 250.dp)
-                                                .clip(RoundedCornerShape(16.dp))
-                                                .background(
-                                                    if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Color(
-                                                        0xFFDCF8C6
-                                                    ) else Color.White
-                                                )
-                                                .padding(16.dp)
-                                        ) {
-                                            Text(
-                                                text = matches[idx].messageArr[msgIdx].content,
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-                                        }
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        shape = RoundedCornerShape(12.dp),
-//            leadingIcon = { Icon(Icons.Rounded.Search, null) },
-                        value = messageTexting,
-                        onValueChange = { messageTexting = it },
-                        modifier = Modifier.weight(4f),
-                        label = { Text("Your message") },
-                        singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent
-                        )
-                    )
-                    Icon(
-                        modifier=Modifier.weight(1f).size(50.dp).clickable {
-                            matchListVM.sendMessage(MessageSendingRequest(usernameInChat, "Text", messageTexting))
-                            messageTexting = ""
-                        },
-                        painter = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = null
-                    )
-                }
-
-            }
-
-
-        }
-
-
-
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -291,12 +169,12 @@ fun MatchList(navController: NavController? = null, matchListVM: MatchListVM) {
             Text(
                 "Messages",
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineLarge,
+                style = Typography.headlineLarge,
             )
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 shape = RoundedCornerShape(12.dp),
-                leadingIcon = { Icon(Icons.Rounded.Search, null) },
+                leadingIcon = { Image(painterResource(id = R.drawable.search), null, modifier = Modifier.size(20.dp)) },
                 value=searchText,
                 onValueChange = { searchText = it },
                 modifier = Modifier.fillMaxWidth(),
@@ -319,7 +197,7 @@ fun MatchList(navController: NavController? = null, matchListVM: MatchListVM) {
             Text(
                 "New Matches",
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleLarge,
+                style = Typography.titleLarge,
             )
             LazyRow {
                 items(matches.size) { matchIdx ->
@@ -340,7 +218,7 @@ fun MatchList(navController: NavController? = null, matchListVM: MatchListVM) {
             Text(
                 "Messages",
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleLarge,
+                style = Typography.titleLarge,
             )
 
             LazyColumn {
@@ -364,6 +242,152 @@ fun MatchList(navController: NavController? = null, matchListVM: MatchListVM) {
             BottomSheet(showBottomSheetState, sheetState, matches, usernameInChat, matchListVM)
 
         }
+
+    }
+}
+
+@Composable
+fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onclick)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        Spacer(modifier = Modifier.weight(0.5f))
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current).data(match.avatarIcon).build(),
+            placeholder = painterResource(R.drawable.profile_placeholder),
+            error = painterResource(R.drawable.profile_placeholder),
+            modifier = Modifier
+                .clip(shape = CircleShape)
+                .size(56.dp)
+                .weight(0.5f),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.weight(0.25f))
+        Column(
+            modifier = Modifier.weight(5f)
+        ) {
+            Text(text = match.displayName, style = Typography.titleMedium)
+            Text(text = if (match.isActive) "Online" else "Offline")
+        }
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheet(showBottomSheetState: MutableState<Boolean>, sheetState: SheetState, matches: SnapshotStateList<MatchState>, usernameInChat: String, matchListVM: MatchListVM) {
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    var messageTexting by remember { mutableStateOf("") }
+
+    ModalBottomSheet(
+        containerColor = Color.White,
+        contentColor = Color.Black,
+        onDismissRequest = {
+            showBottomSheetState.value = false
+        },
+        sheetState = sheetState
+    ) {
+        // Sheet content
+
+        val idx = matches.indexOfFirst { it.username == usernameInChat }
+        Scaffold(
+            containerColor = Color.White,
+            contentColor = Color.Black,
+            topBar = {
+                InChatTopBar(matches[idx])
+            },
+
+            ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(it)) {
+                Log.d("d", it.toString())
+                if (matches[idx].messageArr.isEmpty()) {
+                    Box(modifier=Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text("No messages yet", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                    }
+
+                } else {
+                    Box(modifier=Modifier.weight(1f)){
+                        LazyColumn(state = listState, reverseLayout = true) {
+                            items(matches[idx].messageArr.size) { msgIdx ->
+                                if (matches[idx].messageArr[msgIdx].msgType == "Text") {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(8.dp),
+                                        horizontalArrangement = if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Arrangement.End else Arrangement.Start
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .widthIn(max = 250.dp)
+                                                .clip(RoundedCornerShape(16.dp))
+                                                .background(
+                                                    if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Color(
+                                                        0xFFFDF1F3
+                                                    ) else Color.LightGray
+                                                )
+                                                .padding(16.dp)
+                                        ) {
+                                            Text(
+                                                text = matches[idx].messageArr[msgIdx].content,
+                                                style = Typography.bodyMedium
+                                            )
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.weight(0.2f))
+                    OutlinedTextField(
+                        shape = RoundedCornerShape(12.dp),
+//            leadingIcon = { Icon(Icons.Rounded.Search, null) },
+                        value = messageTexting,
+                        onValueChange = { messageTexting = it },
+                        modifier = Modifier.weight(5f),
+                        label = { Text("Your message") },
+                        singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent
+                        )
+                    )
+                    Image(
+                        painterResource(id = R.drawable.send),
+                        modifier= Modifier
+                            .weight(1f)
+                            .size(40.dp)
+                            .clickable {
+                                matchListVM.sendMessage(
+                                    MessageSendingRequest(
+                                        usernameInChat,
+                                        "Text",
+                                        messageTexting
+                                    )
+                                )
+                                messageTexting = ""
+                            },
+                        contentDescription = null
+                    )
+                }
+
+            }
+
+
+        }
+
+
 
     }
 }
