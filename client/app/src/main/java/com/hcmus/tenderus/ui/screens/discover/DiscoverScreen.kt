@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -170,47 +171,60 @@ fun DiscoverScreen(navController: NavController) {
     }
 }
 
+
 @Composable
 fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) -> Unit) {
     var currentProfileIndex by remember { mutableStateOf(0) }
     val profileCount = profiles.size
+    val offsetX = remember { mutableStateOf(0f) }
+    val coroutineScope = rememberCoroutineScope()
 
     if (profileCount > 0) {
-        val offsetX = remember { mutableStateOf(0f) }
-        val coroutineScope = rememberCoroutineScope()
         val profileUrl = profiles[currentProfileIndex]
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .offset(x = offsetX.value.dp)
                 .pointerInput(Unit) {
-                    detectDragGestures { _, dragAmount ->
-                        offsetX.value += dragAmount.x
-                    }
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            // Handle the start of the drag gesture
+                            offsetX.value = 0f // Reset offset
+                        },
+                        onDrag = { change, dragAmount ->
+                            // Update offset based on drag amount
+                            offsetX.value += dragAmount.x
+                            change.consume()
+                        },
+                        onDragCancel = {
+                            // Handle drag cancellation, if needed
+                            // Optionally reset offset here if you want to
+                        },
+                        onDragEnd = {
+                            coroutineScope.launch {
+                                // Determine swipe direction and update state
+                                when {
+                                    offsetX.value > 300f -> {
+                                        // Right swipe - Like
+                                        onProfilesUpdated(profiles.filterIndexed { index, _ -> index != currentProfileIndex })
+                                    }
+                                    offsetX.value < -300f -> {
+                                        // Left swipe - Nope
+                                        onProfilesUpdated(profiles.filterIndexed { index, _ -> index != currentProfileIndex })
+                                    }
+                                }
+                                // Reset offset
+                                offsetX.value = 0f
+                                // Move to next profile
+                                currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profileCount - 1)
+                            }
+                        }
+                    )
                 }
                 .graphicsLayer {
                     translationX = offsetX.value
                     rotationZ = offsetX.value / 10f
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            if (offsetX.value > 100f) {
-                                // Right swipe - Like
-                                coroutineScope.launch {
-                                    onProfilesUpdated(profiles.filterIndexed { index, _ -> index != currentProfileIndex })
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profileCount - 1)
-                                }
-                            } else if (offsetX.value < -100f) {
-                                // Left swipe - Nope
-                                coroutineScope.launch {
-                                    onProfilesUpdated(profiles.filterIndexed { index, _ -> index != currentProfileIndex })
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profileCount - 1)
-                                }
-                            }
-                            offsetX.value = 0f
-                        }
-                    )
                 }
         ) {
             Image(
@@ -222,6 +236,7 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
         }
     }
 }
+
 
 @Composable
 fun GenderSelection(selectedGender: String, onGenderSelected: (String) -> Unit) {
