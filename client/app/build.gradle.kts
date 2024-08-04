@@ -66,10 +66,6 @@ dependencies {
     implementation(libs.androidx.datastore.core.android)
 //    implementation(libs.androidx.constraintlayout.compose)
 
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.pager.indicators)
-
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
