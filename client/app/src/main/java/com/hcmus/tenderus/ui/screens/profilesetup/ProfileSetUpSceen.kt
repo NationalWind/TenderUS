@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import coil.compose.rememberAsyncImagePainter
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme

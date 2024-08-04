@@ -16,8 +16,8 @@ import androidx.navigation.compose.rememberNavController
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.screens.discover.ChatScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
-import com.hcmus.tenderus.ui.screens.discover.ExploreScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
+import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 
 @Composable
