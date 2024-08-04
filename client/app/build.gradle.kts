@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.datastore.core.android)
 //    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.coil.compose)
+
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

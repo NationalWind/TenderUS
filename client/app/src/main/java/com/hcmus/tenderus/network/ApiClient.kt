@@ -41,6 +41,16 @@ object ApiClient {
     val LoginApi by lazy {
         create(Login::class.java)
     }
+    val GetMatchesApi by lazy {
+        create(GetMatch::class.java)
+    }
+    val MessagePollingApi by lazy {
+        create(MessagePolling::class.java)
+    }
+    val MessageSendingApi by lazy {
+        create(MessageSending::class.java)
+    }
+
 
 
     private fun getUnsafeOkHttpClient(): OkHttpClient? {
@@ -90,6 +100,7 @@ object ApiClient {
             builder.sslSocketFactory(sslSocketFactory, trustManager)
             builder.hostnameVerifier(HostnameVerifier { _, _ -> true })
             builder.addInterceptor(loggingInterceptor)
+            builder.readTimeout(30000, java.util.concurrent.TimeUnit.SECONDS)
             builder.build()
         } catch (e: Exception) {
             throw RuntimeException(e)

@@ -37,6 +37,7 @@ import com.hcmus.tenderus.ui.screens.OnboardingScreen1
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.messaging.FirebaseMessaging
+import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
@@ -47,6 +48,8 @@ import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen3
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
+import com.hcmus.tenderus.ui.screens.MatchList
+import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails2Screen
@@ -106,6 +109,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         askNotificationPermission()
+        TokenManager.init(this)
+        TokenManager.saveToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OWE3YWIxYTVjMmU5MjM3MjQ3NDhhNyIsInVzZXJuYW1lIjoidGVudGVuIiwicGFzc3dvcmQiOiIkMmIkMTAkaWtXenVwR2U2MElsSTlNNTQxazRldXE4Mzc2eW5BS3hBS1lXVHlTTkU1dlpNaXF4RkZQZHEiLCJlbWFpbCI6Im5nLm5ndXludkBnbWFpbC5jb20iLCJwaG9uZSI6ImFob2hlIiwicm9sZSI6IlVTRVIiLCJGQ01SZWdUb2tlbiI6ImNibFlTaGYxUXNDZk1aYVc3VEZ0WmU6QVBBOTFiRV9NVFBsQV9uMDVkVW1fUm0zTkI5eDVpLXRlVmhiNllpaExfbEdmMFNmT290cGZhbEY3cFJuVVVyaXlWYXR3MTBtb0hnRExKWF9YY1lfSXBvMHkxUzdXYVlxV2s2SEt3OTFTLWJSdHRwUkpiMlNUTm9DWjBoeDZnN3hLdnNCbUdJb0l0bU0iLCJhdmF0YXJJY29uIjpudWxsLCJpYXQiOjE3MjI0ODQzNDl9.ZyQOYaC_QCypf39UjLYcIN4b-VQE6E0bgTZ_3rWrykM")
         requestCameraPermission()
         val auth = Firebase.auth
         // Input this var in every composable that needs to call Firebase services (sendSMS, confirmAndSync)
@@ -124,13 +129,16 @@ class MainActivity : ComponentActivity() {
         })
         Log.d(TAG, "Init")
 
+        //VM init
+        val matchListVM = MatchListVM()
+
 
         enableEdgeToEdge()
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "splash") {
-//                    composable("splash") { ExampleLogin(navController = navController)}
+                NavHost(navController, startDestination = "messages") {
+                    composable("messages") { MatchList(matchListVM = matchListVM) }
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
                     composable("signin") { LoginScreen(navController = navController) }
