@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +36,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -44,10 +47,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun DiscoverScreen(navController: NavController) {
@@ -180,67 +185,166 @@ fun DiscoverScreen(navController: NavController) {
 @Composable
 fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) -> Unit) {
     var currentProfileIndex by remember { mutableStateOf(0) }
-    val profileCount = profiles.size
+    var showProfileDetails by remember { mutableStateOf(false) }
     val offsetX = remember { mutableStateOf(0f) }
+    val offsetY = remember { mutableStateOf(0f) }
     val coroutineScope = rememberCoroutineScope()
 
-    if (profileCount > 0) {
+    if (profiles.isNotEmpty()) {
         val profileUrl = profiles[currentProfileIndex]
+
+        // Example user information (replace with actual data as needed)
+        val userName = "John Doe"
+        val userAge = "25"
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .offset(x = offsetX.value.dp)
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { offset ->
-                            // Handle the start of the drag gesture
-                            offsetX.value = 0f // Reset offset
+                            offsetX.value = 0f // Reset offset at the start of the drag
+                            offsetY.value = 0f // Reset offset at the start of the drag
                         },
                         onDrag = { change, dragAmount ->
-                            // Update offset based on drag amount
-                            offsetX.value += dragAmount.x
+                            offsetX.value += dragAmount.x // Update offset based on drag amount
+                            offsetY.value += dragAmount.y // Update offset based on drag amount
                             change.consume()
                         },
                         onDragCancel = {
-                            // Handle drag cancellation, if needed
-                            // Optionally reset offset here if you want to
+                            offsetX.value = 0f // Reset offset when drag is canceled
+                            offsetY.value = 0f // Reset offset when drag is canceled
                         },
                         onDragEnd = {
                             coroutineScope.launch {
-                                // Determine swipe direction and update state
-                                when {
-                                    offsetX.value > 300f -> {
-                                        // Right swipe - Like
-                                        onProfilesUpdated(profiles.filterIndexed { index, _ -> index != currentProfileIndex })
+                                if (offsetX.value > 300f || offsetX.value < -300f) {
+                                    val newProfiles = profiles.toMutableList().apply {
+                                        removeAt(currentProfileIndex)
                                     }
-                                    offsetX.value < -300f -> {
-                                        // Left swipe - Nope
-                                        onProfilesUpdated(profiles.filterIndexed { index, _ -> index != currentProfileIndex })
-                                    }
+                                    onProfilesUpdated(newProfiles)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    offsetX.value = 0f
+                                    offsetY.value = 0f
+                                    showProfileDetails = false // Collapse profile details on swipe
+                                } else if (offsetY.value < -300f) {
+                                    // Swiped up to show full profile
+                                    showProfileDetails = true
+                                    offsetY.value = 0f
+                                } else {
+                                    // Reset offset if swipe is not significant
+                                    offsetX.value = 0f
+                                    offsetY.value = 0f
                                 }
-                                // Reset offset
-                                offsetX.value = 0f
-                                // Move to next profile
-                                currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profileCount - 1)
                             }
                         }
                     )
                 }
-                .graphicsLayer {
-                    translationX = offsetX.value
-                    rotationZ = offsetX.value / 10f
-                }
         ) {
-            Image(
-                painter = rememberAsyncImagePainter(profileUrl),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
+                    .graphicsLayer {
+                        rotationZ = offsetX.value / 20f
+                    }
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(profileUrl),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Overlay profile information
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                        .align(Alignment.BottomStart),
+                    contentAlignment = Alignment.BottomStart
+                ) {
+                    if (!showProfileDetails) {
+                        Column(
+                            modifier = Modifier
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(8.dp)
+                        ) {
+                            Row {
+                                Text(
+                                    text = userName,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp), // Adjust font size
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = userAge,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp) // Adjust font size
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (showProfileDetails) {
+                    // Full Profile Information Section
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White)
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 200.dp) // Ensure content doesn't overlap with the image
+                        ) {
+                            // Profile Image as part of the detailed profile
+                            Image(
+                                painter = rememberAsyncImagePainter(profileUrl),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp) // Adjust height as needed
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text("User Name", style = MaterialTheme.typography.headlineSmall)
+                            Text("Age: 25", style = MaterialTheme.typography.bodyLarge)
+                            Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                "About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum.",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            // Add more profile details here
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Button(
+                                onClick = {
+                                    showProfileDetails = false
+                                },
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            ) {
+                                Text("Collapse")
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
+
+
+
+
+
+
 
 
 @Composable
