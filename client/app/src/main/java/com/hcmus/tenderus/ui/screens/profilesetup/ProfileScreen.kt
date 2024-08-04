@@ -1,6 +1,7 @@
 package com.hcmus.tenderus.ui.screens.profilesetup
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -31,6 +33,7 @@ fun ProfileHeader(imageRes: Int, name: String, age: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .background(Color.White)
     ) {
         Image(
             painter = painterResource(id = imageRes),
@@ -98,7 +101,7 @@ fun ProfileButton(text: String, icon: ImageVector, isPrimary: Boolean = false, o
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isPrimary) Color(0xFFB71C1C) else Color.White,
+            containerColor = if (isPrimary) Color(0xFFB71C1C) else Color(0xFFE7D9D9),
             contentColor = if (isPrimary) Color.White else Color.Black
         ),
         modifier = Modifier
@@ -118,7 +121,11 @@ fun ReportIssueDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Report App Issue", style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = "Report App Issue",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
         },
         text = {
             Column {
@@ -130,7 +137,11 @@ fun ReportIssueDialog(onDismiss: () -> Unit) {
                     onOptionSelected = { selectedIssue = it }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Description", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "Description",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = description,
@@ -145,7 +156,11 @@ fun ReportIssueDialog(onDismiss: () -> Unit) {
                 onClick = {
                     // Handle submit feedback
                     onDismiss()
-                }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFB71C1C),
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
             ) {
                 Text("Submit")
             }
@@ -170,12 +185,16 @@ fun RadioButtonGroup(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 5.dp)
+                    .padding(horizontal = 10.dp)
                     .clickable { onOptionSelected(option) }
             ) {
                 RadioButton(
                     selected = option == selectedOption,
-                    onClick = { onOptionSelected(option) }
+                    onClick = { onOptionSelected(option) },
+                    colors = RadioButtonDefaults.colors(
+                            selectedColor = Color(0xFFB71C1C),
+                    )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = option)
@@ -187,20 +206,27 @@ fun RadioButtonGroup(
 @Composable
 fun ProfileScreen(navController: NavController) {
     Scaffold(
+        containerColor = Color.White
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color.White)
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ProfileHeader(
-                imageRes = R.drawable.profile_placeholder, // Replace with your image resource
-                name = "Rachel",
-                age = 20
-            )
-            ProfileButtons(navController)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ProfileHeader(
+                    imageRes = R.drawable.profile_placeholder, // Replace with your image resource
+                    name = "Rachel",
+                    age = 20
+                )
+                ProfileButtons(navController)
+            }
         }
     }
 }
