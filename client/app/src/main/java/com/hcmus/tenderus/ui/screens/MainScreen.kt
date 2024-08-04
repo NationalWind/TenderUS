@@ -14,11 +14,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.hcmus.tenderus.R
-import com.hcmus.tenderus.ui.screens.discover.ChatScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
+import com.hcmus.tenderus.ui.screens.discover.MessageScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
+import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
+import com.hcmus.tenderus.ui.viewmodels.MatchListVM
+
+
+val matchListVM = MatchListVM()
 
 @Composable
 fun MainScreen(navController: NavController) {
@@ -52,7 +57,8 @@ fun MainScreen(navController: NavController) {
                     composable(BottomNavItem.Discover.route) { DiscoverScreen(navController) }
                     composable(BottomNavItem.Matches.route) { MatchesScreen(navController) }
                     composable(BottomNavItem.Explore.route) { ExploreScreen(navController) }
-                    composable(BottomNavItem.Chat.route) { ChatScreen(navController) }
+//                    composable(BottomNavItem.Chat.route) { MatchList(matchListVM = matchListVM)}
+                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
                     composable(BottomNavItem.Profile.route) { ProfileScreen(navController) }
                 }
             }
