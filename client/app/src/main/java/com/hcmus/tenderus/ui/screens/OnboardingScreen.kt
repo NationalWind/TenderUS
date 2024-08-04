@@ -16,71 +16,79 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.ui.theme.TenderUSTheme
 
 @Composable
 fun OnboardingScreen1(navController: NavController) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .background(Color.White)
-    ) {
-        Text(
-            text = "Welcome to",
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Image(
-            painter = painterResource(id = R.drawable.logo1_2),
-            contentDescription = "logo",
-            modifier = Modifier.size(220.dp)
-        )
-        Text(
-            text = "Connect with fellow HCMUS students and discover new friendships and romances.",
-            textAlign = TextAlign.Center,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Spacer(modifier = Modifier.height(200.dp))
-        Button(
-            onClick = {
-                navController.navigate("signup1") // Navigate to Sign Up screen
-            },
+    TenderUSTheme {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 6.dp) // Optional padding around the button
-                .fillMaxWidth(), // Make the button fill the available width
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
+                .fillMaxSize()
+                .padding(16.dp)
+                .background(Color.White)
         ) {
             Text(
-                text = "Create an account",
-                color = Color.White,
-                fontSize = 23.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 12.dp) // Add vertical padding inside the button
+                text = "Welcome to",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.Black,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 8.dp)
-        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo1_2),
+                contentDescription = "logo",
+                modifier = Modifier.size(220.dp)
+            )
             Text(
-                text = "Already have an account?",
-                fontSize = 14.sp,
-                color = Color.Gray
+                text = "Connect with fellow HCMUS students and discover new friendships and romances.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = "Sign In",
-                fontSize = 14.sp,
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
-                    navController.navigate("signin") // Navigate to Sign In screen
-                }
-            )
+            Spacer(modifier = Modifier.height(200.dp))
+            Button(
+                onClick = {
+                    navController.navigate("signup1") // Navigate to Sign Up screen
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 6.dp) // Optional padding around the button
+                    .fillMaxWidth(), // Make the button fill the available width
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
+            ) {
+                Text(
+                    text = "Create an account",
+                    color = Color.White,
+                    fontSize = 23.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 5.dp) // Add vertical padding inside the button
+
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 8.dp)
+            ) {
+                Text(
+                    text = "Already have an account?",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Sign In",
+                    fontSize = 14.sp,
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clickable {
+                        navController.navigate("signin") // Navigate to Sign In screen
+                    }
+                )
+            }
         }
     }
 }

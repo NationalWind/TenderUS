@@ -1,13 +1,10 @@
-package com.hcmus.tenderus.ui.screens
+package com.hcmus.tenderus.ui.screens.authentication
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,27 +12,20 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
 import kotlinx.coroutines.delay
-import kotlin.coroutines.ContinuationInterceptor
 
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -249,7 +239,7 @@ fun SignUpScreen3(navController: NavController) {
                 fontSize = 30.sp,
                 color =  Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold,
-                lineHeight = 36.sp, // Adds space between the lines
+                lineHeight = 36.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -278,7 +268,7 @@ fun SignUpScreen3(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("SEND", color = Color.White)
+                Text("Continue", color = Color.White)
             }
         }
     }
@@ -290,6 +280,7 @@ fun SignUpScreen4(navController: NavController) {
     var confirmPassword by remember { mutableStateOf(TextFieldValue("")) }
     var isPasswordValid by remember { mutableStateOf(true) }
     var doPasswordsMatch by remember { mutableStateOf(true) }
+    var isSignUpSuccessful by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -320,7 +311,7 @@ fun SignUpScreen4(navController: NavController) {
             Text(
                 "Create a password",
                 fontSize = 30.sp,
-                color =  Color(0xFFB71C1C),
+                color = Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold,
                 lineHeight = 36.sp, // Adds space between the lines
                 textAlign = TextAlign.Center,
@@ -349,6 +340,12 @@ fun SignUpScreen4(navController: NavController) {
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Confirm Password",
+                fontSize = 18.sp,
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth()
+            )
             BasicTextField(
                 value = confirmPassword,
                 onValueChange = {
@@ -371,17 +368,34 @@ fun SignUpScreen4(navController: NavController) {
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
+            if (isSignUpSuccessful) {
+                Text(
+                    "Account created successfully!",
+                    color = Color.Blue,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+            }
             Button(
                 onClick = {
                     if (isPasswordValid && doPasswordsMatch) {
-                        // Handle successful sign up
-                        navController.navigate("profilesetup1")
+                        isSignUpSuccessful = true
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Create an account", color = Color.White)
+            }
+            if (isSignUpSuccessful) {
+                LaunchedEffect(Unit) {
+                    delay(2000L)
+                    navController.navigate("profilesetup1")
+                }
             }
         }
     }

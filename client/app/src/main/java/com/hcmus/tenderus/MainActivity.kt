@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -31,8 +32,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.screens.SplashScreen
 import com.hcmus.tenderus.ui.screens.OnboardingScreen1
-//import com.hcmus.tenderus.ui.screens.OnboardingScreen2
-//import com.hcmus.tenderus.ui.screens.OnboardingScreen3
+
 
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -43,6 +43,10 @@ import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.LoginApi
+import com.hcmus.tenderus.ui.screens.MainScreen
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen3
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import com.hcmus.tenderus.ui.screens.LoginScreen
 import com.hcmus.tenderus.ui.screens.MatchList
@@ -52,6 +56,18 @@ import com.hcmus.tenderus.ui.screens.SignUpScreen2
 import com.hcmus.tenderus.ui.screens.SignUpScreen3
 import com.hcmus.tenderus.ui.screens.SignUpScreen4
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
+import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails2Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails3Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails4Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.SelectYourGoalsScreen
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen1
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen2
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen3
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen4
+import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -66,6 +82,14 @@ class MainActivity : ComponentActivity() {
             // FCM SDK (and your app) can post notifications.
         } else {
             // TODO: Inform user that that your app will not show notifications.
+        }
+    }
+    private val REQUEST_CAMERA_PERMISSION = 100
+
+    private fun requestCameraPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION)
         }
     }
 
@@ -87,11 +111,13 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         askNotificationPermission()
         TokenManager.init(this)
         TokenManager.saveToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OWE3YWIxYTVjMmU5MjM3MjQ3NDhhNyIsInVzZXJuYW1lIjoidGVudGVuIiwicGFzc3dvcmQiOiIkMmIkMTAkaWtXenVwR2U2MElsSTlNNTQxazRldXE4Mzc2eW5BS3hBS1lXVHlTTkU1dlpNaXF4RkZQZHEiLCJlbWFpbCI6Im5nLm5ndXludkBnbWFpbC5jb20iLCJwaG9uZSI6ImFob2hlIiwicm9sZSI6IlVTRVIiLCJGQ01SZWdUb2tlbiI6ImNibFlTaGYxUXNDZk1aYVc3VEZ0WmU6QVBBOTFiRV9NVFBsQV9uMDVkVW1fUm0zTkI5eDVpLXRlVmhiNllpaExfbEdmMFNmT290cGZhbEY3cFJuVVVyaXlWYXR3MTBtb0hnRExKWF9YY1lfSXBvMHkxUzdXYVlxV2s2SEt3OTFTLWJSdHRwUkpiMlNUTm9DWjBoeDZnN3hLdnNCbUdJb0l0bU0iLCJhdmF0YXJJY29uIjpudWxsLCJpYXQiOjE3MjI0ODQzNDl9.ZyQOYaC_QCypf39UjLYcIN4b-VQE6E0bgTZ_3rWrykM")
+        requestCameraPermission()
         val auth = Firebase.auth
         // Input this var in every composable that needs to call Firebase services (sendSMS, confirmAndSync)
         firebaseSMSAuth = FirebaseSMSAuth(auth, this)
@@ -123,11 +149,20 @@ class MainActivity : ComponentActivity() {
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
                     composable("signin") { LoginScreen(navController = navController) }
                     composable("signup1") { SignUpScreen1(navController) }
-                    composable("signup2") { SignUpScreen2(navController)}
-                    composable("signup3") { SignUpScreen3(navController)}
+                    composable("signup2") { SignUpScreen2(navController) }
+                    composable("signup3") { SignUpScreen3(navController) }
                     composable("signup4") { SignUpScreen4(navController) }
                     composable("profilesetup1") { ProfileDetails1Screen(navController) }
-
+                    composable("profilesetup2") { ProfileDetails2Screen(navController ) }
+                    composable("profilesetup3") { ProfileDetails3Screen(navController ) }  // user preferences
+                    composable("filter") { SearchPreferencesScreen(navController) }
+                    composable("selGoal") { SelectYourGoalsScreen(navController) }
+                    composable("add_photos") { ProfileDetails4Screen(navController) }
+                    composable("fgpass1") { ForgotPasswordScreen1(navController) }
+                    composable("fgpass2") { ForgotPasswordScreen2(navController)}
+                    composable("fgpass3") { ForgotPasswordScreen3(navController) }
+                    composable("houserules") { HouseRulesScreen(navController) }
+                    composable("main") { MainScreen(navController) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
