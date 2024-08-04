@@ -25,7 +25,3 @@ fun ChatScreen(navController: NavController) {
 
 }
 
-@Composable
-fun ProfileScreen(navController: NavController) {
-
-}

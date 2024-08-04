@@ -12,7 +12,7 @@ import com.hcmus.tenderus.ui.screens.discover.ChatScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.ExploreScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
-import com.hcmus.tenderus.ui.screens.discover.ProfileScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 
 @Composable
 fun MainScreen(navController: NavController) {
