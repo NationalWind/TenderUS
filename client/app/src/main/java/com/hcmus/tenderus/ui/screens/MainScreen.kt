@@ -23,7 +23,7 @@ import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 
 
-val matchListVM = MatchListVM()
+//val matchListVM = MatchListVM()
 
 @Composable
 fun MainScreen(navController: NavController) {
