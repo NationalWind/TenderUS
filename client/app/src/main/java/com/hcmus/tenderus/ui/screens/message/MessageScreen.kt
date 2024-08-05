@@ -1,6 +1,7 @@
 package com.hcmus.tenderus.ui.screens.message
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -56,6 +58,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -94,8 +97,8 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
         Column(
             modifier = Modifier.padding(15.dp)
         ) {
-            Text(text = match.displayName, style = Typography.titleMedium)
-            Text(text = match.messageArr.first().content)
+            Text(text = match.displayName, style = Typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = if (match.messageArr.first().receiver == match.username) "You: " + match.messageArr.first().content else match.messageArr.first().content, style = Typography.bodyMedium.copy(color = Color.Gray), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Log.d("d", match.displayName)
         val diff = subtractInMinutes(match.messageArr.first().createdAt)
@@ -110,7 +113,7 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
         Spacer(modifier = Modifier
             .fillMaxWidth()
             .weight(1f))
-        Text(text = str)
+        Text(text = str, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 
 }
@@ -135,7 +138,8 @@ fun NewMatchItem(match: MatchState, onClick: () -> Unit) {
         )
         Text(text = match.displayName, modifier = Modifier
             .padding(5.dp)
-            .fillMaxWidth())
+            .fillMaxWidth(),
+            overflow = TextOverflow.Ellipsis)
     }
 
 }
@@ -263,7 +267,7 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
             modifier = Modifier
                 .clip(shape = CircleShape)
                 .size(56.dp)
-                .weight(0.5f),
+                .weight(1f),
             contentDescription = null,
             contentScale = ContentScale.Crop
         )
@@ -271,7 +275,7 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
         Column(
             modifier = Modifier.weight(5f)
         ) {
-            Text(text = match.displayName, style = Typography.titleMedium)
+            Text(text = match.displayName, style = Typography.titleMedium, fontWeight = FontWeight.Bold)
             Text(text = if (match.isActive) "Online" else "Offline")
         }
     }
@@ -350,6 +354,28 @@ fun BottomSheet(showBottomSheetState: MutableState<Boolean>, sheetState: SheetSt
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Spacer(modifier = Modifier.weight(0.2f))
+                    AnimatedVisibility(messageTexting == "") {
+                        Image(
+                            painterResource(id = R.drawable.imageclecir),
+                            modifier = Modifier
+                                .weight(1f)
+                                .size(50.dp)
+                                .clickable {
+
+                                    matchListVM.sendMessage(
+                                        MessageSendingRequest(
+                                            usernameInChat,
+                                            "Text",
+                                            messageTexting
+                                        )
+                                    )
+                                    messageTexting = ""
+
+                                },
+                            contentDescription = null,
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(0.2f))
                     OutlinedTextField(
                         shape = RoundedCornerShape(12.dp),
 //            leadingIcon = { Icon(Icons.Rounded.Search, null) },
@@ -363,23 +389,51 @@ fun BottomSheet(showBottomSheetState: MutableState<Boolean>, sheetState: SheetSt
                             unfocusedContainerColor = Color.Transparent
                         )
                     )
-                    Image(
-                        painterResource(id = R.drawable.send),
-                        modifier= Modifier
-                            .weight(1f)
-                            .size(40.dp)
-                            .clickable {
-                                matchListVM.sendMessage(
-                                    MessageSendingRequest(
-                                        usernameInChat,
-                                        "Text",
-                                        messageTexting
+                    Spacer(modifier = Modifier.weight(0.2f))
+                    AnimatedVisibility(messageTexting == "") {
+                        Image(
+                            painterResource(id = R.drawable.micircle),
+                            modifier= Modifier
+                                .weight(1f)
+                                .size(55.dp)
+                                .clickable {
+
+                                    matchListVM.sendMessage(
+                                        MessageSendingRequest(
+                                            usernameInChat,
+                                            "Text",
+                                            messageTexting
+                                        )
                                     )
-                                )
-                                messageTexting = ""
-                            },
-                        contentDescription = null
-                    )
+                                    messageTexting = ""
+
+                                },
+                            contentDescription = null,
+                        )
+                    }
+                    AnimatedVisibility(messageTexting != "") {
+                        Image(
+                            painterResource(id = R.drawable.send),
+                            modifier= Modifier
+                                .weight(1f)
+                                .size(55.dp)
+                                .clickable {
+
+                                        matchListVM.sendMessage(
+                                            MessageSendingRequest(
+                                                usernameInChat,
+                                                "Text",
+                                                messageTexting
+                                            )
+                                        )
+                                        messageTexting = ""
+
+                                },
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(Color(0xFFE94057))
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(0.2f))
                 }
 
             }

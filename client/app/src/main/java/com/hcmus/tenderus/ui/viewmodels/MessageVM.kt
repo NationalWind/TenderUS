@@ -41,7 +41,15 @@ class MatchListVM: ViewModel() {
                     val newMsg =
                         MessagePollingApi.getNewMessage("Bearer " + TokenManager.getToken()!!)
                     val idx = matches.indexOfFirst { it.username == newMsg.sender }
-                    matches[idx].messageArr.add(0, newMsg)
+                    if (idx == 0) {
+                        matches[idx].messageArr.add(0, newMsg)
+                    } else {
+                        val match = matches[idx]
+                        matches.removeAt(idx)
+                        match.messageArr.add(0, newMsg)
+                        matches.add(0, match)
+                    }
+
                 } catch (e: Exception) {
                     Log.d("MsgPolling", e.toString())
                 }
@@ -52,35 +60,64 @@ class MatchListVM: ViewModel() {
 
     fun getMatches() {
         viewModelScope.launch {
-            val matchesList = GetMatchesApi.getMatches("Bearer " + TokenManager.getToken()!!).toMutableList()
-            matchesList.sortWith { a, b ->
-                if (a.messageArr.isNotEmpty() && b.messageArr.isNotEmpty() && subtractInMinutes(
-                        a.messageArr.last().createdAt,
-                        b.messageArr.last().createdAt
-                    ) != 0L
-                ) {
-                    subtractInMinutes(
-                        a.messageArr.last().createdAt,
-                        b.messageArr.last().createdAt
-                    ).toInt()
-                } else {
-                    subtractInMinutes(a.createdAt, b.createdAt).toInt()
-                }
+            try {
+                val matchesList =
+                    GetMatchesApi.getMatches("Bearer " + TokenManager.getToken()!!).toMutableList()
+                matchesList.sortWith { a, b ->
+                    if (a.messageArr.isEmpty() && b.messageArr.isNotEmpty()) {
+                        -1
+                    } else if (a.messageArr.isNotEmpty() && b.messageArr.isEmpty()) {
+                        1
+                    } else if (a.messageArr.isNotEmpty() && subtractInMinutes(
+                            a.messageArr.first().createdAt,
+                            b.messageArr.first().createdAt
+                        ) != 0L
+                    ) {
+                        subtractInMinutes(
+                            a.messageArr.first().createdAt,
+                            b.messageArr.first().createdAt
+                        ).toInt()
+                    } else {
+                        subtractInMinutes(a.createdAt, b.createdAt).toInt()
+                    }
 
-            }
-            for (m in matchesList) {
-                matches.add(MatchState(m.username, m.avatarIcon, m.displayName, m.createdAt, m.isActive))
-                for (msg in m.messageArr) {
-                    matches.last().messageArr.add(msg)
                 }
+                for (m in matchesList) {
+                    matches.add(
+                        MatchState(
+                            m.username,
+                            m.avatarIcon,
+                            m.displayName,
+                            m.createdAt,
+                            m.isActive
+                        )
+                    )
+                    for (msg in m.messageArr) {
+                        matches.last().messageArr.add(msg)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d("GetMatches", e.toString())
             }
         }
     }
 
     fun sendMessage(req: MessageSendingRequest) {
         viewModelScope.launch {
-            val msg = MessageSendingApi.sendMessage("Bearer " + TokenManager.getToken()!!, req)
-            matches.first { it.username == req.receiver }.messageArr.add(0, msg)
+            try {
+                val msg = MessageSendingApi.sendMessage("Bearer " + TokenManager.getToken()!!, req)
+                val idx = matches.indexOfFirst { it.username == msg.receiver }
+                if (idx == 0) {
+                    matches[idx].messageArr.add(0, msg)
+                } else {
+                    val match = matches[idx]
+                    matches.removeAt(idx)
+                    match.messageArr.add(0, msg)
+                    matches.add(0, match)
+                }
+            } catch (e: Exception) {
+                Log.d("MsgSending", e.toString())
+            }
         }
 
     }
