@@ -287,6 +287,25 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                     }
                 }
 
+                if (!showProfileDetails) {
+                    // Profile button at the bottom right
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp)
+                            .size(64.dp)
+                            .clickable { showProfileDetails = true }
+                            .background(Color.Transparent)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.profile_button),
+                            contentDescription = "Show Profile",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
                 if (showProfileDetails) {
                     // Full Profile Information Section
                     Box(
@@ -324,13 +343,20 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Button(
-                                onClick = {
-                                    showProfileDetails = false
-                                },
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            // Use profile_button image as collapse button
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .size(64.dp)
+                                    .clickable { showProfileDetails = false }
+                                    .background(Color.Transparent)
                             ) {
-                                Text("Collapse")
+                                Image(
+                                    painter = painterResource(id = R.drawable.collapse_button), // Use the same image for collapsing
+                                    contentDescription = "Collapse Profile",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier.fillMaxSize()
+                                )
                             }
                         }
                     }
@@ -339,6 +365,14 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
         }
     }
 }
+
+
+
+
+
+
+
+
 
 
 @Composable
