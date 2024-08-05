@@ -129,8 +129,6 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM) {
     var searchText by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
