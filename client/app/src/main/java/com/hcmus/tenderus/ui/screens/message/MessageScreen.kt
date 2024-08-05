@@ -1,4 +1,4 @@
-package com.hcmus.tenderus.ui.screens
+package com.hcmus.tenderus.ui.screens.message
 
 import android.util.Log
 import androidx.compose.foundation.Image
