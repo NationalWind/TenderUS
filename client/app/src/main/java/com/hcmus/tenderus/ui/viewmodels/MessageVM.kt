@@ -14,6 +14,7 @@ import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Match
 import com.hcmus.tenderus.model.Message
 import com.hcmus.tenderus.network.ApiClient.GetMatchesApi
+import com.hcmus.tenderus.network.ApiClient.HaveReadMessageApi
 import com.hcmus.tenderus.network.ApiClient.MessagePollingApi
 import com.hcmus.tenderus.network.ApiClient.MessageSendingApi
 import com.hcmus.tenderus.network.MessageSendingRequest
@@ -25,7 +26,8 @@ data class MatchState(
     val avatarIcon: String = "",
     val displayName: String = "",
     val createdAt: String = "",
-    val isActive: Boolean = false,
+    var isActive: Boolean = false,
+    var isRead: Boolean = false,
     val messageArr: SnapshotStateList<Message> = mutableStateListOf<Message>()
 )
 
@@ -50,6 +52,7 @@ class MatchListVM: ViewModel() {
                         match.messageArr.add(0, newMsg)
                         matches.add(0, match)
                     }
+                    matches[0].isRead = false
 
                 } catch (e: Exception) {
                     Log.d("MsgPolling", e.toString())
@@ -90,7 +93,8 @@ class MatchListVM: ViewModel() {
                             m.avatarIcon,
                             m.displayName,
                             m.createdAt,
-                            m.isActive
+                            m.isActive,
+                            m.isRead
                         )
                     )
                     for (msg in m.messageArr) {
@@ -121,6 +125,16 @@ class MatchListVM: ViewModel() {
             }
         }
 
+    }
+
+    fun haveReadMessage(conversationID: String) {
+        viewModelScope.launch {
+            try {
+                HaveReadMessageApi.update("Bearer " + TokenManager.getToken()!!, conversationID)
+            } catch (e: Exception) {
+                Log.d("MsgBeRead", e.toString())
+            }
+        }
     }
 
 }

@@ -11,6 +11,6 @@ messageRouter.get("/polling", authMiddeware.checkUser, messageController.message
 messageRouter.get("/", authMiddeware.checkUser, messageController.loadMessage);
 messageRouter.get("/matches", authMiddeware.checkUser, messageController.getMatches);
 
-
+messageRouter.post("/read", authMiddeware.checkUser, messageController.haveRead);
 export default messageRouter;
 

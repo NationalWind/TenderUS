@@ -13,5 +13,4 @@ data class Message(
     var msgType:        String = "",
     var content:        String = "",
     var createdAt:      String = "",
-    var isRead:         Boolean = false
 )

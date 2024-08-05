@@ -50,6 +50,9 @@ object ApiClient {
     val MessageSendingApi by lazy {
         create(MessageSending::class.java)
     }
+    val HaveReadMessageApi by lazy {
+        create(HaveReadMessage::class.java)
+    }
 
 
 

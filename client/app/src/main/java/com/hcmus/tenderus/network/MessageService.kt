@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 
 import retrofit2.http.POST
-
+data class OKResponse (private val message: String)
 data class MessageSendingRequest(
     val receiver: String,
     val msgType: String,
@@ -26,4 +26,10 @@ interface MessagePolling {
 interface MessageSending {
     @POST("api/message")
     suspend fun sendMessage(@Header("Authorization") authorization: String, @Body req: MessageSendingRequest): Message
+}
+
+
+interface HaveReadMessage {
+    @POST("api/message")
+    suspend fun update(@Header("Authorization") authorization: String, @Body conversationID: String): OKResponse
 }

@@ -203,7 +203,8 @@ const messageController = {
       if (!converation) {
         const convo = await db.conversation.create({
           data: {
-            user1_user2: user1 + "_" + user2
+            user1_user2: user1 + "_" + user2,
+            isRead: false
           }
         });
 
@@ -215,7 +216,6 @@ const messageController = {
           msgType: req.body.msgType,
           content: req.body.content,
           createdAt: new Date(),
-          isRead: false
         };
         await db.message.create({ data });
       } else {
@@ -233,11 +233,18 @@ const messageController = {
           msgType: req.body.msgType,
           content: req.body.content,
           createdAt: new Date(),
-          isRead: false
         };
         await db.message.create({ data });
 
       }
+      await db.conversation.update({
+        where: {
+          doc_id: data.conversationID
+        },
+        data: {
+          isRead: false
+        }
+      });
       /*await */FCMPendingMessage(data);
 
       if (messagePollers[data.receiver]) {
@@ -310,6 +317,26 @@ const messageController = {
       }
 
       res.status(200).json(messages)
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  },
+  haveRead: async (req: Request, res: Response) => {
+    try {
+      const { converationID } = req.body;
+      if (!converationID) {
+        res.status(400).json({ message: "Where is my conversationID?" });
+        return;
+      }
+      await db.conversation.update(
+        {
+          where: { doc_id: converationID },
+          data: {
+            isRead: true
+          }
+        }
+      )
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });

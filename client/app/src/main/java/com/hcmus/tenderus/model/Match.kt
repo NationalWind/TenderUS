@@ -8,5 +8,6 @@ data class Match(
     val displayName: String = "",
     val createdAt: String = "",
     val isActive: Boolean = false,
+    val isRead: Boolean = false,
     val messageArr: List<Message> = listOf()
 )

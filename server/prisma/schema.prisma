@@ -79,6 +79,7 @@ model Match {
 model Conversation {
   doc_id      String  @id @default(auto()) @map("_id") @db.ObjectId
   user1_user2 String @unique
+  isRead      Boolean
 }
 
 model Message {
@@ -90,7 +91,6 @@ model Message {
   msgType        String
   content        String
   createdAt      DateTime
-  isRead         Boolean
 
   @@unique([conversationID, msgID(sort: Desc)])
 }

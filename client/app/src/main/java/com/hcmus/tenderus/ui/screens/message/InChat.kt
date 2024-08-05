@@ -97,11 +97,17 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
     val matches = matchListVM.matches
     val usernameInChat = matchListVM.curReceiver
 
+
+
     BackHandler(enabled = true, onBack = {
         navController.navigate("messages")
     })
 
     val idx = matches.indexOfFirst { it.username == usernameInChat }
+    if (!matches[idx].isRead) {
+        matchListVM.haveReadMessage(matches[idx].messageArr.first().conversationID)
+        matches[idx].isRead = true
+    }
     Scaffold(
         containerColor = Color.White,
         contentColor = Color.Black,

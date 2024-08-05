@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -74,7 +75,20 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
             modifier = Modifier.padding(15.dp)
         ) {
             Text(text = match.displayName, style = Typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(text = if (match.messageArr.first().receiver == match.username) "You: " + match.messageArr.first().content else match.messageArr.first().content, style = Typography.bodyMedium.copy(color = Color.Gray), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (match.messageArr.first().receiver == match.username) {
+                Text(text =  "You: " + match.messageArr.first().content, style = Typography.bodyMedium.copy(color = Color.Gray), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            } else {
+
+                Text(
+                    text = match.messageArr.first().content,
+                    style = Typography.bodyMedium.copy(color = Color.Gray),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = if (match.isRead) null else FontWeight.Bold
+                )
+
+            }
+
         }
         Log.d("d", match.displayName)
         val diff = subtractInMinutes(match.messageArr.first().createdAt)
@@ -159,8 +173,8 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM) {
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent
-                )
-
+                ),
+                textStyle = TextStyle(color = Color.Black)
 
             )
 
