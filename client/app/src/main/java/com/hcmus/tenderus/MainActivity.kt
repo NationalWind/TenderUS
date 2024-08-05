@@ -59,6 +59,7 @@ import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen1
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen2
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen3
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen4
+import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import kotlinx.coroutines.launch
