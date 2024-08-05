@@ -21,7 +21,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,6 +52,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.network.MessageSendingRequest
+import com.hcmus.tenderus.ui.screens.BottomNavItem
 import com.hcmus.tenderus.ui.theme.Typography
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.MatchState
@@ -112,10 +116,27 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
         containerColor = Color.White,
         contentColor = Color.Black,
         topBar = {
-            Column {
+            Row {
                 Box(
                     modifier = Modifier.statusBarsPadding()
                 )
+                IconButton(
+                    onClick = {
+                        navController.navigate(BottomNavItem.Chat.route) {
+                            popUpTo(BottomNavItem.Chat.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(5.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.back_ic),
+                        contentDescription = "Back",
+                        tint = Color(0xFFB71C1C),
+                        modifier = Modifier.size(50.dp)
+                    )
+                }
                 InChatTopBar(matches[idx])
             }
         },

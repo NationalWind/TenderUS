@@ -135,17 +135,17 @@ class MainActivity : ComponentActivity() {
         Log.d(TAG, "Init")
 
 //        VM init
-        val matchListVM = MatchListVM()
+//        val matchListVM = MatchListVM()
 
 
         enableEdgeToEdge()
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
+                NavHost(navController, startDestination = "splash") {
 //                NavHost(navController, startDestination = "messages") {
-                NavHost(navController, startDestination = "messages") {
-                    composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
-                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
+//                    composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
+//                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
                     composable("signin") { LoginScreen(navController = navController) }

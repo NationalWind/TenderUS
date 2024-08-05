@@ -18,12 +18,13 @@ import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.discover.MessageScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
+import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 
 
-//val matchListVM = MatchListVM()
+val matchListVM = MatchListVM()
 
 @Composable
 fun MainScreen(navController: NavController) {
@@ -44,7 +45,7 @@ fun MainScreen(navController: NavController) {
                 contentDescription = "Main Logo",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp) // Add padding as needed
+                    .padding(top = 1.dp) // Add padding as needed
                     .size(30.dp) // Adjust size as needed
             )
             // Main content (NavHost)
@@ -57,8 +58,11 @@ fun MainScreen(navController: NavController) {
                     composable(BottomNavItem.Discover.route) { DiscoverScreen(navController) }
                     composable(BottomNavItem.Matches.route) { MatchesScreen(navController) }
                     composable(BottomNavItem.Explore.route) { ExploreScreen(navController) }
-//                    composable(BottomNavItem.Chat.route) { MatchList(matchListVM = matchListVM)}
-                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
+                    composable(BottomNavItem.Chat.route) { MatchList(mainNavController, matchListVM = matchListVM)}
+                    composable("inchat") {
+                        InChatScreen(navController = mainNavController, matchListVM = matchListVM)
+                    }
+//                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
                     composable(BottomNavItem.Profile.route) { ProfileScreen(navController) }
                 }
             }
