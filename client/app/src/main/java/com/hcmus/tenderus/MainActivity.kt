@@ -10,6 +10,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,6 +63,7 @@ import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen1
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen2
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen3
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen4
+import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
@@ -139,7 +144,8 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 //                NavHost(navController, startDestination = "messages") {
                 NavHost(navController, startDestination = "messages") {
-                    composable("messages") { MatchList(matchListVM = matchListVM) }
+                    composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
+                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
                     composable("signin") { LoginScreen(navController = navController) }

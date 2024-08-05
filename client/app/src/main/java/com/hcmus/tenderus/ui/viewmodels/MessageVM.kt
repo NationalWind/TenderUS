@@ -32,6 +32,7 @@ data class MatchState(
 
 class MatchListVM: ViewModel() {
     val matches = mutableStateListOf<MatchState>()
+    var curReceiver by mutableStateOf("")
 
     init {
         getMatches()
