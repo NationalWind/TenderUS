@@ -341,12 +341,6 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
 }
 
 
-
-
-
-
-
-
 @Composable
 fun GenderSelection(selectedGender: String, onGenderSelected: (String) -> Unit) {
     Row(
