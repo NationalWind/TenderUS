@@ -124,6 +124,7 @@ const messageController = {
               avatarIcon: "$userInfo.avatarIcon",
               displayName: "$userInfo.displayName",
               isActive: "$userInfo.isActive",
+              isRead: "$conversation.isRead",
               messageArr: 1
             }
           }
@@ -322,21 +323,24 @@ const messageController = {
       res.status(500).json({ message: "Something went wrong" });
     }
   },
+
+  //api/message/read
   haveRead: async (req: Request, res: Response) => {
     try {
-      const { converationID } = req.body;
-      if (!converationID) {
+      const { conversationID } = req.body;
+      if (!conversationID) {
         res.status(400).json({ message: "Where is my conversationID?" });
         return;
       }
       await db.conversation.update(
         {
-          where: { doc_id: converationID },
+          where: { doc_id: conversationID },
           data: {
             isRead: true
           }
         }
       )
+      res.status(200).json({ message: "OK" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });
