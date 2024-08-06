@@ -150,9 +150,6 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.statusBarsPadding()
-        )
         Column {
             Text(
                 "Messages",
