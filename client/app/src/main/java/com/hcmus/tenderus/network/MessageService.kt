@@ -13,6 +13,9 @@ data class MessageSendingRequest(
     val msgType: String,
     val content: String
 )
+data class HaveReadMessageRequest(
+    val conversationID: String
+)
 interface GetMatch {
     @GET("api/message/matches")
     suspend fun getMatches(@Header("Authorization") authorization: String): List<Match>
@@ -30,6 +33,6 @@ interface MessageSending {
 
 
 interface HaveReadMessage {
-    @POST("api/message")
-    suspend fun update(@Header("Authorization") authorization: String, @Body conversationID: String): OKResponse
+    @POST("api/message/read")
+    suspend fun update(@Header("Authorization") authorization: String, @Body req: HaveReadMessageRequest): OKResponse
 }

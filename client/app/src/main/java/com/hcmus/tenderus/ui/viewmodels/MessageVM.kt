@@ -17,6 +17,7 @@ import com.hcmus.tenderus.network.ApiClient.GetMatchesApi
 import com.hcmus.tenderus.network.ApiClient.HaveReadMessageApi
 import com.hcmus.tenderus.network.ApiClient.MessagePollingApi
 import com.hcmus.tenderus.network.ApiClient.MessageSendingApi
+import com.hcmus.tenderus.network.HaveReadMessageRequest
 import com.hcmus.tenderus.network.MessageSendingRequest
 import com.hcmus.tenderus.utils.subtractInMinutes
 import kotlinx.coroutines.launch
@@ -130,7 +131,7 @@ class MatchListVM: ViewModel() {
     fun haveReadMessage(conversationID: String) {
         viewModelScope.launch {
             try {
-                HaveReadMessageApi.update("Bearer " + TokenManager.getToken()!!, conversationID)
+                HaveReadMessageApi.update("Bearer " + TokenManager.getToken()!!, HaveReadMessageRequest(conversationID))
             } catch (e: Exception) {
                 Log.d("MsgBeRead", e.toString())
             }

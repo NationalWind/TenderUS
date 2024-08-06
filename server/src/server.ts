@@ -5,6 +5,7 @@ import authRouter from "./routers/authRouter";
 import swipeRouter from "./routers/swipeRouter";
 import messageRouter from "./routers/messageRouter";
 import recommendationRouter from "./routers/recommendationRouter";
+import profileRouter from "./routers/profileRouter";
 import { AdmGetAuth, firebaseFCM } from "./lib/firebase";
 import https from "https";
 import http from "http";
@@ -20,6 +21,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/swipe", swipeRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/recommendation", recommendationRouter);
+app.use("/api/profile", profileRouter)
 
 const options = {
   key: fs.readFileSync("cert/key.pem"),
