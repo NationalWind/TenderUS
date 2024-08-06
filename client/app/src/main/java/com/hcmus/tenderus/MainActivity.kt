@@ -143,7 +143,7 @@ class MainActivity : ComponentActivity() {
             TenderUSTheme {
                 val navController = rememberNavController()
 //                NavHost(navController, startDestination = "splash") {
-                NavHost(navController, startDestination = "messages") {
+                NavHost(navController, startDestination = "splash") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
                     composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
                     composable("splash") { SplashScreen(navController = navController) }
