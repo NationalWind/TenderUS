@@ -36,6 +36,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -48,6 +49,7 @@ import androidx.navigation.NavController
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Dialog
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import coil.compose.rememberAsyncImagePainter
@@ -62,6 +64,7 @@ fun DiscoverScreen(navController: NavController) {
     var distance by remember { mutableStateOf(40f) }
     var startAge by remember { mutableStateOf(20f) }
     var endAge by remember { mutableStateOf(28f) }
+    var showNotifications by remember { mutableStateOf(false) }
 
     // Example user profile images
     var profiles by remember { mutableStateOf(
@@ -96,8 +99,23 @@ fun DiscoverScreen(navController: NavController) {
                     text = "Discover",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFB71C1C)
+                    color = Color(0xFFB62424)
                 )
+                Spacer(modifier = Modifier.width(105.dp))
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clickable { showNotifications = !showNotifications }
+                        .background(Color.Transparent)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_noti), // Replace with your notification icon
+                        contentDescription = "Notifications",
+                        tint = Color(0xFFB71C1C),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .size(55.dp)
@@ -121,6 +139,10 @@ fun DiscoverScreen(navController: NavController) {
                     .align(Alignment.Start)
                     .padding(start = 16.dp)
             )
+
+            if (showNotifications) {
+                NotificationDialog(onDismiss = { showNotifications = false })
+            }
 
             DropdownMenu(
                 expanded = expanded,
@@ -181,6 +203,65 @@ fun DiscoverScreen(navController: NavController) {
     }
 }
 
+@Composable
+fun NotificationDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(Color.White, shape = MaterialTheme.shapes.medium)
+                .shadow(8.dp, shape = MaterialTheme.shapes.medium)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Notifications",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                // Example notifications
+                NotificationList(
+                    notifications = listOf(
+                        "New match found!",
+                        "Profile liked!",
+                        "New message received!"
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFBD0D36),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Close")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NotificationList(notifications: List<String>) {
+    Column {
+        notifications.forEach { notification ->
+            Text(
+                text = notification,
+                fontSize = 14.sp,
+                color = Color.Black,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
+    }
+}
 
 @Composable
 fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) -> Unit) {
@@ -365,15 +446,6 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
         }
     }
 }
-
-
-
-
-
-
-
-
-
 
 @Composable
 fun GenderSelection(selectedGender: String, onGenderSelected: (String) -> Unit) {
