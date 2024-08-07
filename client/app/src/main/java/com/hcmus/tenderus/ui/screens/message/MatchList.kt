@@ -90,7 +90,7 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
             }
 
         }
-        Log.d("d", match.displayName)
+
         val diff = subtractInMinutes(match.messageArr.first().createdAt)
         var str = ""
         if (diff < 60) {
@@ -150,9 +150,6 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier.statusBarsPadding()
-        )
         Column {
             Text(
                 "Messages",

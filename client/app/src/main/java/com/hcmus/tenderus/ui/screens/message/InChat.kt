@@ -101,14 +101,8 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
     val matches = matchListVM.matches
     val usernameInChat = matchListVM.curReceiver
 
-
-
-    BackHandler(enabled = true, onBack = {
-        navController.navigate("messages")
-    })
-
     val idx = matches.indexOfFirst { it.username == usernameInChat }
-    if (!matches[idx].isRead) {
+    if (!matches[idx].isRead && matches[idx].messageArr.isNotEmpty()) {
         matchListVM.haveReadMessage(matches[idx].messageArr.first().conversationID)
         matches[idx].isRead = true
     }
@@ -117,9 +111,6 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
         contentColor = Color.Black,
         topBar = {
             Row {
-                Box(
-                    modifier = Modifier.statusBarsPadding()
-                )
                 IconButton(
                     onClick = {
                         navController.navigate(BottomNavItem.Chat.route) {
@@ -193,7 +184,6 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(10.dp)
             ) {
                 Spacer(modifier = Modifier.weight(0.2f))
                 AnimatedVisibility(messageTexting == "") {
