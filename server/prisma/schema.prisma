@@ -49,6 +49,7 @@ model Preference {
   ageMax          Int
   maxDist         Float
   showMe          String
+  recPage         Int?
 }
 
 
