@@ -140,9 +140,9 @@ fun DiscoverScreen(navController: NavController) {
                     .padding(start = 16.dp)
             )
 
-            if (showNotifications) {
-                NotificationDialog(onDismiss = { showNotifications = false })
-            }
+//            if (showNotifications) {
+//                NotificationDialog(onDismiss = { showNotifications = false })
+//            }
 
             DropdownMenu(
                 expanded = expanded,
@@ -203,65 +203,65 @@ fun DiscoverScreen(navController: NavController) {
     }
 }
 
-@Composable
-fun NotificationDialog(onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(Color.White, shape = MaterialTheme.shapes.medium)
-                .shadow(8.dp, shape = MaterialTheme.shapes.medium)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Notifications",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                // Example notifications
-                NotificationList(
-                    notifications = listOf(
-                        "New match found!",
-                        "Profile liked!",
-                        "New message received!"
-                    )
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFBD0D36),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Close")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NotificationList(notifications: List<String>) {
-    Column {
-        notifications.forEach { notification ->
-            Text(
-                text = notification,
-                fontSize = 14.sp,
-                color = Color.Black,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-        }
-    }
-}
+//@Composable
+//fun NotificationDialog(onDismiss: () -> Unit) {
+//    Dialog(onDismissRequest = onDismiss) {
+//        Surface(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp)
+//                .background(Color.White, shape = MaterialTheme.shapes.medium)
+//                .shadow(8.dp, shape = MaterialTheme.shapes.medium)
+//        ) {
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(16.dp)
+//            ) {
+//                Text(
+//                    text = "Notifications",
+//                    fontSize = 18.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    color = Color.Black,
+//                    modifier = Modifier.padding(bottom = 8.dp)
+//                )
+//                // Example notifications
+//                NotificationList(
+//                    notifications = listOf(
+//                        "New match found!",
+//                        "Profile liked!",
+//                        "New message received!"
+//                    )
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//                Button(
+//                    onClick = onDismiss,
+//                    modifier = Modifier.align(Alignment.End),
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = Color(0xFFBD0D36),
+//                        contentColor = Color.White
+//                    )
+//                ) {
+//                    Text("Close")
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//@Composable
+//fun NotificationList(notifications: List<String>) {
+//    Column {
+//        notifications.forEach { notification ->
+//            Text(
+//                text = notification,
+//                fontSize = 14.sp,
+//                color = Color.Black,
+//                modifier = Modifier.padding(vertical = 4.dp)
+//            )
+//        }
+//    }
+//}
 
 @Composable
 fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) -> Unit) {
