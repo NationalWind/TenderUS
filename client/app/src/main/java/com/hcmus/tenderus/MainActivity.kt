@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,8 +31,8 @@ import com.hcmus.tenderus.ui.screens.OnboardingScreen1
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.firebase.FirebaseEmailAuth
-import com.hcmus.tenderus.firebase.FirebaseSMSAuth
 import com.hcmus.tenderus.model.User
+import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
