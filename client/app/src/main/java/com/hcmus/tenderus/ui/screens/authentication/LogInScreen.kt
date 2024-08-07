@@ -26,7 +26,7 @@ import com.hcmus.tenderus.ui.theme.TenderUSTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController) {
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -64,9 +64,9 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email/Phone Number") },
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
                 modifier = Modifier.fillMaxWidth()
             )
 

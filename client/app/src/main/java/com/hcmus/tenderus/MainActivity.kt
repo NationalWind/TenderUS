@@ -47,6 +47,8 @@ import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.LoginApi
+import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
+import com.hcmus.tenderus.network.SyncSignUp
 import com.hcmus.tenderus.ui.screens.MainScreen
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
@@ -142,7 +144,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "main") {
+                NavHost(navController, startDestination = "signin") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
                     composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
@@ -166,6 +168,7 @@ class MainActivity : ComponentActivity() {
                     composable("main") { MainScreen(navController) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
+//                    composable("exlogin") { ExampleLogin(navController) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
 //                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
                 }
@@ -190,7 +193,6 @@ fun ExampleLogin(navController: NavController) {
         Text("Luugin")
     }
 }
-
 @Composable
 fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
     var userRegistration by remember { mutableStateOf(UserRegistration("tenten", "toleron", "ng.nguynv@gmail.com", "ahohe")) }
@@ -209,6 +211,7 @@ fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavCon
         Text("Send Email")
     }
 }
+
 @Composable
 fun ExampleEmailSync(firebaseEmailAuth: FirebaseEmailAuth) {
     var userRegistration by remember { mutableStateOf(UserRegistration("tenten", "toleron", "ng.nguynv@gmail.com")) }
