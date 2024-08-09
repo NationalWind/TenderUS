@@ -121,18 +121,19 @@ const recommendationController = {
         await db.preference.update({
           where: { username: req.body.id },
           data: {
-            recPage: cur_pref.recPage + 1
+            recPage: (cur_pref.recPage + 1) % 1e9
           }
         });
       }
 
-      const l = (cur_pref.recPage * 10) % recs.length
-      const r = (cur_pref.recPage * 10 + limit - 1) % recs.length
-      if (l > r) {
-        res.status(200).json({ profiles: recs.slice(l, recs.length).concat(recs.slice(0, r + 1)) });
-      } else {
-        res.status(200).json({ profiles: recs.slice(l, r + 1) });
+      const resRecs: Profile[] = [];
+
+      const begin = cur_pref.recPage * 10;
+      const end = cur_pref.recPage * 10 + limit;
+      for (let i = begin; i < end; i++) {
+        resRecs.push(recs[i % recs.length]);
       }
+      res.status(200).json({ profiles: resRecs });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });
