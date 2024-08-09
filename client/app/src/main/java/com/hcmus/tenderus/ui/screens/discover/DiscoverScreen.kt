@@ -1,5 +1,8 @@
 package com.hcmus.tenderus.ui.screens.discover
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,14 +54,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import coil.compose.rememberAsyncImagePainter
+import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
+import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun DiscoverScreen(navController: NavController) {
+fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)) {
     var location by remember { mutableStateOf("Ho Chi Minh city, VietNam") }
     var expanded by remember { mutableStateOf(false) }
     var selectedGender by remember { mutableStateOf("Female") }
@@ -66,20 +75,12 @@ fun DiscoverScreen(navController: NavController) {
     var endAge by remember { mutableStateOf(28f) }
     var showNotifications by remember { mutableStateOf(false) }
 
-    // Example user profile images
-    var profiles by remember { mutableStateOf(
-        listOf(
-            "https://fastly.picsum.photos/id/813/400/400.jpg?hmac=3eUkOPA1X4a9JB_fNq27cSoZ_ii17tUciJnLjDvW7lA",
-            "https://fastly.picsum.photos/id/117/400/400.jpg?hmac=lqQqWF--nOABfxYFPF-OUZTuCyYMv3Y0siDTCYlbbdI",
-            "https://fastly.picsum.photos/id/947/400/400.jpg?hmac=dPYdI-hfEy6EqwlKDEBuAtx8AVMy0u05pV5jTtGVCKc",
-            "https://fastly.picsum.photos/id/652/400/400.jpg?hmac=rU1jgJh7wB4lwyFsI0DfW0_Pk03cA-e2OeFfWYSbg6E",
-            "https://fastly.picsum.photos/id/67/400/400.jpg?hmac=wlcqJPOdBr1W3h-XmG1YRKKBfSI8uFQ0EOaVR1nbuIc",
-            "https://fastly.picsum.photos/id/165/400/400.jpg?hmac=2pNjhj20nxxGLi_7LTBU5NgrX60JSaoI4Nsq15NZDRQ",
-            "https://fastly.picsum.photos/id/737/400/400.jpg?hmac=X3PgjnQsTxQJNaxmk0fjtfJ1NlSaM1dzCNBNqDK_XSY",
-            "https://fastly.picsum.photos/id/914/400/400.jpg?hmac=jpTaivRKgUauZAhcOBbCE3guVYVcjWuP_a5k7vIu6xs",
-        )
-    )}
+    // Observe the state from the ViewModel
+    val discoverUiState by remember { derivedStateOf { viewModel.discoverUiState } }
 
+    LaunchedEffect(Unit) {
+        viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+    }
     TenderUSTheme {
         Column(
             modifier = Modifier
@@ -140,10 +141,6 @@ fun DiscoverScreen(navController: NavController) {
                     .padding(start = 16.dp)
             )
 
-//            if (showNotifications) {
-//                NotificationDialog(onDismiss = { showNotifications = false })
-//            }
-
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
@@ -196,12 +193,26 @@ fun DiscoverScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SwipeableProfiles(profiles) { updatedProfiles ->
-                profiles = updatedProfiles
+            when (discoverUiState) {
+                is DiscoverUiState.Loading -> {
+                    // Show a loading spinner or progress indicator
+                    CircularProgressIndicator()
+                }
+                is DiscoverUiState.Success -> {
+                    var profiles = (discoverUiState as DiscoverUiState.Success).profiles.map { it.avatarIcon }
+                    SwipeableProfiles(profiles) { updatedProfiles ->
+                        profiles = updatedProfiles
+                    }
+                }
+                is DiscoverUiState.Error -> {
+                    // Show an error message
+                    Text("Failed to load profiles", color = Color.Red)
+                }
             }
         }
     }
 }
+
 
 //@Composable
 //fun NotificationDialog(onDismiss: () -> Unit) {

@@ -10,12 +10,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,8 +28,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -144,7 +153,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "main") {
+                NavHost(navController, startDestination = "signin") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
                     composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
@@ -165,6 +174,11 @@ class MainActivity : ComponentActivity() {
                     composable("fgpass2") { ForgotPasswordScreen2(navController)}
                     composable("fgpass3") { ForgotPasswordScreen3(navController) }
                     composable("houserules") { HouseRulesScreen(navController) }
+//                    composable("main") { MainScreen(navController) }
+                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
+                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
+                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
+                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
                     composable("main") { MainScreen(/*navController*/) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
@@ -195,26 +209,32 @@ fun ExampleLogin(navController: NavController) {
 }
 @Composable
 fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
-    var userRegistration by remember { mutableStateOf(UserRegistration("tenten", "toleron", "ng.nguynv@gmail.com", "ahohe")) }
+    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9@gmail.com", "hihi")) }
     val scope = rememberCoroutineScope()
-    Button(onClick = {
-        scope.launch {
-            try {
-                firebaseEmailAuth.sendEmail(userRegistration.email)
-                navController.navigate("emailsync")
-            } catch (e: Exception) {
-                Log.d("EmailSend", e.toString())
-            }
 
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(onClick = {
+            scope.launch {
+                try {
+                    firebaseEmailAuth.sendEmail(userRegistration.email)
+                    navController.navigate("emailsync")
+                } catch (e: Exception) {
+                    Log.d("EmailSend", e.toString())
+                }
+            }
+        }) {
+            Text("Send Email")
         }
-    }) {
-        Text("Send Email")
     }
 }
 
+
 @Composable
 fun ExampleEmailSync(firebaseEmailAuth: FirebaseEmailAuth) {
-    var userRegistration by remember { mutableStateOf(UserRegistration("tenten", "toleron", "ng.nguynv@gmail.com")) }
+    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9124@gmail.com")) }
     val scope = rememberCoroutineScope()
     var text by remember { mutableStateOf("Sync Email") }
 
@@ -227,8 +247,96 @@ fun ExampleEmailSync(firebaseEmailAuth: FirebaseEmailAuth) {
             Log.d("EmailSync", e.toString())
         }
     }
-
 }
+
+@Composable
+fun ExampleSMSSend(firebaseSMSAuth: FirebaseSMSAuth, navController: NavController) {
+    var userRegistration by remember { mutableStateOf(UserRegistration("tenten", "toleron", "ng.nguynv@gmail.com", "ahohe")) }
+    var phoneNumber by remember { mutableStateOf("+84772405038") } // Replace with the user's phone number
+    val scope = rememberCoroutineScope()
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(onClick = {
+            scope.launch {
+                try {
+                    firebaseSMSAuth.sendSMS(phoneNumber)
+                    // Navigate to OTP verification screen
+                    navController.navigate("otpVerification")
+                } catch (e: Exception) {
+                    Log.d("SMSSend", e.toString())
+                }
+            }
+        }) {
+            Text("Send SMS")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OTPVerificationScreen(
+    firebaseSMSAuth: FirebaseSMSAuth,
+    navController: NavController
+) {
+    var otp by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9@gmail.com", "+84772405038")) }
+    var syncFor by remember { mutableStateOf("SIGN_UP") } // Replace with the user's phone number
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Enter the OTP sent to your phone", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (otp.isEmpty()) OutlinedTextField(
+            value = otp,
+            onValueChange = { otp = it },
+            label = { Text("OTP") },
+            visualTransformation = VisualTransformation.None,
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        ) else OutlinedTextField(
+            value = otp,
+            onValueChange = { otp = it },
+            label = { Text("OTP") },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = {
+            scope.launch {
+                try {
+                    firebaseSMSAuth.confirmAndSync(userRegistration, otp, syncFor)
+                    navController.navigate("home") // Navigate to the home screen or any other screen upon success
+                } catch (e: Exception) {
+                    errorMessage = e.localizedMessage
+                    Log.e("OTPVerification", "Error verifying OTP", e)
+                }
+            }
+        }) {
+            Text("Verify OTP")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        errorMessage?.let {
+            Text(text = it, color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
