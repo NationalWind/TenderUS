@@ -41,7 +41,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun AdminReportScreen(reports: List<Report>) {
+fun ReportListScreen(reports: List<Report>) {
     Scaffold(
         topBar = { TopBar() },
         content = { paddingValues ->
@@ -122,7 +122,7 @@ fun ReportCard(report: Report, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun AdminReportScreenPreview() {
+fun ReportListScreenPreview() {
     val reports = listOf(
         Report("RP0000", "Jiji", LocalDateTime.now(), Status.REVIEWED),
         Report("RP0001", "Jiji", LocalDateTime.now(), Status.PENDING),
@@ -136,6 +136,6 @@ fun AdminReportScreenPreview() {
         Report("RP0009", "Jiji", LocalDateTime.now(), Status.PENDING),
     )
     TenderUSTheme {
-        AdminReportScreen(reports = reports)
+        ReportListScreen(reports = reports)
     }
 }
