@@ -66,7 +66,6 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = Modifier.weight(0.5f))
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current).data(match.avatarIcon).build(),
             placeholder = painterResource(R.drawable.profile_placeholder),
@@ -113,10 +112,7 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
             Row {
                 IconButton(
                     onClick = {
-                        navController.navigate(BottomNavItem.Chat.route) {
-                            popUpTo(BottomNavItem.Chat.route) { inclusive = true }
-                            launchSingleTop = true
-                        }
+                        navController.popBackStack()
                     },
                     modifier = Modifier
                         .padding(5.dp)
@@ -131,57 +127,7 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
                 InChatTopBar(matches[idx])
             }
         },
-
-        ) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) {
-            Log.d("d", it.toString())
-            if (matches[idx].messageArr.isEmpty()) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(
-                        "No messages yet",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-            } else {
-                Box(modifier = Modifier.weight(1f)) {
-                    LazyColumn(state = listState, reverseLayout = true) {
-                        items(matches[idx].messageArr.size) { msgIdx ->
-                            if (matches[idx].messageArr[msgIdx].msgType == "Text") {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp),
-                                    horizontalArrangement = if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Arrangement.End else Arrangement.Start
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .widthIn(max = 250.dp)
-                                            .clip(RoundedCornerShape(16.dp))
-                                            .background(
-                                                if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Color(
-                                                    0xFFFDF1F3
-                                                ) else Color.LightGray
-                                            )
-                                            .padding(16.dp)
-                                    ) {
-                                        Text(
-                                            text = matches[idx].messageArr[msgIdx].content,
-                                            style = Typography.bodyMedium
-                                        )
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
+        bottomBar = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -268,6 +214,59 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
                 }
                 Spacer(modifier = Modifier.weight(0.2f))
             }
+        }
+
+        ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            Log.d("d", it.toString())
+            if (matches[idx].messageArr.isEmpty()) {
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    Text(
+                        "No messages yet",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+            } else {
+                Box(modifier = Modifier.weight(1f)) {
+                    LazyColumn(state = listState, reverseLayout = true) {
+                        items(matches[idx].messageArr.size) { msgIdx ->
+                            if (matches[idx].messageArr[msgIdx].msgType == "Text") {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    horizontalArrangement = if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Arrangement.End else Arrangement.Start
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .widthIn(max = 250.dp)
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(
+                                                if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Color(
+                                                    0xFFFDF1F3
+                                                ) else Color.LightGray
+                                            )
+                                            .padding(16.dp)
+                                    ) {
+                                        Text(
+                                            text = matches[idx].messageArr[msgIdx].content,
+                                            style = Typography.bodyMedium
+                                        )
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
 
         }
 

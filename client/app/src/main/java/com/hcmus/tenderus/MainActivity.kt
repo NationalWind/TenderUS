@@ -144,7 +144,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "signin") {
+                NavHost(navController, startDestination = "main") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
                     composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
@@ -165,7 +165,7 @@ class MainActivity : ComponentActivity() {
                     composable("fgpass2") { ForgotPasswordScreen2(navController)}
                     composable("fgpass3") { ForgotPasswordScreen3(navController) }
                     composable("houserules") { HouseRulesScreen(navController) }
-                    composable("main") { MainScreen(navController) }
+                    composable("main") { MainScreen(/*navController*/) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("exlogin") { ExampleLogin(navController) }

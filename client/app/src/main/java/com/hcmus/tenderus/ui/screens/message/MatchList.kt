@@ -146,7 +146,7 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -155,6 +155,7 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM) {
                 "Messages",
                 fontWeight = FontWeight.Bold,
                 style = Typography.headlineLarge,
+                color = Color(0xFFBD0D36)
             )
             Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
@@ -180,6 +181,7 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM) {
                 "New Matches",
                 fontWeight = FontWeight.Bold,
                 style = Typography.titleLarge,
+                color = Color(0xFFBD0D36)
             )
             LazyRow {
                 items(matches.size) { matchIdx ->
@@ -199,6 +201,7 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM) {
                 "Messages",
                 fontWeight = FontWeight.Bold,
                 style = Typography.titleLarge,
+                color = Color(0xFFBD0D36)
             )
 
             LazyColumn {
