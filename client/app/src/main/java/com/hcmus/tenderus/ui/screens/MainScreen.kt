@@ -1,5 +1,7 @@
 package com.hcmus.tenderus.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -36,6 +38,7 @@ import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 
 val matchListVM = MatchListVM()
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun MainScreen(/*navController: NavController*/) {
     val mainNavController = rememberNavController()
