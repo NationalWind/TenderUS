@@ -72,7 +72,7 @@ fun ReportCard(report: Report, modifier: Modifier = Modifier) {
                 .padding(start = 16.dp, top = 12.dp, bottom = 12.dp)
         ) {
             AsyncImage(
-                model = "https://i.ytimg.com/vi/oZpYEEcvu5I/hqdefault.jpg",
+                model = "https://us-tuna-sounds-images.voicemod.net/6d7e6aff-da39-4fb8-be82-5f12ee5fc75c-1698204266163.png",
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -104,7 +104,14 @@ fun ReportCard(report: Report, modifier: Modifier = Modifier) {
                     )
                 }
                 Text(
-                    text = "Lorem ipsum bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla",
+                    text = """
+                                Leute, wir sind von einem Waffenstillstand zu einem Ausfall 
+                                übergegangen. Die Führung macht einfach, was sie will. Aber da es 
+                                unser Job ist, haben wir keine Wahl. Wir müssen unseren Befehlen 
+                                folgen und den Feind vernichten. Aber jetzt ist unser Feind die 
+                                ganze Welt. Es gibt keine Möglichkeit, einen grausamen Krieg zu 
+                                vermeiden, und wir müssen endlos lange kämpfen.""".trimIndent(),
+                    // Will change after having api
                     textAlign = TextAlign.Justify,
                     fontSize = 12.sp,
                     color = Color.LightGray,
@@ -124,16 +131,16 @@ fun ReportCard(report: Report, modifier: Modifier = Modifier) {
 @Composable
 fun ReportListScreenPreview() {
     val reports = listOf(
-        Report("RP0000", "Jiji", LocalDateTime.now(), Status.REVIEWED),
-        Report("RP0001", "Jiji", LocalDateTime.now(), Status.PENDING),
-        Report("RP0002", "Jiji", LocalDateTime.now(), Status.REVIEWED),
-        Report("RP0003", "Jiji", LocalDateTime.now(), Status.PENDING),
-        Report("RP0004", "Jiji", LocalDateTime.now(), Status.REVIEWED),
-        Report("RP0005", "Jiji", LocalDateTime.now(), Status.PENDING),
-        Report("RP0006", "Jiji", LocalDateTime.now(), Status.REVIEWED),
-        Report("RP0007", "Jiji", LocalDateTime.now(), Status.PENDING),
-        Report("RP0008", "Jiji", LocalDateTime.now(), Status.REVIEWED),
-        Report("RP0009", "Jiji", LocalDateTime.now(), Status.PENDING),
+        Report("RP0000", "Hehe", LocalDateTime.now(), Status.REVIEWED),
+        Report("RP0001", "Hehe", LocalDateTime.now(), Status.PENDING),
+        Report("RP0002", "Hehe", LocalDateTime.now(), Status.REVIEWED),
+        Report("RP0003", "Hehe", LocalDateTime.now(), Status.PENDING),
+        Report("RP0004", "Hehe", LocalDateTime.now(), Status.REVIEWED),
+        Report("RP0005", "Hehe", LocalDateTime.now(), Status.PENDING),
+        Report("RP0006", "Hehe", LocalDateTime.now(), Status.REVIEWED),
+        Report("RP0007", "Hehe", LocalDateTime.now(), Status.PENDING),
+        Report("RP0008", "Hehe", LocalDateTime.now(), Status.REVIEWED),
+        Report("RP0009", "Hehe", LocalDateTime.now(), Status.PENDING),
     )
     TenderUSTheme {
         ReportListScreen(reports = reports)
