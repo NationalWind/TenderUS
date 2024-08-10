@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -78,6 +80,10 @@ import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
+import com.hcmus.tenderus.firebase.FirebaseEmailAuth
+import com.hcmus.tenderus.model.User
+import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
