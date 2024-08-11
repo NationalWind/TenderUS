@@ -10,7 +10,9 @@ const profileController = {
   createProf: async (req: Request, res: Response) => {
     try {
       const data: Profile = req.body;
+      delete req.body.role
       await db.profile.create({ data });
+      res.status(200).json({ message: "OK" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });
@@ -19,7 +21,9 @@ const profileController = {
   createPref: async (req: Request, res: Response) => {
     try {
       const data: Preference = req.body;
+      delete req.body.role
       await db.preference.create({ data });
+      res.status(200).json({ message: "OK" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });
@@ -27,8 +31,15 @@ const profileController = {
   },
   updateProf: async (req: Request, res: Response) => {
     try {
-      const data: Profile = req.body;
-      await db.profile.create({ data });
+      const data: Omit<Profile, "doc_id"> = req.body;
+      delete req.body.role
+      await db.profile.update({
+        where: {
+          username: req.body.username
+        },
+        data
+      });
+      res.status(200).json({ message: "OK" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });
@@ -37,7 +48,14 @@ const profileController = {
   updatePref: async (req: Request, res: Response) => {
     try {
       const data: Preference = req.body;
-      await db.preference.create({ data });
+      delete req.body.role
+      await db.preference.update({
+        where: {
+          username: req.body.username
+        },
+        data
+      });
+      res.status(200).json({ message: "OK" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });

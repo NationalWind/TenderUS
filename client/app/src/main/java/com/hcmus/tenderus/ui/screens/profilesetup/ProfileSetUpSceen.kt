@@ -446,7 +446,9 @@ fun ProfileDetails4Screen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(50.dp))
 
         Button(
-            onClick = { navController.navigate("houserules") }, // Replace with your navigation target
+            onClick = {
+                navController.navigate("houserules")
+                      }, // Replace with your navigation target
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
             enabled = imageUris.size >= 0,
             modifier = Modifier.fillMaxWidth()

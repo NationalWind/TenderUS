@@ -39,7 +39,6 @@ fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val scope = rememberCoroutineScope()
 
     TenderUSTheme {
         Column(
