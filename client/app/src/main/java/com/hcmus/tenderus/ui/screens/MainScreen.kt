@@ -36,6 +36,7 @@ import com.hcmus.tenderus.ui.screens.discover.MessageScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
+import com.hcmus.tenderus.ui.screens.profilesetup.EditProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 
@@ -128,6 +129,12 @@ fun MainScreen(auth: FirebaseAuth, matchListVM: MatchListVM) {
                             showBar = true
                         }
                         ProfileScreen(mainNavController)
+                    }
+                    composable("editprofile") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        EditProfileScreen(mainNavController)
                     }
 
                 }
