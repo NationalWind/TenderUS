@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.screens.authentication
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,14 +21,21 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.model.UserLogin
+import com.hcmus.tenderus.ui.screens.BottomNavItem
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
+import com.hcmus.tenderus.utils.firebase.GenAuth
+import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
     TenderUSTheme {
@@ -86,7 +94,21 @@ fun LoginScreen(navController: NavController) {
             Button(
                 onClick =
                 { /* Handle login logic here */
-                    navController.navigate("main")
+                    scope.launch {
+                        try {
+                            GenAuth.login(
+                                UserLogin(
+                                    username,
+                                    password,
+                                    FCMRegToken = TenderUSPushNotificationService.token!!
+                                ), auth
+                            )
+                            navController.navigate(BottomNavItem.Discover.route)
+                        } catch (e: Exception) {
+                            Log.d("Login", e.toString())
+                            // GUI error message here
+                        }
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFB71C1C),

@@ -1,5 +1,8 @@
 package com.hcmus.tenderus.ui.screens
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresExtension
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -23,7 +26,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.discover.MessageScreen
@@ -34,10 +40,11 @@ import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 
 
-val matchListVM = MatchListVM()
 
+
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun MainScreen(/*navController: NavController*/) {
+fun MainScreen(auth: FirebaseAuth, matchListVM: MatchListVM) {
     val mainNavController = rememberNavController()
     var showBar by remember { mutableStateOf(true) }
     Scaffold(
@@ -65,18 +72,29 @@ fun MainScreen(/*navController: NavController*/) {
                         .size(30.dp) // Adjust size as needed
                 )
             }
-
+            Log.d("dsoiegh", TokenManager.getToken()?:"" )
             // Main content (NavHost)
             Box(
             ) {
                 NavHost(
                     navController = mainNavController,
-                    startDestination = BottomNavItem.Discover.route,
+                    startDestination = if (TokenManager.getToken() == null) {
+                        "signin"
+                    } else {
+                        BottomNavItem.Discover.route
+                    },
 
                 ) {
+                    composable("signin") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        LoginScreen(navController = mainNavController, auth)
+                    }
                     composable(BottomNavItem.Discover.route) {
                         LaunchedEffect(Unit) {
                             showBar = true
+                            matchListVM.init()
                         }
                         DiscoverScreen(mainNavController/*navController*/)
                     }
@@ -106,8 +124,12 @@ fun MainScreen(/*navController: NavController*/) {
                     }
 //                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
                     composable(BottomNavItem.Profile.route) {
-                        ProfileScreen(mainNavController/*navController*/)
+                        LaunchedEffect(Unit) {
+                            showBar = true
+                        }
+                        ProfileScreen(mainNavController)
                     }
+
                 }
             }
         }

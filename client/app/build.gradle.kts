@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.datastore.core.android)
 //    implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.coil.compose)
+    implementation(libs.firebase.storage.ktx)
 
 
 
@@ -85,6 +86,7 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.firebase.messaging.ktx)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.storage)
 
     // Retrofit
     implementation(libs.retrofit)

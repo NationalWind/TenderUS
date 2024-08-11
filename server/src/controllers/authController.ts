@@ -52,6 +52,7 @@ const authController = {
           return;
         }
 
+        data.FirebaseUID = decodedToken.uid
         data.password = await bcrypt.hash(data.password, 10);
         data.role = Role.USER;
         delete data.token
@@ -89,7 +90,10 @@ const authController = {
         const isMatched = await bcrypt.compare(data.password, foundAccount.password);
         if (isMatched) {
           const token = jwt.sign(foundAccount, process.env.JWT_KEY as string);
-          res.status(200).json({ token });
+
+          const firebaseToken = await AdmGetAuth().createCustomToken(foundAccount.FirebaseUID);
+
+          res.status(200).json({ token: token, firebaseToken: firebaseToken });
         } else {
           res.status(401).json({ message: "Wrong password" });
         }
@@ -160,8 +164,9 @@ const authController = {
   // POST /api/auth/signOut
   signOut: async (req: Request, res: Response) => {
     try {
-      const { username } = req.body;
+      const username = req.body.id;
       await db.account.update({ where: { username: username }, data: { FCMRegToken: null } });
+      res.status(200).json({ message: "OK" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });

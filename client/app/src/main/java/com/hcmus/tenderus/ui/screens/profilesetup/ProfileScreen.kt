@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.screens.profilesetup
 
+import android.util.Log
 import com.hcmus.tenderus.ui.screens.report.ReportIssueDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.utils.firebase.GenAuth
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +53,7 @@ fun ProfileHeader(imageRes: Int, name: String, age: Int) {
 @Composable
 fun ProfileButtons(navController: NavController) {
     var showDialog by remember { mutableStateOf(false) }
-
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,7 +82,18 @@ fun ProfileButtons(navController: NavController) {
             text = "Log Out",
             icon = Icons.Default.ExitToApp,
             isPrimary = true,
-            onClick = { /* Handle Log Out */ }
+            onClick = { /* Handle Log Out */
+
+                scope.launch {
+                    try {
+                        GenAuth.signOut()
+                        navController.navigate("signin")
+                    } catch (e: Exception) {
+                        // GUI error message here
+                    }
+                }
+
+            }
         )
         ProfileButton(
             text = "About Us",
