@@ -57,16 +57,16 @@ model Preference {
 
 model Like {
   doc_id   String  @id @default(auto()) @map("_id") @db.ObjectId
-  id       String
-  likedID  String
+  username       String
+  likedUsername  String
 
-  @@index(id)
+  @@index(username)
 }
 
 model Pass_A {
   doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  id        String
-  passedID  String
+  username        String
+  passedUsername  String
 }
 
 /// user1 < user2

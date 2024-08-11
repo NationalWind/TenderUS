@@ -177,11 +177,11 @@ const messageController = {
       }
 
 
-      var user1 = req.body.id
+      var user1 = req.body.username
       var user2 = req.body.receiver
-      if (req.body.id > req.body.receiver) {
+      if (req.body.username > req.body.receiver) {
         user1 = req.body.receiver
-        user2 = req.body.id
+        user2 = req.body.username
       }
 
       const match = await db.match.findFirst({
@@ -212,7 +212,7 @@ const messageController = {
         data = {
           conversationID: convo.doc_id,
           msgID: 0,
-          sender: req.body.id,
+          sender: req.body.username,
           receiver: req.body.receiver,
           msgType: req.body.msgType,
           content: req.body.content,
@@ -275,7 +275,7 @@ const messageController = {
         return;
       }
       const page_size = parseInt(req.query.page_size);;
-      const sender = req.body.id;
+      const sender = req.body.username;
 
       var messages: Message[] = [];
       var user1 = sender

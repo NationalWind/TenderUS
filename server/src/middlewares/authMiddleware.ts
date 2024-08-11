@@ -14,7 +14,7 @@ const authMiddeware = {
       }
       const token = bearer.substring(7);
       const decoded = jwt.verify(token, process.env.JWT_KEY as string) as { username: string, role: Role };
-      req.body.id = decoded.username;
+      req.body.username = decoded.username;
       req.body.role = decoded.role;
       delete req.body.token;
       next();
