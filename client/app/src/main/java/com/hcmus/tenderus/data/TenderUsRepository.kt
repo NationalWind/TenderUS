@@ -9,7 +9,7 @@ object TokenManager {
 
     private const val PREF_NAME = "MyAppPreferences"
     private const val TOKEN_KEY = "jwt_token"
-    private const val USERNAME_KEY = "username"
+//    private const val USERNAME_KEY = "username"
 
     private lateinit var sharedPreferences: SharedPreferences
 

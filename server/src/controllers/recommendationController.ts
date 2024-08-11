@@ -43,11 +43,11 @@ const recommendationController = {
       res.status(500).json({ message: "Something went wrong" });
     }
   },
-  // GET /api/recommendation?page=&limit=&group=
+  // GET /api/recommendation?limit=&group=
   getRecs: async (req: Request, res: Response) => {
     try {
-      if (!req.query.page || !req.query.limit || typeof req.query.page !== "string" || typeof req.query.limit !== "string") {
-        res.status(400).json({ message: "Bad request" });
+      if (!req.query.limit || typeof req.query.limit !== "string") {
+        res.status(400).json({ message: "Bad request: limit param is missing" });
         return;
       }
 
@@ -56,8 +56,12 @@ const recommendationController = {
         return;
       }
 
-      const page = parseInt(req.query.page);
       const limit = parseInt(req.query.limit);
+
+      if (limit <= 0) {
+        res.status(400).json({ message: "Bad request: limit must be greater than 0" });
+        return;
+      }
 
       const cur_pref = await db.preference.findUnique({ where: { username: req.body.id } });
       const cur_prof = await db.profile.findUnique({ where: { username: req.body.id } });
@@ -105,13 +109,31 @@ const recommendationController = {
         return b_cur.length - a_cur.length;
       })
 
-      const l = (page * 10) % recs.length
-      const r = (page * 10 + limit) % recs.length
-      if (l > r) {
-        res.status(200).json({ profiles: recs.slice(l, recs.length).concat(recs.slice(0, r + 1)) });
+      if (!cur_pref.recPage) {
+        cur_pref.recPage = 0;
+        await db.preference.update({
+          where: { username: req.body.id },
+          data: {
+            recPage: 1
+          }
+        });
       } else {
-        res.status(200).json({ profiles: recs.slice(l, r + 1) });
+        await db.preference.update({
+          where: { username: req.body.id },
+          data: {
+            recPage: (cur_pref.recPage + 1) % 1e9
+          }
+        });
       }
+
+      const resRecs: Profile[] = [];
+
+      const begin = cur_pref.recPage * 10;
+      const end = cur_pref.recPage * 10 + limit;
+      for (let i = begin; i < end; i++) {
+        resRecs.push(recs[i % recs.length]);
+      }
+      res.status(200).json({ profiles: resRecs });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });

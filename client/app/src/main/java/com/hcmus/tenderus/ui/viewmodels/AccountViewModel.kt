@@ -30,6 +30,7 @@ class AccountViewModel(private val tenderUsRepository: TenderUsRepository): View
         getAccounts()
     }
 
+
     fun getAccounts() {
         viewModelScope.launch {
             accountUiState = AccountUiState.Loading

@@ -53,6 +53,9 @@ object ApiClient {
     val HaveReadMessageApi by lazy {
         create(HaveReadMessage::class.java)
     }
+    val GetProfile by lazy {
+        create(GetProfile::class.java)
+    }
 
 
 
