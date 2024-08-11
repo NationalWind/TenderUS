@@ -5,9 +5,11 @@ import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.model.UserRegistration
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.POST
 
-data class AuthOKResponse(private val token: String)
+data class AuthOKResponse(val message: String)
+data class LoginOKResponse(val token: String, val firebaseToken: String)
 
 interface SyncSignUp {
     @POST("api/auth/register")
@@ -31,6 +33,11 @@ interface SyncPasswordReset {
 
 interface Login {
     @POST("api/auth/login")
-    suspend fun login(@Body userLogin: UserLogin): AuthOKResponse
+    suspend fun login(@Body userLogin: UserLogin): LoginOKResponse
+}
+
+interface SignOut {
+    @POST("api/auth/signOut")
+    suspend fun signOut(@Header("Authorization") token: String): LoginOKResponse
 }
 

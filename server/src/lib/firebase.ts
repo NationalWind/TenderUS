@@ -24,29 +24,29 @@ const firebaseConfig = {
   appId: process.env.FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
+// Initialize Firebase APP
+// const app = initializeApp(firebaseConfig);
+// const storage = getStorage(app);
 
 //Storage
-const firebase = {
-  uploadFile: async (data: string) => {
-    // Convert data to file object
-    const res = await fetch(data);
-    const blob = await res.blob();
-    const file = new File([blob], `${uuid()}.jpeg`, { type: "image/jpeg" });
-    // Upload file
-    const uploadRef = ref(storage, file.name);
-    const snapshot = await uploadBytes(uploadRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
-  },
+// const firebase = {
+//   uploadFile: async (data: string) => {
+//     // Convert data to file object
+//     const res = await fetch(data);
+//     const blob = await res.blob();
+//     const file = new File([blob], `${uuid()}.jpeg`, { type: "image/jpeg" });
+//     // Upload file
+//     const uploadRef = ref(storage, file.name);
+//     const snapshot = await uploadBytes(uploadRef, file);
+//     const downloadURL = await getDownloadURL(snapshot.ref);
+//     return downloadURL;
+//   },
 
-  deleteFile: async (url: string) => {
-    const deleteRef = ref(storage, url);
-    deleteObject(deleteRef);
-  },
-};
+//   deleteFile: async (url: string) => {
+//     const deleteRef = ref(storage, url);
+//     deleteObject(deleteRef);
+//   },
+// };
 
 const firebaseFCM = {
   sendFCM: async (/*avatarIconURL: string, */registrationToken: string, payload: string) => {
@@ -74,6 +74,5 @@ const firebaseFCM = {
 
 
 
-export { AdmGetAuth, getMessaging, firebase, firebaseFCM };
+export { AdmGetAuth, getMessaging, firebaseFCM };
 
-export default firebase;

@@ -21,18 +21,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.network.ApiClient.LoginApi
+import com.hcmus.tenderus.ui.screens.BottomNavItem
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
+import com.hcmus.tenderus.utils.firebase.GenAuth
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val scope = rememberCoroutineScope()
@@ -92,15 +96,20 @@ fun LoginScreen(navController: NavController) {
 
             Button(
                 onClick =
-                {
-                    val fcmToken = TenderUSPushNotificationService.token?: ""
-                    val userLogin = UserLogin(username, password, "", "", fcmToken)
+                { /* Handle login logic here */
                     scope.launch {
                         try {
-                            LoginApi.login(userLogin)
-                            navController.navigate("main")
+                            GenAuth.login(
+                                UserLogin(
+                                    username,
+                                    password,
+                                    FCMRegToken = TenderUSPushNotificationService.token!!
+                                ), auth
+                            )
+                            navController.navigate(BottomNavItem.Discover.route)
                         } catch (e: Exception) {
                             Log.d("Login", e.toString())
+                            // GUI error message here
                         }
                     }
                 },

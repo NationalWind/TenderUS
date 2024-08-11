@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,6 +52,7 @@ import com.hcmus.tenderus.ui.screens.OnboardingScreen1
 
 
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.hcmus.tenderus.data.TokenManager
@@ -81,10 +83,12 @@ import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
+
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val TAG = "MainAct"
+    private lateinit var auth: FirebaseAuth
     private lateinit var firebaseSMSAuth: FirebaseSMSAuth
     private lateinit var firebaseEmailAuth: FirebaseEmailAuth
     // Declare the launcher at the top of your Activity/Fragment:
@@ -130,9 +134,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         askNotificationPermission()
         TokenManager.init(this)
-        TokenManager.saveToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OWE3YWIxYTVjMmU5MjM3MjQ3NDhhNyIsInVzZXJuYW1lIjoidGVudGVuIiwicGFzc3dvcmQiOiIkMmIkMTAkaWtXenVwR2U2MElsSTlNNTQxazRldXE4Mzc2eW5BS3hBS1lXVHlTTkU1dlpNaXF4RkZQZHEiLCJlbWFpbCI6Im5nLm5ndXludkBnbWFpbC5jb20iLCJwaG9uZSI6ImFob2hlIiwicm9sZSI6IlVTRVIiLCJGQ01SZWdUb2tlbiI6ImNibFlTaGYxUXNDZk1aYVc3VEZ0WmU6QVBBOTFiRV9NVFBsQV9uMDVkVW1fUm0zTkI5eDVpLXRlVmhiNllpaExfbEdmMFNmT290cGZhbEY3cFJuVVVyaXlWYXR3MTBtb0hnRExKWF9YY1lfSXBvMHkxUzdXYVlxV2s2SEt3OTFTLWJSdHRwUkpiMlNUTm9DWjBoeDZnN3hLdnNCbUdJb0l0bU0iLCJhdmF0YXJJY29uIjpudWxsLCJpYXQiOjE3MjI0ODQzNDl9.ZyQOYaC_QCypf39UjLYcIN4b-VQE6E0bgTZ_3rWrykM")
+//        TokenManager.saveToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OWE3YWIxYTVjMmU5MjM3MjQ3NDhhNyIsInVzZXJuYW1lIjoidGVudGVuIiwicGFzc3dvcmQiOiIkMmIkMTAkaWtXenVwR2U2MElsSTlNNTQxazRldXE4Mzc2eW5BS3hBS1lXVHlTTkU1dlpNaXF4RkZQZHEiLCJlbWFpbCI6Im5nLm5ndXludkBnbWFpbC5jb20iLCJwaG9uZSI6ImFob2hlIiwicm9sZSI6IlVTRVIiLCJGQ01SZWdUb2tlbiI6ImNibFlTaGYxUXNDZk1aYVc3VEZ0WmU6QVBBOTFiRV9NVFBsQV9uMDVkVW1fUm0zTkI5eDVpLXRlVmhiNllpaExfbEdmMFNmT290cGZhbEY3cFJuVVVyaXlWYXR3MTBtb0hnRExKWF9YY1lfSXBvMHkxUzdXYVlxV2s2SEt3OTFTLWJSdHRwUkpiMlNUTm9DWjBoeDZnN3hLdnNCbUdJb0l0bU0iLCJhdmF0YXJJY29uIjpudWxsLCJpYXQiOjE3MjI0ODQzNDl9.ZyQOYaC_QCypf39UjLYcIN4b-VQE6E0bgTZ_3rWrykM")
         requestCameraPermission()
-        val auth = Firebase.auth
+        auth = Firebase.auth
         // Input this var in every composable that needs to call Firebase services (sendSMS, confirmAndSync)
         firebaseSMSAuth = FirebaseSMSAuth(auth, this)
         firebaseEmailAuth = FirebaseEmailAuth(auth, this)
@@ -149,21 +153,21 @@ class MainActivity : ComponentActivity() {
         })
         Log.d(TAG, "Init")
 
-//        VM init
-        val matchListVM = MatchListVM()
 
+        // VM init
+        val matchListVM: MatchListVM by viewModels()
 
         enableEdgeToEdge()
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "signin") {
+                NavHost(navController, startDestination = "main") {
 //                NavHost(navController, startDestination = "messages") {
-                    composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
-                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
+//                    composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
+//                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
-                    composable("signin") { LoginScreen(navController = navController) }
+                    composable("signin") { LoginScreen(navController = navController, auth) }
                     composable("signup1") { SignUpScreen1(navController) }
                     composable("signup2") { SignUpScreen2(navController) }
                     composable("signup3") { SignUpScreen3(navController) }
@@ -195,22 +199,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun ExampleLogin(navController: NavController) {
-    var userLogin by remember { mutableStateOf(UserLogin("tenten", "toleron", "ng.nguynv@gmail.com", "", "cblYShf1QsCfMZaW7TFtZe:APA91bE_MTPlA_n05dUm_Rm3NB9x5i-teVhb6YihL_lGf0SfOotpfalF7pRnUUriyVatw10moHgDLJX_XcY_Ipo0y1S7WaYqWk6HKw91S-bRttpRJb2STNoCZ0hx6g7xKvsBmGIoItmM")) }
-    val scope = rememberCoroutineScope()
-    Button(onClick = {
-        scope.launch {
-            try {
-                LoginApi.login(userLogin)
-            } catch (e: Exception) {
-                Log.d("Login", e.toString())
-            }
-        }
-    }) {
-        Text("Luugin")
-    }
-}
+//@Composable
+//fun ExampleLogin(navController: NavController, auth: FirebaseAuth) {
+//    var userLogin by remember { mutableStateOf(UserLogin("tenten", "toleron", "ng.nguynv@gmail.com", "", "cblYShf1QsCfMZaW7TFtZe:APA91bE_MTPlA_n05dUm_Rm3NB9x5i-teVhb6YihL_lGf0SfOotpfalF7pRnUUriyVatw10moHgDLJX_XcY_Ipo0y1S7WaYqWk6HKw91S-bRttpRJb2STNoCZ0hx6g7xKvsBmGIoItmM")) }
+//    val scope = rememberCoroutineScope()
+//    Button(onClick = {
+//        scope.launch {
+//            try {
+//                Login.login(userLogin, auth)
+//            } catch (e: Exception) {
+//                Log.d("Login", e.toString())
+//            }
+//        }
+//    }) {
+//        Text("Luugin")
+//    }
+//}
 @Composable
 fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
     var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9@gmail.com", "hihi")) }
