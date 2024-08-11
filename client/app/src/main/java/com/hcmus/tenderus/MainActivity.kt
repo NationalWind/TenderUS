@@ -161,7 +161,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "main") {
+                NavHost(navController, startDestination = "signin") {
 //                NavHost(navController, startDestination = "messages") {
 //                    composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
 //                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
@@ -187,10 +187,10 @@ class MainActivity : ComponentActivity() {
                     composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
 //                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
-                    composable("main") { MainScreen(/*navController*/) }
+                    composable("main") { MainScreen(auth, matchListVM) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
-                    composable("exlogin") { ExampleLogin(navController) }
+//                    composable("exlogin") { ExampleLogin(navController) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
 //                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
                 }

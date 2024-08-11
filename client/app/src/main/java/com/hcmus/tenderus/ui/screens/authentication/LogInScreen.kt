@@ -39,8 +39,6 @@ fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val scope = rememberCoroutineScope()
-
     TenderUSTheme {
         Column(
             modifier = Modifier
@@ -106,7 +104,7 @@ fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
                                     FCMRegToken = TenderUSPushNotificationService.token!!
                                 ), auth
                             )
-                            navController.navigate(BottomNavItem.Discover.route)
+                            navController.navigate("main")
                         } catch (e: Exception) {
                             Log.d("Login", e.toString())
                             // GUI error message here
