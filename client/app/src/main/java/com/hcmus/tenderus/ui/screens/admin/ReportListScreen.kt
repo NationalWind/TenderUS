@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.Status
-import com.hcmus.tenderus.ui.screens.admin.composable.TopBar
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -43,7 +42,6 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ReportListScreen(reports: List<Report>) {
     Scaffold(
-        topBar = { TopBar() },
         content = { paddingValues ->
             LazyColumn(modifier = Modifier.padding(paddingValues)) {
                 items(reports) { report ->

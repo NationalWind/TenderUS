@@ -62,6 +62,7 @@ import com.hcmus.tenderus.network.ApiClient.LoginApi
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
 import com.hcmus.tenderus.network.SyncSignUp
 import com.hcmus.tenderus.ui.screens.MainScreen
+import com.hcmus.tenderus.ui.screens.admin.AdminScreen
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen3
@@ -154,13 +155,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "signup1") {
+                NavHost(navController, startDestination = "admin") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
                     composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
-                    composable("signin") { LoginScreen(navController = navController) }
+                    composable("signin") { LoginScreen(navController = navController, auth) }
                     composable("signup1") { SignUpScreen(navController, firebaseSMSAuth, firebaseEmailAuth) }
                     composable("profilesetup1") { ProfileDetails1Screen(navController) }
                     composable("profilesetup2") { ProfileDetails2Screen(navController ) }
@@ -177,10 +178,11 @@ class MainActivity : ComponentActivity() {
                     composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
 //                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
-                    composable("main") { MainScreen(/*navController*/) }
+                    composable("main") { MainScreen(auth, matchListVM) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
                     composable("exlogin") { ExampleLogin(navController) }
+                    composable("admin") {AdminScreen()}
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
 //                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
                 }
