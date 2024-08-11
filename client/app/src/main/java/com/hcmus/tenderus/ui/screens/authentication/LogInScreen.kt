@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.model.UserLogin
+import com.hcmus.tenderus.network.ApiClient.LoginApi
 import com.hcmus.tenderus.ui.screens.BottomNavItem
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.utils.firebase.GenAuth
@@ -37,6 +38,8 @@ fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
     var password by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val scope = rememberCoroutineScope()
 
     TenderUSTheme {
         Column(

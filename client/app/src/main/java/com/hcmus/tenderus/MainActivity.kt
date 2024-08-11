@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -183,12 +185,12 @@ class MainActivity : ComponentActivity() {
 //                    composable("main") { MainScreen(navController) }
                     composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
                     composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
-                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
-                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
-                    composable("main") { MainScreen(auth, matchListVM) }
+//                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
+//                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
+                    composable("main") { MainScreen(/*navController*/) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
-//                    composable("exlogin") { ExampleLogin(navController) }
+                    composable("exlogin") { ExampleLogin(navController) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
 //                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
                 }

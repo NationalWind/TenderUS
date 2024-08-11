@@ -321,6 +321,7 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                                 } else if (offsetY.value < -300f) {
                                     // Swiped up to show full profile
                                     showProfileDetails = true
+                                    offsetX.value = 0f
                                     offsetY.value = 0f
                                 } else {
                                     // Reset offset if swipe is not significant
