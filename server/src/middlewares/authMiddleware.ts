@@ -3,7 +3,6 @@ import jwt, { decode } from "jsonwebtoken";
 import { Role } from "@prisma/client";
 
 const authMiddeware = {
-  // Look up routers, if all requests using this middleware, later use req.body.id as username
   checkUser: (req: Request, res: Response, next: NextFunction) => {
     try {
       // "For now", a token is converted to a username, a role
