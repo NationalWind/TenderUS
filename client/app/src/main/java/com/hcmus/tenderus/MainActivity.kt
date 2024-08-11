@@ -179,12 +179,12 @@ class MainActivity : ComponentActivity() {
 //                    composable("main") { MainScreen(navController) }
                     composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
                     composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
-                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
-                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
+//                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
+//                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
                     composable("main") { MainScreen(/*navController*/) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
-//                    composable("exlogin") { ExampleLogin(navController) }
+                    composable("exlogin") { ExampleLogin(navController) }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
 //                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
                 }
