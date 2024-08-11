@@ -59,6 +59,7 @@ import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import coil.compose.rememberAsyncImagePainter
 import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
 import kotlinx.coroutines.launch
@@ -199,7 +200,7 @@ fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewMod
                     CircularProgressIndicator()
                 }
                 is DiscoverUiState.Success -> {
-                    var profiles = (discoverUiState as DiscoverUiState.Success).profiles.map { it.avatarIcon }
+                    var profiles = (discoverUiState as DiscoverUiState.Success).profiles
                     SwipeableProfiles(profiles) { updatedProfiles ->
                         profiles = updatedProfiles
                     }
@@ -275,7 +276,7 @@ fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewMod
 //}
 
 @Composable
-fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) -> Unit) {
+fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>) -> Unit) {
     var currentProfileIndex by remember { mutableStateOf(0) }
     var showProfileDetails by remember { mutableStateOf(false) }
     val offsetX = remember { mutableStateOf(0f) }
@@ -283,11 +284,7 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
     val coroutineScope = rememberCoroutineScope()
 
     if (profiles.isNotEmpty()) {
-        val profileUrl = profiles[currentProfileIndex]
-
-        // Example user information (replace with actual data as needed)
-        val userName = "John Doe"
-        val userAge = "25"
+        val profile = profiles[currentProfileIndex]
 
         Box(
             modifier = Modifier
@@ -318,12 +315,13 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
-                                } else if (offsetY.value < -300f) {
+                                } /*else if (offsetY.value < -300f) {
                                     // Swiped up to show full profile
                                     showProfileDetails = true
                                     offsetX.value = 0f
                                     offsetY.value = 0f
-                                } else {
+                                }*/
+                                else {
                                     // Reset offset if swipe is not significant
                                     offsetX.value = 0f
                                     offsetY.value = 0f
@@ -342,7 +340,7 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                     }
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(profileUrl),
+                    painter = rememberAsyncImagePainter(profile.avatarIcon),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -364,14 +362,14 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                         ) {
                             Row {
                                 Text(
-                                    text = userName,
+                                    text = profile.displayName,
                                     color = Color.White,
                                     style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp), // Adjust font size
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = userAge,
+                                    text = "${profile.age}",
                                     color = Color.White,
                                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp) // Adjust font size
                                 )
@@ -415,7 +413,7 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                         ) {
                             // Profile Image as part of the detailed profile
                             Image(
-                                painter = rememberAsyncImagePainter(profileUrl),
+                                painter = rememberAsyncImagePainter(profile.avatarIcon),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
@@ -425,11 +423,11 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Text("User Name", style = MaterialTheme.typography.headlineSmall)
-                            Text("Age: 25", style = MaterialTheme.typography.bodyLarge)
+                            Text(profile.displayName, style = MaterialTheme.typography.headlineSmall)
+                            Text("Age: ${profile.age}", style = MaterialTheme.typography.bodyLarge)
                             Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                "About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum.",
+                                profile.description,
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             // Add more profile details here
