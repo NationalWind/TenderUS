@@ -79,7 +79,7 @@ fun ProfileButtons(navController: NavController) {
             text = "Log Out",
             icon = Icons.Default.ExitToApp,
             isPrimary = true,
-            onClick = { /* Handle Log Out */ }
+            onClick = { navController.navigate("signin") }
         )
         ProfileButton(
             text = "About Us",

@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.screens.authentication
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.model.UserLogin
+import com.hcmus.tenderus.network.ApiClient.LoginApi
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
+import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +34,8 @@ fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val scope = rememberCoroutineScope()
 
     TenderUSTheme {
         Column(
@@ -85,8 +92,17 @@ fun LoginScreen(navController: NavController) {
 
             Button(
                 onClick =
-                { /* Handle login logic here */
-                    navController.navigate("main")
+                {
+                    val fcmToken = TenderUSPushNotificationService.token?: ""
+                    val userLogin = UserLogin(username, password, "", "", fcmToken)
+                    scope.launch {
+                        try {
+                            LoginApi.login(userLogin)
+                            navController.navigate("main")
+                        } catch (e: Exception) {
+                            Log.d("Login", e.toString())
+                        }
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFB71C1C),
