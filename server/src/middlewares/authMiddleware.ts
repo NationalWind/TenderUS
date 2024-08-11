@@ -3,7 +3,6 @@ import jwt, { decode } from "jsonwebtoken";
 import { Role } from "@prisma/client";
 
 const authMiddeware = {
-  // Look up routers, if all requests using this middleware, later use req.body.id as username
   checkUser: (req: Request, res: Response, next: NextFunction) => {
     try {
       // "For now", a token is converted to a username, a role
@@ -14,7 +13,7 @@ const authMiddeware = {
       }
       const token = bearer.substring(7);
       const decoded = jwt.verify(token, process.env.JWT_KEY as string) as { username: string, role: Role };
-      req.body.id = decoded.username;
+      req.body.username = decoded.username;
       req.body.role = decoded.role;
       delete req.body.token;
       next();

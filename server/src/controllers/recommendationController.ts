@@ -20,7 +20,7 @@ const recommendationController = {
   // POST /api/recommendation/join { id(username): String, group: String }
   join: async (req: Request, res: Response) => {
     try {
-      const username: string = req.body.id;
+      const username: string = req.body.username;
       if (!req.body.group || typeof req.body.group !== "string" || !validGroups.includes(req.body.group)) {
         res.status(400).json({ message: "Bad request" });
         return;
@@ -63,8 +63,8 @@ const recommendationController = {
         return;
       }
 
-      const cur_pref = await db.preference.findUnique({ where: { username: req.body.id } });
-      const cur_prof = await db.profile.findUnique({ where: { username: req.body.id } });
+      const cur_pref = await db.preference.findUnique({ where: { username: req.body.username } });
+      const cur_prof = await db.profile.findUnique({ where: { username: req.body.username } });
 
       if (!cur_prof || !cur_pref) {
         res.status(404).json({ message: "User requesting not found" });
@@ -112,14 +112,14 @@ const recommendationController = {
       if (!cur_pref.recPage) {
         cur_pref.recPage = 0;
         await db.preference.update({
-          where: { username: req.body.id },
+          where: { username: req.body.username },
           data: {
             recPage: 1
           }
         });
       } else {
         await db.preference.update({
-          where: { username: req.body.id },
+          where: { username: req.body.username },
           data: {
             recPage: (cur_pref.recPage + 1) % 1e9
           }

@@ -10,8 +10,8 @@ const authController = {
   // GET /api/auth/account
   getAccount: async (req: Request, res: Response) => {
     try {
-      const { id } = req.body.id;
-      const account = await db.account.findUnique({ where: { id } });
+      const { username } = req.body.username;
+      const account = await db.account.findUnique({ where: { username } });
       res.status(200).json(account);
     } catch (error) {
       console.log(error);
@@ -164,7 +164,7 @@ const authController = {
   // POST /api/auth/signOut
   signOut: async (req: Request, res: Response) => {
     try {
-      const username = req.body.id;
+      const username = req.body.username;
       await db.account.update({ where: { username: username }, data: { FCMRegToken: null } });
       res.status(200).json({ message: "OK" });
     } catch (error) {
