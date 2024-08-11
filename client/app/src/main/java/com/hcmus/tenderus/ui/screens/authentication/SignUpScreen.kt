@@ -46,6 +46,8 @@ fun SignUpScreen(
     var verificationCode by remember { mutableStateOf("") }
     var timer by remember { mutableStateOf(60) }
     var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var isUsernameValid by remember { mutableStateOf(true) }
     var isEmailValid by remember { mutableStateOf(true) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
     var confirmPassword by remember { mutableStateOf(TextFieldValue("")) }
@@ -271,7 +273,38 @@ fun SignUpScreen(
                     }
                 }
                 4 -> {
-                    // Step 4: Password Creation
+                    // Step 4: Password & Username Creation
+                    Text(
+                        "Enter a username",
+                        fontSize = 30.sp,
+                        color = Color(0xFFB71C1C),
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 36.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    BasicTextField(
+                        value = username,
+                        onValueChange = {
+                            username = it
+                            isUsernameValid = validateUsername(username)
+                        },
+                        textStyle = TextStyle(fontSize = 18.sp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                            .padding(16.dp)
+                    )
+                    if (!isUsernameValid) {
+                        Text(
+                            "Invalid username",
+                            color = Color.Red,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         "Create a password",
                         fontSize = 30.sp,
@@ -331,13 +364,13 @@ fun SignUpScreen(
                             if (isPasswordValid && doPasswordsMatch) {
                                 // Perform signup and navigation
                                 isSignUpSuccessful = true
-                                navController.navigate("success")
+                                navController.navigate("profilesetup1")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Sign Up", color = Color.White)
+                        Text("Create an account", color = Color.White)
                     }
                 }
             }
@@ -356,4 +389,8 @@ fun validatePhoneNumber(phoneNumber: String): Boolean {
 fun validatePassword(password: String): Boolean {
     // Example validation: Check if the password is at least 8 characters long
     return password.length >= 8
+}
+
+fun validateUsername(username: String): Boolean {
+    return username.isNotEmpty() && username.length >= 3
 }
