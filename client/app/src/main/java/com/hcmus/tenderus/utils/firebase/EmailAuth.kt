@@ -14,7 +14,7 @@ import kotlinx.coroutines.tasks.await
 class FirebaseEmailAuth(private val auth: FirebaseAuth, private val act: Activity) {
     private val TAG = "Firebase Auth Email"
 
-    suspend fun sendEmail(email: String) {
+    open suspend fun sendEmail(email: String) {
         try {
             auth.createUserWithEmailAndPassword(email, email).await()
         } catch(e: FirebaseAuthUserCollisionException) {

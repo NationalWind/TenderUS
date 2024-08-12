@@ -58,7 +58,7 @@ class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity)
 
     }
 
-    fun sendSMS(phoneNumber: String) {
+    open suspend fun sendSMS(phoneNumber: String) {
         val options = PhoneAuthOptions.newBuilder(auth)
             .setPhoneNumber(phoneNumber) // Phone number to verify
             .setTimeout(120L, TimeUnit.SECONDS) // Timeout and unit

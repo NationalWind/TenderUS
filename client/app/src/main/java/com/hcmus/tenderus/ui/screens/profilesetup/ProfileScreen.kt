@@ -5,6 +5,7 @@ import com.hcmus.tenderus.ui.screens.report.ReportIssueDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -18,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -68,7 +71,9 @@ fun ProfileButtons(navController: NavController) {
                 text = "Edit Profile",
                 icon = Icons.Default.Edit,
                 isPrimary = false,
-                onClick = { /* Handle Edit Profile */ }
+                onClick = {
+                    navController.navigate("editprofile")
+                }
             )
         }
         ProfileButton(
@@ -152,6 +157,175 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditProfileScreen(navController: NavController) {
+    var name by remember { mutableStateOf(TextFieldValue("Rachel")) }
+    var age by remember { mutableStateOf(TextFieldValue("20")) }
+    var phoneNumber by remember { mutableStateOf(TextFieldValue("123456789")) }
+    var email by remember { mutableStateOf(TextFieldValue("rachel@example.com")) }
+    var gender by remember { mutableStateOf("Female") }
+    var birthday by remember { mutableStateOf(TextFieldValue("01/01/2000")) }
+
+    val genders = listOf("Female", "Male", "Other")
+    var expanded by remember { mutableStateOf(false) }
+    var isConfirmingPhone by remember { mutableStateOf(false) }
+    var isConfirmingEmail by remember { mutableStateOf(false) }
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Edit Profile", color = Color(0xFFB71C1C))
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFB71C1C))
+                    }
+                },
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = Color.White
+                ),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        },
+        containerColor = Color.White
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .background(Color.White)
+                .clickable(
+                    onClick = {
+                        keyboardController?.hide() // Hide the keyboard
+                    }
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.profile_placeholder), // Replace with your image resource
+                contentDescription = null,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = age,
+                onValueChange = { age = it },
+                label = { Text("Age") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text("Phone Number") },
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    if (isConfirmingPhone) {
+                        Icon(Icons.Default.Check, contentDescription = "Confirmed", tint = Color.Green)
+                    } else {
+                        Icon(Icons.Default.Send, contentDescription = "Send Verification", tint = Color(0xFFB71C1C))
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    if (isConfirmingEmail) {
+                        Icon(Icons.Default.Check, contentDescription = "Confirmed", tint = Color.Green)
+                    } else {
+                        Icon(Icons.Default.Send, contentDescription = "Send Verification", tint = Color(0xFFB71C1C))
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = gender,
+                    onValueChange = { /* no-op */ },
+                    label = { Text("Gender") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { expanded = true },
+                    enabled = false,
+                    trailingIcon = {
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    },
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        containerColor = Color.White
+                    )
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    genders.forEach { selection ->
+                        DropdownMenuItem(
+                            text = { Text(selection) },
+                            onClick = {
+                                gender = selection
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = birthday,
+                onValueChange = { birthday = it },
+                label = { Text("Birthday") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = {
+                    // Handle save profile logic here
+                    navController.popBackStack()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
+            ) {
+                Text("Save")
+            }
+        }
+    }
+}
+
 
 @Composable
 @Preview(showBackground = true)
