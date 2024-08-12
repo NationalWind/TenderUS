@@ -21,7 +21,7 @@ const messageController = {
   // GET /api/message/matches
   getMatches: async (req: Request, res: Response) => {
     try {
-      const username = req.body.id;
+      const username = req.body.username;
 
       const matches = await db.match.aggregateRaw({
         pipeline: [
@@ -143,7 +143,7 @@ const messageController = {
   // GET /api/message/polling
   messageLongPoll: async (req: Request, res: Response) => {
     try {
-      const username = req.body.id;
+      const username = req.body.username;
       if (messagePollers[username]) {
         clearTimeout(messagePollers[username].timeout);
       }
@@ -229,7 +229,7 @@ const messageController = {
         data = {
           conversationID: converation.doc_id,
           msgID: msg!.msgID + 1,
-          sender: req.body.id,
+          sender: req.body.username,
           receiver: req.body.receiver,
           msgType: req.body.msgType,
           content: req.body.content,
