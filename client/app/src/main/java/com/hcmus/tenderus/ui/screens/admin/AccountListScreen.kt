@@ -34,13 +34,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.hcmus.tenderus.model.Account
 import com.hcmus.tenderus.model.Role
-import com.hcmus.tenderus.ui.screens.admin.composable.TopBar
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 
 @Composable
 fun AccountListScreen(accounts: List<Account>) {
     Scaffold(
-        topBar = { TopBar() },
         content = { paddingValues ->
             LazyColumn(modifier = Modifier.padding(paddingValues)) {
                 items(accounts) { account ->

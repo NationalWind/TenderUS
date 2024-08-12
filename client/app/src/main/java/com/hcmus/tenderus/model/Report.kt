@@ -6,7 +6,11 @@ enum class Status { PENDING, REVIEWED }
 
 data class Report(
     val id: String,
-    val username: String,
-    val date: LocalDateTime,
-    val status: Status
+    val reporter: String,
+    val reporterAvatar: String = "",
+    val reported: String,
+    val reportedAvatar: String = "",
+    val date: String,
+    val status: Status = Status.PENDING,
+    val message: String
 )

@@ -3,6 +3,7 @@ package com.hcmus.tenderus.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.hcmus.tenderus.model.Account
+import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.network.TenderUsApiService
 
 object TokenManager {
@@ -26,15 +27,14 @@ object TokenManager {
     }
 
 
-
 }
 
 interface TenderUsRepository {
-    suspend fun getAccounts(): List<Account>
+    suspend fun getReportList(): List<Report>
 }
 
 class NetworkTenderUsRepository(
     private val tenderUsApiService: TenderUsApiService
 ) : TenderUsRepository {
-    override suspend fun getAccounts(): List<Account> = tenderUsApiService.getAccounts()
+    override suspend fun getReportList(): List<Report> = tenderUsApiService.getReportList()
 }

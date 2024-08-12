@@ -11,6 +11,6 @@ class NetworkTenderUsRepositoryTest {
         val repository = NetworkTenderUsRepository(
             tenderUsApiService = FakeTenderUsApiService()
         )
-        assertEquals(FakeDataSource.accountList, repository.getAccounts())
+        assertEquals(FakeDataSource.reportList, repository.getReportList())
     }
 }

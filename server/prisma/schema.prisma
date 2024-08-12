@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
 }
 
 datasource db {
@@ -13,81 +13,100 @@ enum Role {
 }
 
 model Account {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  username String  @unique
-  password String
-  email    String?
-  phone    String?
-  role     Role
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  username    String    @unique
+  password    String
+  email       String?
+  phone       String?
+  role        Role
   FCMRegToken String?
+  penalty     Penalty[]
+  reporter    Report[]  @relation("reporter")
+  reported    Report[]  @relation("reported")
+  Profile     Profile?
+}
+
+enum PenaltyType {
+  RESTRICT_DISCOVER
+  RESTRICT_MESSAGE
+  BAN
+}
+
+model Penalty {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  type      PenaltyType
+  toDate    DateTime
+  accountId String      @db.ObjectId
+  Account   Account     @relation(fields: [accountId], references: [id])
 }
 
 model Profile {
-  doc_id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  username        String   @unique
-  displayName     String
+  doc_id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  accountId   String  @unique @db.ObjectId
+  account     Account @relation(fields: [accountId], references: [id])
+  displayName String
 
-  avatarIcon      String
-  pictures        String[]
-  description     String
+  avatarIcon  String
+  pictures    String[]
+  description String
 
-  longitude       Float
-  latitude        Float
+  longitude Float
+  latitude  Float
 
-  identity        String
-  age             Int
-  interests       String[]
-  groups          String[]
+  identity  String
+  age       Int
+  interests String[]
+  groups    String[]
 
-  isActive        Boolean
+  isActive Boolean
 }
 
 model Preference {
-  doc_id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  username        String   @unique
-  ageMin          Int
-  ageMax          Int
-  maxDist         Float
-  showMe          String
-  
-  recPage         Int?
+  doc_id   String @id @default(auto()) @map("_id") @db.ObjectId
+  username String @unique
+  ageMin   Int
+  ageMax   Int
+  maxDist  Float
+  showMe   String
+
+  recPage Int?
 }
 
-
 model Like {
-  doc_id   String  @id @default(auto()) @map("_id") @db.ObjectId
-  id       String
-  likedID  String
+  doc_id  String @id @default(auto()) @map("_id") @db.ObjectId
+  id      String
+  likedID String
 
   @@index(id)
 }
 
 model Pass_A {
-  doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  id        String
-  passedID  String
+  doc_id   String @id @default(auto()) @map("_id") @db.ObjectId
+  id       String
+  passedID String
 }
 
 /// user1 < user2
 model Match {
-  doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  doc_id    String   @id @default(auto()) @map("_id") @db.ObjectId
   user1     String
   user2     String
   createdAt DateTime
+
   @@unique([user1, user2])
 }
 
 // user1 < user2
 model Conversation {
   doc_id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  user1_user2 String @unique
+  user1_user2 String  @unique
   isRead      Boolean
 }
 
 model Message {
-  doc_id         String  @id @default(auto()) @map("_id") @db.ObjectId
-  conversationID String  @db.ObjectId
-  msgID          Int 
+  doc_id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  conversationID String   @db.ObjectId
+  msgID          Int
   sender         String
   receiver       String
   msgType        String
@@ -95,4 +114,20 @@ model Message {
   createdAt      DateTime
 
   @@unique([conversationID, msgID(sort: Desc)])
+}
+
+enum Status {
+  PENDING
+  REVIEWED
+}
+
+model Report {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  reporterId String   @db.ObjectId
+  reporter   Account  @relation("reporter", fields: [reporterId], references: [id])
+  reportedId String   @db.ObjectId
+  reported   Account  @relation("reported", fields: [reportedId], references: [id])
+  date       DateTime
+  status     Status   @default(PENDING)
+  message    String
 }

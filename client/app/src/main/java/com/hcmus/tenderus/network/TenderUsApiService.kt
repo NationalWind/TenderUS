@@ -1,9 +1,9 @@
 package com.hcmus.tenderus.network
 
-import com.hcmus.tenderus.model.Account
-import retrofit2.http.POST
+import com.hcmus.tenderus.model.Report
+import retrofit2.http.GET
 
 interface TenderUsApiService {
-    @POST("api/auth/getAccounts")
-    suspend fun getAccounts(): List<Account>
+    @GET("api/admin/report")
+    suspend fun getReportList(): List<Report>
 }

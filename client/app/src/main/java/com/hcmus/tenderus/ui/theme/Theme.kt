@@ -15,19 +15,12 @@ private val DarkColorScheme = darkColorScheme(
     primary = PinkPrimary,
     background = Color(0xFF121212),
     surface = Color(0xFF121212),
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onBackground = Color.White,
-    onSurface = Color.White,
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = PinkPrimary,
     background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
+    surface = Color(0xFFFFFFFE),
     onSurface = Color.Black,
 )
 

@@ -1,14 +1,26 @@
 package com.hcmus.tenderus.fake
 
-import com.hcmus.tenderus.model.Account
-import com.hcmus.tenderus.model.Role
+import com.hcmus.tenderus.model.Report
+import com.hcmus.tenderus.model.Status
+import java.time.LocalDateTime
 
 object FakeDataSource {
-    val accountList = listOf(
-        Account(username = "bao", role = Role.ADMIN, email = "hehe@hehe", phone = "123"),
-        Account(username = "phong", role = Role.ADMIN, email = "hehe@hehe", phone = "123"),
-        Account(username = "thuy", role = Role.ADMIN, email = "hehe@hehe", phone = "123"),
-        Account(username = "vu", role = Role.ADMIN, email = "hehe@hehe", phone = "123"),
-        Account(username = "y", role = Role.ADMIN, email = "hehe@hehe", phone = "123"),
+    val reportList = listOf(
+        Report(
+            id = "000001",
+            reporter = "user001",
+            reported = "user002",
+            date = LocalDateTime.now().toString(),
+            status = Status.PENDING,
+            message = "しかのこのこのここしたんたん"
+        ),
+        Report(
+            id = "000001",
+            reporter = "user001",
+            reported = "user002",
+            date = LocalDateTime.now().toString(),
+            status = Status.PENDING,
+            message = "しかのこのこのここしたんたん"
+        ),
     )
 }
