@@ -31,7 +31,7 @@ import androidx.navigation.NavController
 import com.hcmus.tenderus.R
 
 @Composable
-fun ExploreScreen(navController: NavController){
+fun ExploreScreen(navController: NavController) {
     Scaffold(
         containerColor = Color.White
     ) { paddingValues ->
@@ -61,7 +61,8 @@ fun WelcomeSection() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 5.dp)
+            .padding(horizontal = 8.dp, vertical = 5.dp),
+
     ) {
         Text(
             text = "Welcome to Explore",
@@ -84,30 +85,32 @@ fun CategorySection() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.Center // Center the images horizontally
         ) {
             CategoryItem(
                 imageRes = R.drawable.looking_for_love,
                 text = "Looking for\nLove"
             )
+            Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.free_tonight,
                 text = "Free \ntonight?"
             )
         }
-        Spacer(modifier = Modifier.height(13.dp))
+        Spacer(modifier = Modifier.height(16.dp)) // Increase space between rows
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(11.dp)
+            horizontalArrangement = Arrangement.Center // Center the images horizontally
         ) {
             CategoryItem(
                 imageRes = R.drawable.coffe_date,
                 text = "Coffee\nDate"
             )
+            Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.let_friend,
                 text = "Let's be \nfriend"
@@ -115,12 +118,14 @@ fun CategorySection() {
         }
     }
 }
+
 @Composable
 fun WelcomeJointopic() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 5.dp)
+            .padding(horizontal = 8.dp, vertical = 5.dp),
+        
     ) {
         Text(
             text = "For you",
@@ -137,35 +142,38 @@ fun WelcomeJointopic() {
         )
     }
 }
+
 @Composable
 fun TopicSection() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.Center // Center the images horizontally
         ) {
             CategoryItem(
                 imageRes = R.drawable.drink,
                 text = "Like to go \ndrinking"
             )
+            Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.movie,
                 text = "Movie \nLovers"
             )
         }
-        Spacer(modifier = Modifier.height(13.dp))
+        Spacer(modifier = Modifier.height(16.dp)) // Increase space between rows
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(11.dp)
+            horizontalArrangement = Arrangement.Center // Center the images horizontally
         ) {
             CategoryItem(
                 imageRes = R.drawable.creative,
                 text = "Creative \nLovers"
             )
+            Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.sport,
                 text = "Love \nSports"
@@ -173,12 +181,13 @@ fun TopicSection() {
         }
     }
 }
+
 @Composable
 fun CategoryItem(imageRes: Int, text: String) {
     Box(
         modifier = Modifier
-            .width(162.dp)
-            .aspectRatio(0.675f)
+            .width(180.dp) // Increase the width of the item
+            .aspectRatio(0.75f) // Adjust the aspect ratio for larger images
     ) {
         Image(
             painter = painterResource(id = imageRes),
