@@ -36,7 +36,7 @@ model Profile {
   latitude        Float
 
   identity        String
-  age             Int
+  birthDate        String
   interests       String[]
   groups          String[]
 

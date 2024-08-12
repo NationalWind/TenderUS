@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import db from "../lib/db";
+import { getAge } from "../lib/timeUtil";
 import { Account, Role, Profile, Preference } from "@prisma/client";
 import { firebaseFCM } from "../lib/firebase";
 import { parse } from "dotenv";
+
 
 const validGroups = ["Free Tonight", "Study Group", "Open Day", "Binge Watchers", "Self Care"]
 
@@ -81,16 +83,15 @@ const recommendationController = {
         where: {
           username: {
             not: cur_prof.username
-          },
-          age: {
-            gte: cur_pref.ageMin,
-            lte: cur_pref.ageMax
           }
         }
       });
 
       const recs: Profile[] = [];
+
       for (const user of users) {
+        const age = getAge(user.birthDate);
+        if (age > cur_pref.ageMax || age < cur_pref.ageMin) continue;
         if (cur_pref.showMe != user.identity && cur_pref.showMe != "Both") continue;
         if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.maxDist * cur_pref.maxDist) {
           if (req.query.group) {
