@@ -1,6 +1,8 @@
 package com.hcmus.tenderus.ui.screens.profilesetup
 
+import android.icu.util.Calendar
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -8,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -20,25 +23,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import androidx.compose.ui.platform.LocalContext
-import coil.compose.rememberAsyncImagePainter
-import com.hcmus.tenderus.R
-import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.FileProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import com.hcmus.tenderus.R
+import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Profile
+import com.hcmus.tenderus.ui.theme.TenderUSTheme
+import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
+import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
+import com.hcmus.tenderus.ui.viewmodels.ProfileVM
 import java.io.File
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
+
+val token = TokenManager.getToken() ?: ""
 
 @Composable
-fun ProfileDetails1Screen(navController: NavHostController) {
+fun ProfileDetails1Screen(
+    navController: NavHostController,
+    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
+) {
     var fullName by remember { mutableStateOf("") }
-    var selectedUniversity by remember { mutableStateOf("") }
     var dateOfBirth by remember { mutableStateOf("") }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -52,7 +68,6 @@ fun ProfileDetails1Screen(navController: NavHostController) {
     )
 
     val focusManager = LocalFocusManager.current
-
     val isFormComplete = fullName.isNotEmpty() && dateOfBirth.isNotEmpty() && profileImageUri != null
 
     TenderUSTheme {
@@ -116,7 +131,7 @@ fun ProfileDetails1Screen(navController: NavHostController) {
             TextField(
                 value = dateOfBirth,
                 onValueChange = { dateOfBirth = it },
-                label = { Text("Date of Birth (DD/MM/YYYY)") },
+                label = { Text("Date of Birth (YYYY-MM-DD)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -126,9 +141,22 @@ fun ProfileDetails1Screen(navController: NavHostController) {
             // Continue Button
             Button(
                 onClick = {
-                    if (isFormComplete) {
-                        navController.navigate("profilesetup2")
-                    }
+                    val profile = Profile(
+                        displayName = fullName,
+                        avatarIcon = profileImageUri.toString(),
+                        pictures = listOf(),
+                        description = "",
+                        longitude = 0f,
+                        latitude = 0f,
+                        identity = "",
+                        birthDate = dateOfBirth,
+                        interests = listOf(),
+                        groups = listOf(),
+                        isActive = true
+                    )
+
+                    profileVM.createUserProfile(token, profile)
+                    navController.navigate("profilesetup2")
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isFormComplete) Color(0xFFB71C1C) else Color.Gray
@@ -138,19 +166,63 @@ fun ProfileDetails1Screen(navController: NavHostController) {
             ) {
                 Text("Continue", color = Color.White)
             }
-//
+            Spacer(modifier = Modifier.height(150.dp))
         }
     }
 }
 
 
 @Composable
-fun ProfileDetails2Screen(navController: NavHostController) {
+fun ProfileDetails2Screen(
+    navController: NavHostController,
+    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
+) {
     var selectedGender by remember { mutableStateOf("") }
     var isButtonClicked by remember { mutableStateOf(false) }
 
+    var profile by remember { mutableStateOf<Profile?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
+
     val genders = listOf("Male", "Female", "Other")
     val icons = listOf(R.drawable.male, R.drawable.female, R.drawable.othergender)
+
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(token)
+    }
+
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+    val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
+
+    // Handle profile data and errors
+    when (profileUiState) {
+        is ProfileUiState.Success -> {
+            profile = (profileUiState as ProfileUiState.Success).profile
+            Log.d("ProfileDetails2Screen", "Profile fetched: $profile")
+        }
+        is ProfileUiState.Error -> {
+            error = true
+        }
+        is ProfileUiState.Loading -> {
+            loading = true
+        }
+        else -> Unit
+    }
+
+    // Observe update status
+    LaunchedEffect(updateProfileState) {
+        when (updateProfileState) {
+            is ProfileUiState.Success -> {
+                // Navigate to the next screen on successful profile update
+                navController.navigate("profilesetup3")
+            }
+            is ProfileUiState.Error -> {
+                // Handle error scenario
+                error = true
+            }
+            else -> Unit
+        }
+    }
 
     TenderUSTheme {
         Column(
@@ -202,7 +274,7 @@ fun ProfileDetails2Screen(navController: NavHostController) {
                             contentDescription = gender,
                             tint = if (selectedGender == gender) Color.White else Color.Black,
                             modifier = Modifier
-                                .size(35.dp) // Set the size for the icon
+                                .size(35.dp)
                                 .padding(end = 8.dp)
                         )
                         Text(text = gender)
@@ -210,10 +282,13 @@ fun ProfileDetails2Screen(navController: NavHostController) {
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            Spacer(modifier = Modifier.height(180.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Button(
                 onClick = {
-                    navController.navigate("profilesetup3")
+                    if (profile != null) {
+                        val updatedProfile = profile!!.copy(identity = selectedGender)
+                        profileVM.updateUserProfile(token, updatedProfile)
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isButtonClicked) Color(0xFFB71C1C) else Color.LightGray
@@ -222,12 +297,16 @@ fun ProfileDetails2Screen(navController: NavHostController) {
             ) {
                 Text("Continue", color = Color.White)
             }
+            Spacer(modifier = Modifier.height(160.dp))
         }
     }
 }
 
 @Composable
-fun ProfileDetails3Screen(navController: NavHostController) {
+fun ProfileDetails3Screen(
+    navController: NavHostController,
+    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
+) {
     val interests = listOf(
         "Photography", "Karaoke", "Cooking", "Run", "Art",
         "Extreme", "Drink", "Shopping", "Yoga", "Tennis",
@@ -235,6 +314,48 @@ fun ProfileDetails3Screen(navController: NavHostController) {
     )
 
     val selectedInterests = remember { mutableStateListOf<String>() }
+    var profile by remember { mutableStateOf<Profile?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(token)
+    }
+
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+    val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
+
+    // Handle profile data and errors
+    when (profileUiState) {
+        is ProfileUiState.Success -> {
+            profile = (profileUiState as ProfileUiState.Success).profile
+            selectedInterests.clear()
+            selectedInterests.addAll(profile?.interests ?: emptyList())
+        }
+        is ProfileUiState.Error -> {
+            error = true
+        }
+        is ProfileUiState.Loading -> {
+            loading = true
+        }
+        else -> Unit
+    }
+
+    // Observe update status
+    LaunchedEffect(updateProfileState) {
+        when (updateProfileState) {
+            is ProfileUiState.Success -> {
+                // Navigate to the next screen on successful profile update
+                navController.navigate("filter")
+            }
+            is ProfileUiState.Error -> {
+                // Handle error scenario
+                error = true
+            }
+            else -> Unit
+        }
+    }
 
     TenderUSTheme {
         Box(
@@ -248,15 +369,15 @@ fun ProfileDetails3Screen(navController: NavHostController) {
                 onClick = { navController.navigate("filter") },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 16.dp) // Adjust padding to move the button down
+                    .padding(top = 16.dp)
             ) {
-                Text("Skip", color = Color.Gray, fontSize = 18.sp) // Increase font size
+                Text("Skip", color = Color.Gray, fontSize = 18.sp)
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 64.dp), // Adjust padding to prevent overlap with the skip button
+                    .padding(top = 64.dp),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -271,14 +392,14 @@ fun ProfileDetails3Screen(navController: NavHostController) {
                     style = MaterialTheme.typography.titleLarge,
                     color = Color(0xFFB71C1C),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp // Increase font size
+                    fontSize = 28.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Select a few of your interests and let everyone know what you're passionate about.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
-                    fontSize = 16.sp // Increase font size for better readability
+                    fontSize = 16.sp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 interests.chunked(2).forEach { rowInterests ->
@@ -308,20 +429,34 @@ fun ProfileDetails3Screen(navController: NavHostController) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        navController.navigate("filter")
+                        profile?.let {
+                            val updatedProfile = it.copy(interests = selectedInterests.toList())
+                            profileVM.updateUserProfile(token, updatedProfile)
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Continue", color = Color.White)
+                    Text("Continue", color = Color.White, fontSize = 18.sp) // Increase font size
                 }
+            }
+
+            if (loading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+
+            if (error) {
+                Text("An error occurred. Please try again.", color = Color.Red, modifier = Modifier.align(Alignment.Center))
             }
         }
     }
 }
 
 @Composable
-fun ProfileDetails4Screen(navController: NavHostController) {
+fun ProfileDetails4Screen(
+    navController: NavHostController,
+    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
+) {
     var imageUris by remember { mutableStateOf(listOf<Uri?>()) }
     val context = LocalContext.current
 
@@ -348,88 +483,139 @@ fun ProfileDetails4Screen(navController: NavHostController) {
         }
     )
 
-    Column(
+    var profile by remember { mutableStateOf<Profile?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
+
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+    val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
+
+    // Handle profile data and errors
+    when (profileUiState) {
+        is ProfileUiState.Success -> {
+            profile = (profileUiState as ProfileUiState.Success).profile
+            imageUris = profile?.pictures?.map { Uri.parse(it) } ?: emptyList()
+        }
+        is ProfileUiState.Error -> {
+            error = true
+        }
+        is ProfileUiState.Loading -> {
+            loading = true
+        }
+        else -> Unit
+    }
+
+    // Observe update status
+    LaunchedEffect(updateProfileState) {
+        when (updateProfileState) {
+            is ProfileUiState.Success -> {
+                navController.navigate("houserules")
+            }
+            is ProfileUiState.Error -> {
+                error = true
+            }
+            else -> Unit
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .padding(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(50.dp))
-        Image(
-            painter = painterResource(id = R.drawable.tim),
-            contentDescription = "Heart Icon",
-            modifier = Modifier.size(100.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Add Photos",
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFB71C1C)
-        )
-        Text(
-            text = "Add at least 2 photos to continue",
-            fontSize = 16.sp,
-            color = Color.Gray,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        val gridModifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 2.dp)
-        Spacer(modifier = Modifier.height(30.dp))
         Column(
-            modifier = gridModifier,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.Top
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp), // Center the row by adding horizontal padding
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            Image(
+                painter = painterResource(id = R.drawable.tim),
+                contentDescription = "Heart Icon",
+                modifier = Modifier.size(100.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Add Photos",
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFB71C1C)
+            )
+            Text(
+                text = "Add at least 2 photos to continue",
+                fontSize = 16.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            val gridModifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 2.dp)
+            Spacer(modifier = Modifier.height(30.dp))
+            Column(
+                modifier = gridModifier,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                for (i in 0 until 3) {
-                    PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
-                        if (imageUris.getOrNull(i) != null) {
-                            imageUris = imageUris.toMutableList().apply { removeAt(i) }
-                        } else {
-                            showDialog = true
-                        }
-                    })
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    for (i in 0 until 3) {
+                        PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
+                            if (imageUris.getOrNull(i) != null) {
+                                imageUris = imageUris.toMutableList().apply { removeAt(i) }
+                            } else {
+                                showDialog = true
+                            }
+                        })
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    for (i in 3 until 6) {
+                        PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
+                            if (imageUris.getOrNull(i) != null) {
+                                imageUris = imageUris.toMutableList().apply { removeAt(i) }
+                            } else {
+                                showDialog = true
+                            }
+                        })
+                    }
                 }
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp), // Center the row by adding horizontal padding
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+            Spacer(modifier = Modifier.height(50.dp))
+
+            Button(
+                onClick = {
+                    profile?.let {
+                        val updatedProfile = it.copy(pictures = imageUris.map { uri -> uri.toString() })
+                        profileVM.updateUserProfile(token, updatedProfile)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
+                enabled = imageUris.size >= 2,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                for (i in 3 until 6) {
-                    PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
-                        if (imageUris.getOrNull(i) != null) {
-                            imageUris = imageUris.toMutableList().apply { removeAt(i) }
-                        } else {
-                            showDialog = true
-                        }
-                    })
-                }
+                Text("Continue", color = Color.White)
             }
         }
 
-        Spacer(modifier = Modifier.height(50.dp))
+        if (loading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
 
-        Button(
-            onClick = {
-                navController.navigate("houserules")
-                      }, // Replace with your navigation target
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-            enabled = imageUris.size >= 0,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Continue", color = Color.White)
+        if (error) {
+            Text("An error occurred. Please try again.", color = Color.Red, modifier = Modifier.align(Alignment.Center))
         }
     }
 
@@ -460,13 +646,13 @@ fun ChooseImageSourceDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = MaterialTheme.shapes.medium,
-            shadowElevation = 8.dp // Use shadowElevation instead of elevation
+            shadowElevation = 8.dp
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Choose an option", style = MaterialTheme.typography.headlineSmall) // Use headlineSmall instead of h6
+                Text("Choose an option", style = MaterialTheme.typography.headlineSmall)
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(onClick = onGalleryClick) {
                     Text("Choose from Gallery")
@@ -525,8 +711,6 @@ fun PhotoBox(imageUri: Uri?, onClick: () -> Unit) {
         }
     }
 }
-
-
 @Composable
 fun HouseRulesScreen(navController: NavHostController) {
     Surface(
@@ -603,3 +787,4 @@ fun HouseRulesScreen(navController: NavHostController) {
         }
     }
 }
+
