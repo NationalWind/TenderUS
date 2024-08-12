@@ -41,21 +41,6 @@ fun ProfileDetails1Screen(navController: NavHostController) {
     var selectedUniversity by remember { mutableStateOf("") }
     var dateOfBirth by remember { mutableStateOf("") }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-
-    val universities = listOf(
-        "VNU-HCM University of Technology",
-        "VNU-HCM University of Science",
-        "VNU-HCM University of Social Sciences and Humanities",
-        "VNU-HCM International University",
-        "VNU-HCM University of Information Technology",
-        "VNU-HCM University of Economics and Law",
-        "VNU-HCM An Giang University",
-        "VNU-HCM School of Medicine",
-        "VNU-HCM School of Political and Administration Sciences",
-        "VNU-HCM Institute for Environment and Resources",
-        "University of Economics Ho Chi Minh City"
-    )
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -68,8 +53,7 @@ fun ProfileDetails1Screen(navController: NavHostController) {
 
     val focusManager = LocalFocusManager.current
 
-    val isFormComplete = fullName.isNotEmpty() && dateOfBirth.isNotEmpty() &&
-            selectedUniversity.isNotEmpty() && profileImageUri != null
+    val isFormComplete = fullName.isNotEmpty() && dateOfBirth.isNotEmpty() && profileImageUri != null
 
     TenderUSTheme {
         Column(
@@ -136,31 +120,8 @@ fun ProfileDetails1Screen(navController: NavHostController) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(200.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = true }
-                    .padding(8.dp)
-            ) {
-                Text(text = if (selectedUniversity.isEmpty()) "Select University" else selectedUniversity)
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    universities.forEach { university ->
-                        DropdownMenuItem(
-                            text = { Text(university) },
-                            onClick = {
-                                selectedUniversity = university
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(20.dp))
 
             // Continue Button
             Button(
@@ -177,7 +138,7 @@ fun ProfileDetails1Screen(navController: NavHostController) {
             ) {
                 Text("Continue", color = Color.White)
             }
-            Spacer(modifier = Modifier.height(150.dp))
+//
         }
     }
 }
@@ -222,6 +183,7 @@ fun ProfileDetails2Screen(navController: NavHostController) {
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Start)
+                            .padding(start = 10.dp)
             )
             Spacer(modifier = Modifier.height(100.dp))
             genders.forEachIndexed { index, gender ->
@@ -248,19 +210,18 @@ fun ProfileDetails2Screen(navController: NavHostController) {
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(180.dp))
             Button(
                 onClick = {
                     navController.navigate("profilesetup3")
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isButtonClicked) Color(0xFFB71C1C) else Color.Gray
+                    containerColor = if (isButtonClicked) Color(0xFFB71C1C) else Color.LightGray
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Continue", color = Color.White)
             }
-            Spacer(modifier = Modifier.height(160.dp))
         }
     }
 }
