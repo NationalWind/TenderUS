@@ -91,6 +91,7 @@ const recommendationController = {
 
       const recs: Profile[] = [];
       for (const user of users) {
+        if (cur_pref.showMe != user.identity && cur_pref.showMe != "Both") continue;
         if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.maxDist * cur_pref.maxDist) {
           if (req.query.group) {
             if (user.groups.includes(req.query.group)) {
@@ -100,6 +101,11 @@ const recommendationController = {
             recs.push(user);
           }
         }
+      }
+
+      if (recs.length == 0) {
+        res.status(200).json({ profiles: [] });
+        return;
       }
 
       // Recommend by interests
