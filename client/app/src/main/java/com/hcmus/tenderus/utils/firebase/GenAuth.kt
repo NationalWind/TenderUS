@@ -9,10 +9,11 @@ import kotlinx.coroutines.tasks.await
 
 class GenAuth {
     companion object {
-        suspend fun login(userLogin: UserLogin, auth: FirebaseAuth) {
+        suspend fun login(userLogin: UserLogin, auth: FirebaseAuth): Boolean {
             val res = LoginApi.login(userLogin)
             auth.signInWithCustomToken(res.firebaseToken).await()
             TokenManager.saveToken(res.token)
+            return res.firstTime
         }
         suspend fun signOut() {
             SignOutApi.signOut("Bearer " + TokenManager.getToken()!!)

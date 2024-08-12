@@ -97,14 +97,17 @@ fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
                 { /* Handle login logic here */
                     scope.launch {
                         try {
-                            GenAuth.login(
+                            if (GenAuth.login(
                                 UserLogin(
                                     username,
                                     password,
                                     FCMRegToken = TenderUSPushNotificationService.token!!
                                 ), auth
-                            )
-                            navController.navigate("main")
+                            )) {
+                                //First Time
+                            } else {
+                                navController.navigate(BottomNavItem.Discover.route)
+                            }
                         } catch (e: Exception) {
                             Log.d("Login", e.toString())
                             // GUI error message here

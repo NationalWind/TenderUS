@@ -9,7 +9,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 data class AuthOKResponse(val message: String)
-data class LoginOKResponse(val token: String, val firebaseToken: String)
+data class LoginOKResponse(val token: String, val firebaseToken: String, val firstTime: Boolean)
 
 interface SyncSignUp {
     @POST("api/auth/register")
