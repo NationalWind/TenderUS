@@ -68,6 +68,9 @@ fun ProfileDetails1Screen(navController: NavHostController) {
 
     val focusManager = LocalFocusManager.current
 
+    val isFormComplete = fullName.isNotEmpty() && dateOfBirth.isNotEmpty() &&
+            selectedUniversity.isNotEmpty() && profileImageUri != null
+
     TenderUSTheme {
         Column(
             modifier = Modifier
@@ -86,7 +89,7 @@ fun ProfileDetails1Screen(navController: NavHostController) {
 
             Text(
                 text = "Profile Details",
-                fontSize = 40.sp,
+                fontSize = 48.sp,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold
@@ -159,12 +162,18 @@ fun ProfileDetails1Screen(navController: NavHostController) {
             }
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Continue Button
             Button(
                 onClick = {
-                    navController.navigate("profilesetup2")
+                    if (isFormComplete) {
+                        navController.navigate("profilesetup2")
+                    }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-                modifier = Modifier.fillMaxWidth()
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isFormComplete) Color(0xFFB71C1C) else Color.Gray
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isFormComplete
             ) {
                 Text("Continue", color = Color.White)
             }
@@ -173,9 +182,11 @@ fun ProfileDetails1Screen(navController: NavHostController) {
     }
 }
 
+
 @Composable
 fun ProfileDetails2Screen(navController: NavHostController) {
     var selectedGender by remember { mutableStateOf("") }
+    var isButtonClicked by remember { mutableStateOf(false) }
 
     val genders = listOf("Male", "Female", "Other")
     val icons = listOf(R.drawable.male, R.drawable.female, R.drawable.othergender)
@@ -197,24 +208,26 @@ fun ProfileDetails2Screen(navController: NavHostController) {
 
             Text(
                 text = "Profile Details",
-                fontSize = 40.sp,
+                fontSize = 48.sp,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(130.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Select Gender",
-                fontSize = 30.sp,
+                text = "I am a",
+                fontSize = 35.sp,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.Black,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Start)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(100.dp))
             genders.forEachIndexed { index, gender ->
                 OutlinedButton(
-                    onClick = { selectedGender = gender },
+                    onClick = { selectedGender = gender
+                        isButtonClicked = true},
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedGender == gender) Color(0xFFB71C1C) else Color.White,
@@ -240,7 +253,9 @@ fun ProfileDetails2Screen(navController: NavHostController) {
                 onClick = {
                     navController.navigate("profilesetup3")
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isButtonClicked) Color(0xFFB71C1C) else Color.Gray
+                ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Continue", color = Color.White)
@@ -337,7 +352,7 @@ fun ProfileDetails3Screen(navController: NavHostController) {
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Continue", color = Color.White, fontSize = 18.sp) // Increase font size
+                    Text("Continue", color = Color.White)
                 }
             }
         }
