@@ -5,8 +5,29 @@ import { Account, Role, Like, Match, Profile, Preference } from "@prisma/client"
 import { firebaseFCM } from "../lib/firebase";
 
 
-// POST /api/profile/
+
 const profileController = {
+  //GET api/profile/prof
+  getProf: async (req: Request, res: Response) => {
+    try {
+      const prof = await db.profile.findUnique({ where: { username: req.body.username } });
+      res.status(200).json(prof);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  },
+  //GET api/profile/pref
+  getPref: async (req: Request, res: Response) => {
+    try {
+      const pref = await db.preference.findUnique({ where: { username: req.body.username } });
+      res.status(200).json(pref);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  },
+  // POST /api/profile/...
   createProf: async (req: Request, res: Response) => {
     try {
       const data: Profile = req.body;
