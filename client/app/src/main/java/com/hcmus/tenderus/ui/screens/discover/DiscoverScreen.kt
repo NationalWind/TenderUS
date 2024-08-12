@@ -63,7 +63,24 @@ import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.Period
 import kotlin.math.roundToInt
+
+fun calculateAgeFromDob(dob: String): Int {
+    // Extract the year from the last 4 characters of the date of birth string
+    val yearStr = dob.take(4)
+
+    // Convert extracted year to integer
+    val yearOfBirth = yearStr.toIntOrNull() ?: return -1 // Return -1 for invalid year format
+
+    // Create LocalDate with the extracted year and default month and day
+    val today = LocalDate.now()
+    val birthday = LocalDate.of(yearOfBirth, today.month, today.dayOfMonth)
+
+    // Calculate age
+    return Period.between(birthday, today).years
+}
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
@@ -369,7 +386,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "${profile.age}",
+                                    text = "${calculateAgeFromDob(profile.birthDate)}",
                                     color = Color.White,
                                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp) // Adjust font size
                                 )
@@ -424,7 +441,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                             Spacer(modifier = Modifier.height(16.dp))
 
                             Text(profile.displayName, style = MaterialTheme.typography.headlineSmall)
-                            Text("Age: ${profile.age}", style = MaterialTheme.typography.bodyLarge)
+                            Text("Age: ${calculateAgeFromDob(profile.birthDate)}", style = MaterialTheme.typography.bodyLarge)
                             Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
                             Text(
                                 profile.description,

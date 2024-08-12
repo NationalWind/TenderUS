@@ -28,8 +28,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.model.UserLogin
+import com.hcmus.tenderus.model.UserRegistration
+import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
+import com.hcmus.tenderus.network.SyncSignUp
 import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
+import com.hcmus.tenderus.utils.firebase.GenAuth
+import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -364,7 +370,17 @@ fun SignUpScreen(
                             if (isPasswordValid && doPasswordsMatch) {
                                 // Perform signup and navigation
                                 isSignUpSuccessful = true
-                                navController.navigate("profilesetup1")
+                                scope.launch {
+                                    try {
+                                        SyncSignUpApi.sync(UserRegistration(username,
+                                            password.toString(), email, phoneNumber,
+                                            token=TenderUSPushNotificationService.token!!))
+                                        navController.navigate("profilesetup1")
+                                    } catch (e: Exception) {
+                                        Log.d("Signup", e.toString())
+                                        // GUI error message here
+                                    }
+                                }
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
