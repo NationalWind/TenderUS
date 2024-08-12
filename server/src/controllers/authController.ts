@@ -93,7 +93,9 @@ const authController = {
 
           const firebaseToken = await AdmGetAuth().createCustomToken(foundAccount.FirebaseUID);
 
-          res.status(200).json({ token: token, firebaseToken: firebaseToken });
+          const firstTime = await db.profile.findUnique({ where: { username: data.username } }) == null;
+
+          res.status(200).json({ token, firebaseToken, firstTime });
         } else {
           res.status(401).json({ message: "Wrong password" });
         }
