@@ -1,5 +1,9 @@
 package com.hcmus.tenderus.ui.screens.message
 
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -27,10 +31,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,16 +56,101 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.network.MessageSendingRequest
 import com.hcmus.tenderus.ui.screens.BottomNavItem
 import com.hcmus.tenderus.ui.theme.Typography
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.MatchState
+import com.hcmus.tenderus.utils.AudioRecorder
+import com.hcmus.tenderus.utils.firebase.StorageUtil.Companion.uploadToStorage
+import kotlinx.coroutines.delay
+import java.io.File
+import kotlin.time.Duration.Companion.seconds
+
+
+@Composable
+fun VoiceMessage(audioUrl: String) {
+    var isPlaying by remember { mutableStateOf(false) }
+    val mediaPlayer = remember {MediaPlayer()}
+    var currentValue by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(Unit) {
+        try {
+            mediaPlayer.setDataSource(audioUrl)
+            mediaPlayer.prepare()
+            mediaPlayer.setOnCompletionListener {
+                isPlaying = false
+                currentValue = 0f
+            }
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+        }
+
+    }
+
+
+
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer.release()
+        }
+    }
+    if (isPlaying) {
+        LaunchedEffect(Unit) {
+            while (true) {
+                currentValue = mediaPlayer.currentPosition.toFloat() / mediaPlayer.duration
+                delay(1.seconds / 30)
+            }
+        }
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AnimatedVisibility(!isPlaying) {
+            Image(painter = painterResource(id = R.drawable.playcircle), contentDescription = null, modifier = Modifier.size(55.dp).weight(1f).clickable {
+
+                mediaPlayer.setAudioAttributes(
+                    AudioAttributes
+                        .Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+
+
+                mediaPlayer.start()
+                isPlaying = true
+
+            })
+        }
+        AnimatedVisibility(isPlaying) {
+            Image(painter = painterResource(id = R.drawable.pausecircle), contentDescription = null, modifier = Modifier.size(55.dp).weight(1f).clickable {
+                mediaPlayer.pause()
+                isPlaying = false
+            })
+        }
+
+        Spacer(modifier = Modifier.weight(0.2f))
+        Slider(
+            value = currentValue,
+            onValueChange = {
+                mediaPlayer.seekTo((it * mediaPlayer.duration).toInt())
+                currentValue = it
+            },
+            modifier = Modifier.weight(5f),
+            colors = SliderDefaults.colors(thumbColor = Color(0xFFE94057), activeTrackColor = Color(0xFFE94057), inactiveTrackColor = Color.LightGray)
+        )
+    }
+}
 
 @Composable
 fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
@@ -93,12 +188,15 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
+fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: FirebaseAuth, context: Context) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var messageTexting by remember { mutableStateOf("") }
+    var isRecording by remember { mutableStateOf(false) }
     val matches = matchListVM.matches
     val usernameInChat = matchListVM.curReceiver
+    val audioRecorder = remember { AudioRecorder(context) }
+    val file = remember {File(context.cacheDir.toString(), "audio.mp3")}
 
     val idx = matches.indexOfFirst { it.username == usernameInChat }
     if (!matches[idx].isRead && matches[idx].messageArr.isNotEmpty()) {
@@ -166,25 +264,42 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent
                     ),
-                    textStyle = TextStyle(color = Color.Black)
+                    textStyle = TextStyle(color = Color.Black),
+                    enabled = !isRecording
                 )
                 Spacer(modifier = Modifier.weight(0.2f))
-                AnimatedVisibility(messageTexting == "") {
+                AnimatedVisibility(messageTexting == "" && !isRecording) {
                     Image(
                         painterResource(id = R.drawable.micircle),
                         modifier = Modifier
                             .weight(1f)
                             .size(55.dp)
                             .clickable {
-
-                                matchListVM.sendMessage(
-                                    MessageSendingRequest(
-                                        usernameInChat,
-                                        "Text",
-                                        messageTexting
+                                isRecording = true
+                                audioRecorder.start(file)
+                            },
+                        contentDescription = null,
+                    )
+                }
+                AnimatedVisibility(messageTexting == "" && isRecording) {
+                    Image(
+                        painterResource(id = R.drawable.circlestop),
+                        modifier = Modifier
+                            .weight(1f)
+                            .size(55.dp)
+                            .clickable {
+                                audioRecorder.stop()
+                                uploadToStorage(auth, file.toUri(), context, "Audio") {
+                                    matchListVM.sendMessage(
+                                        MessageSendingRequest(
+                                            usernameInChat,
+                                            "Audio",
+                                            it
+                                        )
                                     )
-                                )
-                                messageTexting = ""
+                                    isRecording = false
+                                }
+
 
                             },
                         contentDescription = null,
@@ -236,7 +351,6 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
                 Box(modifier = Modifier.weight(1f)) {
                     LazyColumn(state = listState, reverseLayout = true) {
                         items(matches[idx].messageArr.size) { msgIdx ->
-                            if (matches[idx].messageArr[msgIdx].msgType == "Text") {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -254,14 +368,18 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
                                             )
                                             .padding(16.dp)
                                     ) {
-                                        Text(
-                                            text = matches[idx].messageArr[msgIdx].content,
-                                            style = Typography.bodyMedium
-                                        )
+                                        if (matches[idx].messageArr[msgIdx].msgType == "Text") {
+                                            Text(
+                                                text = matches[idx].messageArr[msgIdx].content,
+                                                style = Typography.bodyMedium
+                                            )
+                                        } else if (matches[idx].messageArr[msgIdx].msgType == "Audio") {
+                                            VoiceMessage(audioUrl = matches[idx].messageArr[msgIdx].content)
+                                        }
                                     }
                                 }
 
-                            }
+
                         }
                     }
                 }
@@ -272,4 +390,6 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM) {
 
 
     }
+
+
 }

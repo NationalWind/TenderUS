@@ -75,12 +75,13 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
             modifier = Modifier.padding(15.dp)
         ) {
             Text(text = match.displayName, style = Typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            val msg = if (match.messageArr.first().msgType == "Text") match.messageArr.first().content else "Audio"
             if (match.messageArr.first().receiver == match.username) {
-                Text(text =  "You: " + match.messageArr.first().content, style = Typography.bodyMedium.copy(color = Color.Gray), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(text = "You: $msg", style = Typography.bodyMedium.copy(color = Color.Gray), maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else {
 
                 Text(
-                    text = match.messageArr.first().content,
+                    text = msg,
                     style = Typography.bodyMedium.copy(color = Color.Gray),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

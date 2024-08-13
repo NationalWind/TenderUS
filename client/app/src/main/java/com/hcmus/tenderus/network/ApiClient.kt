@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.*
 
 object ApiClient {
-    private const val BASE_URL = "https://192.168.1.183:8000/"
+    private const val BASE_URL = "https://192.168.1.60:8000/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

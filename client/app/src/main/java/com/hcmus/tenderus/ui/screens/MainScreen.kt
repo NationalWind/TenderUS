@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.screens
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
@@ -45,7 +46,7 @@ import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun MainScreen(auth: FirebaseAuth, matchListVM: MatchListVM) {
+fun MainScreen(auth: FirebaseAuth, matchListVM: MatchListVM, context: Context) {
     val mainNavController = rememberNavController()
     var showBar by remember { mutableStateOf(true) }
     Scaffold(
@@ -121,7 +122,7 @@ fun MainScreen(auth: FirebaseAuth, matchListVM: MatchListVM) {
                         LaunchedEffect(Unit) {
                             showBar = false
                         }
-                        InChatScreen(navController = mainNavController, matchListVM = matchListVM)
+                        InChatScreen(navController = mainNavController, matchListVM = matchListVM, auth, context)
                     }
 //                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
                     composable(BottomNavItem.Profile.route) {

@@ -126,8 +126,13 @@ class MainActivity : ComponentActivity() {
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.RECORD_AUDIO),
+            0
+        )
         askNotificationPermission()
-        TokenManager.init(this)
+        TokenManager.init(applicationContext)
         TokenManager.saveToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OWE3YWIxYTVjMmU5MjM3MjQ3NDhhNyIsInVzZXJuYW1lIjoidGVudGVuIiwicGFzc3dvcmQiOiIkMmIkMTAkaWtXenVwR2U2MElsSTlNNTQxazRldXE4Mzc2eW5BS3hBS1lXVHlTTkU1dlpNaXF4RkZQZHEiLCJlbWFpbCI6Im5nLm5ndXludkBnbWFpbC5jb20iLCJwaG9uZSI6ImFob2hlIiwicm9sZSI6IlVTRVIiLCJGQ01SZWdUb2tlbiI6ImNibFlTaGYxUXNDZk1aYVc3VEZ0WmU6QVBBOTFiRV9NVFBsQV9uMDVkVW1fUm0zTkI5eDVpLXRlVmhiNllpaExfbEdmMFNmT290cGZhbEY3cFJuVVVyaXlWYXR3MTBtb0hnRExKWF9YY1lfSXBvMHkxUzdXYVlxV2s2SEt3OTFTLWJSdHRwUkpiMlNUTm9DWjBoeDZnN3hLdnNCbUdJb0l0bU0iLCJhdmF0YXJJY29uIjpudWxsLCJpYXQiOjE3MjI0ODQzNDl9.ZyQOYaC_QCypf39UjLYcIN4b-VQE6E0bgTZ_3rWrykM")
         requestCameraPermission()
         val auth = Firebase.auth
@@ -155,10 +160,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "profilesetup1") {
+                NavHost(navController, startDestination = "main") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
-                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
+//                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
                     composable("signin") { LoginScreen(navController = navController, auth) }
@@ -178,7 +183,7 @@ class MainActivity : ComponentActivity() {
                     composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
 //                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
-                    composable("main") { MainScreen(auth, matchListVM) }
+                    composable("main") { MainScreen(auth, matchListVM, applicationContext) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
                     composable("exlogin") { ExampleLogin(navController) }
