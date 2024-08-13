@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
             0
         )
         askNotificationPermission()
-        TokenManager.init(applicationContext)
+        TokenManager.init(this)
         TokenManager.saveToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OWE3YWIxYTVjMmU5MjM3MjQ3NDhhNyIsInVzZXJuYW1lIjoidGVudGVuIiwicGFzc3dvcmQiOiIkMmIkMTAkaWtXenVwR2U2MElsSTlNNTQxazRldXE4Mzc2eW5BS3hBS1lXVHlTTkU1dlpNaXF4RkZQZHEiLCJlbWFpbCI6Im5nLm5ndXludkBnbWFpbC5jb20iLCJwaG9uZSI6ImFob2hlIiwicm9sZSI6IlVTRVIiLCJGQ01SZWdUb2tlbiI6ImNibFlTaGYxUXNDZk1aYVc3VEZ0WmU6QVBBOTFiRV9NVFBsQV9uMDVkVW1fUm0zTkI5eDVpLXRlVmhiNllpaExfbEdmMFNmT290cGZhbEY3cFJuVVVyaXlWYXR3MTBtb0hnRExKWF9YY1lfSXBvMHkxUzdXYVlxV2s2SEt3OTFTLWJSdHRwUkpiMlNUTm9DWjBoeDZnN3hLdnNCbUdJb0l0bU0iLCJhdmF0YXJJY29uIjpudWxsLCJpYXQiOjE3MjI0ODQzNDl9.ZyQOYaC_QCypf39UjLYcIN4b-VQE6E0bgTZ_3rWrykM")
         requestCameraPermission()
         val auth = Firebase.auth

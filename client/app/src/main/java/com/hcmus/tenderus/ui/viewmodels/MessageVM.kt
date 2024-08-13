@@ -15,6 +15,7 @@ import com.hcmus.tenderus.model.Match
 import com.hcmus.tenderus.model.Message
 import com.hcmus.tenderus.network.ApiClient.GetMatchesApi
 import com.hcmus.tenderus.network.ApiClient.HaveReadMessageApi
+import com.hcmus.tenderus.network.ApiClient.MessageLoadingApi
 import com.hcmus.tenderus.network.ApiClient.MessagePollingApi
 import com.hcmus.tenderus.network.ApiClient.MessageSendingApi
 import com.hcmus.tenderus.network.HaveReadMessageRequest
@@ -131,6 +132,20 @@ class MatchListVM: ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.d("MsgSending", e.toString())
+            }
+        }
+
+    }
+
+    fun loadMessage() {
+        viewModelScope.launch {
+            try {
+                matches.first { it.username == curReceiver }.let {
+                    val messages = MessageLoadingApi.loadMessage("Bearer " + TokenManager.getToken()!!, curReceiver, 20, it.messageArr.last().msgID)
+                    it.messageArr.addAll(messages)
+                }
+            } catch (e: Exception) {
+                Log.d("MsgLoading", e.toString())
             }
         }
 

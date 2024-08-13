@@ -62,6 +62,9 @@ object ApiClient {
     val SignOutApi by lazy {
         create(SignOut::class.java)
     }
+    val MessageLoadingApi by lazy {
+        create(MessageLoading::class.java)
+    }
 
 
 

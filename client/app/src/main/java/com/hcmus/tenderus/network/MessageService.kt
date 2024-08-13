@@ -7,6 +7,8 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 
 import retrofit2.http.POST
+import retrofit2.http.Query
+
 data class OKResponse (private val message: String)
 data class MessageSendingRequest(
     val receiver: String,
@@ -29,6 +31,11 @@ interface MessagePolling {
 interface MessageSending {
     @POST("api/message")
     suspend fun sendMessage(@Header("Authorization") authorization: String, @Body req: MessageSendingRequest): Message
+}
+
+interface MessageLoading {
+    @GET("api/message")
+    suspend fun loadMessage(@Header("Authorization") authorization: String, @Query("receiver") receiver: String, @Query("page_size") pageSize: Int, @Query("msgID") msgID: Int ) : List<Message>
 }
 
 

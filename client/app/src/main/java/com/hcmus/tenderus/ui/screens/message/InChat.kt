@@ -39,6 +39,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -81,21 +82,9 @@ fun VoiceMessage(audioUrl: String) {
     var isPlaying by remember { mutableStateOf(false) }
     val mediaPlayer = remember {MediaPlayer()}
     var currentValue by remember { mutableFloatStateOf(0f) }
-    LaunchedEffect(Unit) {
-        try {
-            mediaPlayer.setDataSource(audioUrl)
-            mediaPlayer.prepare()
-            mediaPlayer.setOnCompletionListener {
-                isPlaying = false
-                currentValue = 0f
-            }
+    var isPrepared by remember { mutableStateOf(false) }
 
-        } catch (e: Exception) {
 
-            e.printStackTrace()
-        }
-
-    }
 
 
 
@@ -117,26 +106,49 @@ fun VoiceMessage(audioUrl: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AnimatedVisibility(!isPlaying) {
-            Image(painter = painterResource(id = R.drawable.playcircle), contentDescription = null, modifier = Modifier.size(55.dp).weight(1f).clickable {
+            Image(painter = painterResource(id = R.drawable.playcircle), contentDescription = null, modifier = Modifier
+                .size(55.dp)
+                .weight(1f)
+                .clickable {
 
-                mediaPlayer.setAudioAttributes(
-                    AudioAttributes
-                        .Builder()
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build()
-                )
+                    mediaPlayer.setAudioAttributes(
+                        AudioAttributes
+                            .Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+
+                    try {
+                        if (isPrepared) {
+                            mediaPlayer.start()
+                        } else {
+                            mediaPlayer.setDataSource(audioUrl)
+                            mediaPlayer.prepare()
+                            mediaPlayer.setOnCompletionListener {
+                                isPlaying = false
+                            }
+                            mediaPlayer.start()
+                            isPrepared = true
+                        }
 
 
-                mediaPlayer.start()
-                isPlaying = true
+                    } catch (e: Exception) {
 
-            })
+                        e.printStackTrace()
+                    }
+
+                    isPlaying = true
+
+                })
         }
         AnimatedVisibility(isPlaying) {
-            Image(painter = painterResource(id = R.drawable.pausecircle), contentDescription = null, modifier = Modifier.size(55.dp).weight(1f).clickable {
-                mediaPlayer.pause()
-                isPlaying = false
-            })
+            Image(painter = painterResource(id = R.drawable.pausecircle), contentDescription = null, modifier = Modifier
+                .size(55.dp)
+                .weight(1f)
+                .clickable {
+                    mediaPlayer.pause()
+                    isPlaying = false
+                })
         }
 
         Spacer(modifier = Modifier.weight(0.2f))
@@ -203,6 +215,7 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: F
         matchListVM.haveReadMessage(matches[idx].messageArr.first().conversationID)
         matches[idx].isRead = true
     }
+
     Scaffold(
         containerColor = Color.White,
         contentColor = Color.Black,
@@ -379,6 +392,12 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: F
                                     }
                                 }
 
+
+                        }
+                        item {
+                            LaunchedEffect(Unit) {
+                                matchListVM.loadMessage()
+                            }
 
                         }
                     }

@@ -163,7 +163,7 @@ const messageController = {
   // Must post multimedia first then use this endpoint with content = url
   send: async (req: Request, res: Response) => {
     try {
-      const requiredFields = ["id", "receiver", "msgType", "content"];
+      const requiredFields = ["receiver", "msgType", "content"];
       const missingFields = requiredFields.filter(field => !req.body[field]);
 
       if (missingFields.length > 0) {
@@ -225,7 +225,7 @@ const messageController = {
             conversationID: converation.doc_id
           }
         });
-        console.log(msg, converation, typeof (converation.doc_id))
+
         data = {
           conversationID: converation.doc_id,
           msgID: msg!.msgID + 1,
