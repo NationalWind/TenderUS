@@ -239,6 +239,7 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: F
             }
         },
         bottomBar = {
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -247,7 +248,6 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: F
                     Image(
                         painterResource(id = R.drawable.imageclecir),
                         modifier = Modifier
-                            .weight(1f)
                             .size(50.dp)
                             .clickable {
 
@@ -285,7 +285,6 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: F
                     Image(
                         painterResource(id = R.drawable.micircle),
                         modifier = Modifier
-                            .weight(1f)
                             .size(55.dp)
                             .clickable {
                                 isRecording = true
@@ -401,11 +400,35 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: F
 
                         }
                     }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth().align(Alignment.BottomCenter)
+                    ) {
+                        if (messageTexting == "" && isRecording) {
+                            Row {
+                                Spacer(modifier = Modifier.weight(29f))
+                                Image(
+                                    painterResource(id = R.drawable.circlecancle),
+                                    modifier = Modifier
+                                        .size(55.dp)
+                                        .clickable {
+                                            audioRecorder.stop()
+                                            isRecording = false
+                                        },
+                                    contentDescription = null,
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+
                 }
             }
 
 
         }
+
 
 
     }
