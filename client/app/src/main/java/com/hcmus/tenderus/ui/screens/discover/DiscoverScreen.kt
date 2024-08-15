@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -300,6 +303,16 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
     val offsetY = remember { mutableStateOf(0f) }
     val coroutineScope = rememberCoroutineScope()
 
+    // State for button animation
+    var isLikeButtonActive by remember { mutableStateOf(false) }
+    var isDislikeButtonActive by remember { mutableStateOf(false) }
+
+    // Reset button states when the profile changes
+    LaunchedEffect(currentProfileIndex) {
+        isLikeButtonActive = false
+        isDislikeButtonActive = false
+    }
+
     if (profiles.isNotEmpty()) {
         val profile = profiles[currentProfileIndex]
 
@@ -315,15 +328,22 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                         onDrag = { change, dragAmount ->
                             offsetX.value += dragAmount.x // Update offset based on drag amount
                             offsetY.value += dragAmount.y // Update offset based on drag amount
+
+                            isLikeButtonActive = offsetX.value > 100f
+                            isDislikeButtonActive = offsetX.value < -100f
+
                             change.consume()
                         },
                         onDragCancel = {
                             offsetX.value = 0f // Reset offset when drag is canceled
                             offsetY.value = 0f // Reset offset when drag is canceled
+                            isLikeButtonActive = false // Deactivate buttons when drag is canceled
+                            isDislikeButtonActive = false
                         },
                         onDragEnd = {
                             coroutineScope.launch {
-                                if (offsetX.value > 300f || offsetX.value < -300f) {
+                                if (offsetX.value > 300f) {
+                                    // Like
                                     val newProfiles = profiles.toMutableList().apply {
                                         removeAt(currentProfileIndex)
                                     }
@@ -332,16 +352,26 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
-                                } /*else if (offsetY.value < -300f) {
-                                    // Swiped up to show full profile
-                                    showProfileDetails = true
+                                    isLikeButtonActive = false // Deactivate buttons when drag is canceled
+                                    isDislikeButtonActive = false
+                                } else if (offsetX.value < -300f) {
+                                    // Dislike
+                                    val newProfiles = profiles.toMutableList().apply {
+                                        removeAt(currentProfileIndex)
+                                    }
+                                    onProfilesUpdated(newProfiles)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
-                                }*/
-                                else {
+                                    showProfileDetails = false // Collapse profile details on swipe
+                                    isLikeButtonActive = false // Deactivate buttons when drag is canceled
+                                    isDislikeButtonActive = false
+                                } else {
                                     // Reset offset if swipe is not significant
                                     offsetX.value = 0f
                                     offsetY.value = 0f
+                                    isLikeButtonActive = false
+                                    isDislikeButtonActive = false
                                 }
                             }
                         }
@@ -356,54 +386,59 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                         rotationZ = offsetX.value / 20f
                     }
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(profile.avatarIcon),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                // Overlay profile information
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .align(Alignment.BottomStart),
-                    contentAlignment = Alignment.BottomStart
+                        .size(300.dp, 480.dp) // Fixed size for rectangular image
+                        .align(Alignment.Center)
+                        .clip(RoundedCornerShape(16.dp)) // Rounded corners
+                        .background(Color.Black.copy(alpha = 0.5f)) // Optional background
                 ) {
-                    if (!showProfileDetails) {
-                        Column(
-                            modifier = Modifier
-                                .background(Color.Black.copy(alpha = 0.5f))
-                                .padding(8.dp)
-                        ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(profile.avatarIcon),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                // Overlay profile information
+                if (!showProfileDetails) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(bottom = 100.dp)
+                            .padding(start = 20.dp)
+                            .wrapContentWidth()
+                            .wrapContentHeight()
+                            .background(Color.Black.copy(alpha = 0.5f))
+                    ) {
+                        Column {
                             Row {
                                 Text(
                                     text = profile.displayName,
                                     color = Color.White,
-                                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp), // Adjust font size
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp),
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "${calculateAgeFromDob(profile.birthDate)}",
                                     color = Color.White,
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp) // Adjust font size
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp)
                                 )
                             }
                         }
                     }
                 }
 
+                // Profile button at the bottom right
                 if (!showProfileDetails) {
-                    // Profile button at the bottom right
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(16.dp)
                             .size(64.dp)
                             .clickable { showProfileDetails = true }
-                            .background(Color.Transparent)
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.profile_button),
@@ -447,11 +482,10 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                                 profile.description,
                                 style = MaterialTheme.typography.bodyMedium
                             )
-                            // Add more profile details here
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // Use profile_button image as collapse button
+                            // Use collapse button image for collapsing profile details
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.End)
@@ -460,7 +494,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                                     .background(Color.Transparent)
                             ) {
                                 Image(
-                                    painter = painterResource(id = R.drawable.collapse_button), // Use the same image for collapsing
+                                    painter = painterResource(id = R.drawable.collapse_button),
                                     contentDescription = "Collapse Profile",
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier.fillMaxSize()
@@ -470,9 +504,93 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                     }
                 }
             }
+
+            // Action buttons at the bottom center (always visible)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .align(Alignment.BottomCenter) // Align buttons at the bottom center of the screen
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // Dislike Button
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp) // Increased size
+                            .graphicsLayer(
+                                scaleX = if (isDislikeButtonActive) 1.5f else 1f,
+                                scaleY = if (isDislikeButtonActive) 1.5f else 1f,
+                                alpha = if (isDislikeButtonActive) 0.5f else 1f
+                            )
+                            .background(Color.Transparent)
+                            .clickable {
+                                // Dislike
+                                if (profiles.isNotEmpty()) {
+                                    val newProfiles = profiles.toMutableList().apply {
+                                        removeAt(currentProfileIndex)
+                                    }
+                                    onProfilesUpdated(newProfiles)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    offsetX.value = 0f
+                                    offsetY.value = 0f
+                                    showProfileDetails = false // Collapse profile details on swipe
+                                }
+                            }
+                    ) {
+                        Image(
+                            painter = painterResource(
+                                id = if (isDislikeButtonActive) R.drawable.big_dislike else R.drawable.dislike
+                            ),
+                            contentDescription = "Dislike",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    // Like Button
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp) // Increased size
+                            .graphicsLayer(
+                                scaleX = if (isLikeButtonActive) 1.5f else 1f,
+                                scaleY = if (isLikeButtonActive) 1.5f else 1f,
+                                alpha = if (isLikeButtonActive) 0.5f else 1f
+                            )
+                            .background(Color.Transparent)
+                            .clickable {
+                                // Like
+                                if (profiles.isNotEmpty()) {
+                                    val newProfiles = profiles.toMutableList().apply {
+                                        removeAt(currentProfileIndex)
+                                    }
+                                    onProfilesUpdated(newProfiles)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    offsetX.value = 0f
+                                    offsetY.value = 0f
+                                    showProfileDetails = false // Collapse profile details on swipe
+                                }
+                            }
+                    ) {
+                        Image(
+                            painter = painterResource(
+                                id = if (isLikeButtonActive) R.drawable.big_like else R.drawable.like
+                            ),
+                            contentDescription = "Like",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
         }
     }
 }
+
+
 
 @Composable
 fun GenderSelection(selectedGender: String, onGenderSelected: (String) -> Unit) {
@@ -621,19 +739,8 @@ fun AgeRangeSlider(
     }
 }
 
-
-
-
-
-// eg to run
-@Composable
-fun MessageScreen(navController: NavController) {
-
-}
 @Composable
 fun MatchesScreen(navController: NavController) {
 
 }
-
-
 

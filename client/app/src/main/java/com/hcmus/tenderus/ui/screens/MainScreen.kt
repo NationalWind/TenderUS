@@ -33,7 +33,6 @@ import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
-import com.hcmus.tenderus.ui.screens.discover.MessageScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
