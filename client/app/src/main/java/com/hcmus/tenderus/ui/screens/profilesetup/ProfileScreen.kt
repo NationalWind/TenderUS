@@ -162,7 +162,6 @@ fun ProfileScreen(navController: NavController) {
 @Composable
 fun EditProfileScreen(navController: NavController) {
     var name by remember { mutableStateOf(TextFieldValue("Rachel")) }
-    var age by remember { mutableStateOf(TextFieldValue("20")) }
     var phoneNumber by remember { mutableStateOf(TextFieldValue("123456789")) }
     var email by remember { mutableStateOf(TextFieldValue("rachel@example.com")) }
     var gender by remember { mutableStateOf("Female") }
@@ -220,20 +219,12 @@ fun EditProfileScreen(navController: NavController) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name") },
+                label = { Text("Full Name") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = age,
-                onValueChange = { age = it },
-                label = { Text("Age") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = phoneNumber,
@@ -282,7 +273,11 @@ fun EditProfileScreen(navController: NavController) {
                         Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                     },
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        containerColor = Color.White
+                        containerColor = Color.White,
+                        disabledTextColor = Color.Black, // Ensure this matches other fields
+                        focusedBorderColor = Color.Gray,
+                        unfocusedBorderColor = Color.Gray,
+                        disabledBorderColor = Color.Gray // Border color when disabled
                     )
                 )
                 DropdownMenu(

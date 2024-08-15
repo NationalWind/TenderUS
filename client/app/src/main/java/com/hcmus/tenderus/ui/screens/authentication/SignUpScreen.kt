@@ -3,6 +3,7 @@ package com.hcmus.tenderus.ui.screens.authentication
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
@@ -170,6 +171,26 @@ fun SignUpScreen(
                     ) {
                         Text("Continue", color = Color.White)
                     }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Already have an account?",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Sign In",
+                            fontSize = 14.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable {
+                                navController.navigate("signin") // Navigate to Sign In screen
+                            }
+                        )
+                    }
 
 
                     errorMessage?.let {
@@ -217,6 +238,26 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("SEND", color = Color.White)
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Already have an account?",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Sign In",
+                            fontSize = 14.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable {
+                                navController.navigate("signin") // Navigate to Sign In screen
+                            }
+                        )
                     }
                 }
                 3 -> {
@@ -273,13 +314,81 @@ fun SignUpScreen(
                     ) {
                         Text("Continue", color = Color.White)
                     }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Already have an account?",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Sign In",
+                            fontSize = 14.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable {
+                                navController.navigate("signin") // Navigate to Sign In screen
+                            }
+                        )
+                    }
                     errorMessage?.let {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(text = it, color = Color.Red, fontSize = 14.sp)
                     }
                 }
                 4 -> {
-                    // Step 4: Password & Username Creation
+                    // Step 4: Waiting for Email Verification
+                    Text(
+                        "Verify your email address",
+                        fontSize = 30.sp,
+                        color = Color(0xFFB71C1C),
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 36.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "A verification link has been sent to your email. Please check your inbox and click the link to verify your email.",
+                        fontSize = 18.sp,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                try {
+                                    val isVerified = firebaseEmailAuth.isEmailVerifiedSign()
+                                    if (isVerified) {
+                                        step = 5 // Proceed to the next screen after verification
+                                    } else {
+                                        errorMessage = "Email not verified yet. Please check your inbox."
+                                    }
+                                } catch (e: Exception) {
+                                    errorMessage = "Failed to check verification status: ${e.message}"
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Check Verification Status", color = Color.White)
+                    }
+                    errorMessage?.let {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = it, color = Color.Red, fontSize = 14.sp)
+                    }
+                }
+
+                5 -> {
+                    // Step 5: Password & Username Creation
                     Text(
                         "Enter a username",
                         fontSize = 30.sp,
@@ -375,10 +484,10 @@ fun SignUpScreen(
                                         SyncSignUpApi.sync(UserRegistration(username,
                                             password.toString(), email, phoneNumber,
                                             token=TenderUSPushNotificationService.token!!))
-                                        navController.navigate("profilesetup1")
+                                        navController.navigate("login")
                                     } catch (e: Exception) {
                                         Log.d("Signup", e.toString())
-                                        // GUI error message here
+                                        errorMessage = "Sign up failed. Please try again."
                                     }
                                 }
                             }
@@ -387,6 +496,26 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Create an account", color = Color.White)
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Already have an account?",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Sign In",
+                            fontSize = 14.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable {
+                                navController.navigate("signin") // Navigate to Sign In screen
+                            }
+                        )
                     }
                 }
             }

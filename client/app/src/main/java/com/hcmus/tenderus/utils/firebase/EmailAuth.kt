@@ -14,7 +14,7 @@ import kotlinx.coroutines.tasks.await
 class FirebaseEmailAuth(private val auth: FirebaseAuth, private val act: Activity) {
     private val TAG = "Firebase Auth Email"
 
-    open suspend fun sendEmail(email: String) {
+    suspend fun sendEmail(email: String) {
         try {
             auth.createUserWithEmailAndPassword(email, email).await()
         } catch(e: FirebaseAuthUserCollisionException) {
@@ -43,5 +43,10 @@ class FirebaseEmailAuth(private val auth: FirebaseAuth, private val act: Activit
         } else {
             throw Exception("Invalid syncFor")
         }
+    }
+    // New method to check if the email is verified
+    suspend fun isEmailVerifiedSign(): Boolean {
+        auth.currentUser?.reload()?.await()  // Reload the user's data from Firebase
+        return auth.currentUser?.isEmailVerified ?: false
     }
 }

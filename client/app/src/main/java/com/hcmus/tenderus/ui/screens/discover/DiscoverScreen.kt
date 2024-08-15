@@ -388,9 +388,10 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
             ) {
                 Box(
                     modifier = Modifier
-                        .size(300.dp, 480.dp) // Fixed size for rectangular image
+                        .size(350.dp, 560.dp) // Fixed size for rectangular image
                         .align(Alignment.Center)
-                        .clip(RoundedCornerShape(16.dp)) // Rounded corners
+                        .offset(y = (-45).dp)
+                        .clip(RoundedCornerShape(12.dp)) // Rounded corners
                         .background(Color.Black.copy(alpha = 0.5f)) // Optional background
                 ) {
                     Image(
@@ -437,7 +438,8 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(16.dp)
-                            .size(64.dp)
+                            .size(60.dp)
+                            .offset(x = (-10).dp, y = (-60).dp)
                             .clickable { showProfileDetails = true }
                     ) {
                         Image(
@@ -490,6 +492,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                                 modifier = Modifier
                                     .align(Alignment.End)
                                     .size(64.dp)
+                                    .offset(x = (-10).dp, y = (-60).dp)
                                     .clickable { showProfileDetails = false }
                                     .background(Color.Transparent)
                             ) {
@@ -520,12 +523,13 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                     // Dislike Button
                     Box(
                         modifier = Modifier
-                            .size(100.dp) // Increased size
+                            .size(115.dp) // Increased size
                             .graphicsLayer(
-                                scaleX = if (isDislikeButtonActive) 1.5f else 1f,
-                                scaleY = if (isDislikeButtonActive) 1.5f else 1f,
+                                scaleX = if (isDislikeButtonActive) 1.3f else 1f,
+                                scaleY = if (isDislikeButtonActive) 1.3f else 1f,
                                 alpha = if (isDislikeButtonActive) 0.5f else 1f
                             )
+                            .offset(x = (-12).dp, y = (10).dp)
                             .background(Color.Transparent)
                             .clickable {
                                 // Dislike
@@ -554,12 +558,13 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                     // Like Button
                     Box(
                         modifier = Modifier
-                            .size(80.dp) // Increased size
+                            .size(95.dp) // Increased size
                             .graphicsLayer(
                                 scaleX = if (isLikeButtonActive) 1.5f else 1f,
                                 scaleY = if (isLikeButtonActive) 1.5f else 1f,
                                 alpha = if (isLikeButtonActive) 0.5f else 1f
                             )
+                            .offset(x = (10).dp, y = (10).dp)
                             .background(Color.Transparent)
                             .clickable {
                                 // Like
