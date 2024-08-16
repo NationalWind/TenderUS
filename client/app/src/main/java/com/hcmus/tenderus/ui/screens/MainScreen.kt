@@ -92,6 +92,9 @@ fun MainScreen(auth: FirebaseAuth, firebaseSMSAuth: FirebaseSMSAuth, firebaseEma
 
                 ) {
                     composable("signup1") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
                         SignUpScreen(mainNavController, firebaseSMSAuth, firebaseEmailAuth)
                     }
                     composable("signin") {
