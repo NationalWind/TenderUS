@@ -495,7 +495,7 @@ fun SignUpScreen(
                                 scope.launch {
                                     try {
                                         // call sync
-                                        GenAuth.syncForSignUp(username, password.toString())
+                                        GenAuth.syncForSignUp(username, password.text)
                                         navController.navigate("signin")
                                     } catch (e: Exception) {
                                         Log.d("Signup", e.toString())
