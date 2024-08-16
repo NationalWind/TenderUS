@@ -374,12 +374,10 @@ fun SignUpScreen(
                         onClick = {
                             scope.launch {
                                 try {
-                                    val isVerified = firebaseEmailAuth.isEmailVerifiedSign()
-                                    if (isVerified) {
-                                        step = 5 // Proceed to the next screen after verification
-                                    } else {
-                                        errorMessage = "Email not verified yet. Please check your inbox."
-                                    }
+                                    firebaseEmailAuth.confirm()
+
+                                    step = 5 // Proceed to the next screen after verification
+
                                 } catch (e: Exception) {
                                     errorMessage = "Failed to check verification status: ${e.message}"
                                 }
@@ -490,9 +488,7 @@ fun SignUpScreen(
                                 isSignUpSuccessful = true
                                 scope.launch {
                                     try {
-                                        SyncSignUpApi.sync(UserRegistration(username,
-                                            password.toString(), email, phoneNumber,
-                                            token=TenderUSPushNotificationService.token!!))
+                                        // call sync
                                         navController.navigate("login")
                                     } catch (e: Exception) {
                                         Log.d("Signup", e.toString())

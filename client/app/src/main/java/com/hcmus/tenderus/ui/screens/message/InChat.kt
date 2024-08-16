@@ -63,7 +63,9 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.network.MessageSendingRequest
 import com.hcmus.tenderus.ui.screens.BottomNavItem
@@ -200,7 +202,7 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: FirebaseAuth, context: Context) {
+fun InChatScreen(navController: NavController, matchListVM: MatchListVM, context: Context) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var messageTexting by remember { mutableStateOf("") }
@@ -301,7 +303,7 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM, auth: F
                             .size(55.dp)
                             .clickable {
                                 audioRecorder.stop()
-                                uploadToStorage(auth, file.toUri(), context, "Audio") {
+                                uploadToStorage(Firebase.auth, file.toUri(), context, "Audio") {
                                     matchListVM.sendMessage(
                                         MessageSendingRequest(
                                             usernameInChat,

@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
+fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -102,7 +102,7 @@ fun LoginScreen(navController: NavController, auth: FirebaseAuth) {
                                     username,
                                     password,
                                     FCMRegToken = TenderUSPushNotificationService.token!!
-                                ), auth
+                                )
                             )) {
                                 //First Time
                             } else {

@@ -27,7 +27,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
@@ -46,12 +48,9 @@ import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun MainScreen(auth: FirebaseAuth, firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, matchListVM: MatchListVM, context: Context) {
+fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, matchListVM: MatchListVM, context: Context) {
     val mainNavController = rememberNavController()
     var showBar by remember { mutableStateOf(true) }
-    LaunchedEffect (auth == FirebaseAuth.getInstance()) {
-        Log.d("dsoiegh", "ssshhhh")
-    }
 
     Scaffold(
 
@@ -101,7 +100,7 @@ fun MainScreen(auth: FirebaseAuth, firebaseSMSAuth: FirebaseSMSAuth, firebaseEma
                         LaunchedEffect(Unit) {
                             showBar = false
                         }
-                        LoginScreen(navController = mainNavController, auth)
+                        LoginScreen(navController = mainNavController)
                     }
                     composable(BottomNavItem.Discover.route) {
                         LaunchedEffect(Unit) {
@@ -132,7 +131,7 @@ fun MainScreen(auth: FirebaseAuth, firebaseSMSAuth: FirebaseSMSAuth, firebaseEma
                         LaunchedEffect(Unit) {
                             showBar = false
                         }
-                        InChatScreen(navController = mainNavController, matchListVM = matchListVM, auth, context)
+                        InChatScreen(navController = mainNavController, matchListVM = matchListVM, context)
                     }
 //                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
                     composable(BottomNavItem.Profile.route) {

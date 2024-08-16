@@ -80,6 +80,7 @@ import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
+import com.hcmus.tenderus.utils.firebase.GenAuth
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -135,10 +136,9 @@ class MainActivity : ComponentActivity() {
         askNotificationPermission()
         TokenManager.init(this)
         requestCameraPermission()
-        val auth = Firebase.auth
         // Input this var in every composable that needs to call Firebase services (sendSMS, confirmAndSync)
-        firebaseSMSAuth = FirebaseSMSAuth(auth, this)
-        firebaseEmailAuth = FirebaseEmailAuth(auth, this)
+        firebaseSMSAuth = FirebaseSMSAuth(this)
+        firebaseEmailAuth = FirebaseEmailAuth(this)
 
         // Initialize FCM
         TenderUSPushNotificationService.sharedPref = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
@@ -160,13 +160,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "signup1") {
+                NavHost(navController, startDestination = "emailsend") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
 //                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
-                    composable("signin") { LoginScreen(navController = navController, auth) }
+                    composable("signin") { LoginScreen(navController = navController) }
                     composable("signup1") { SignUpScreen(navController, firebaseSMSAuth, firebaseEmailAuth) }
                     composable("profilesetup1") { ProfileDetails1Screen(navController) }
                     composable("profilesetup2") { ProfileDetails2Screen(navController ) }
@@ -177,11 +177,12 @@ class MainActivity : ComponentActivity() {
                     composable("fgpass1") { ForgotPasswordScreen(navController) }
                     composable("houserules") { HouseRulesScreen(navController) }
 //                    composable("main") { MainScreen(navController) }
-//                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
-//                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
+                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
+                    composable("emailconfirm") { ExampleEmailConfirm(firebaseEmailAuth, navController = navController) }
+                    composable("emailsync") { ExampleEmailSync() }
 //                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
 //                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
-                    composable("main") { MainScreen(auth, firebaseSMSAuth, firebaseEmailAuth, matchListVM, applicationContext) }
+                    composable("main") { MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, applicationContext) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
                     composable("exlogin") { ExampleLogin(navController) }
@@ -210,48 +211,63 @@ fun ExampleLogin(navController: NavController) {
         Text("Luugin")
     }
 }
-//@Composable
-//fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
-//    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9@gmail.com", "hihi")) }
-//    val scope = rememberCoroutineScope()
-//
-//    Box(
-//        modifier = Modifier.fillMaxSize(),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Button(onClick = {
-//            scope.launch {
-//                try {
-//                    firebaseEmailAuth.sendEmail(userRegistration.email)
-//                    navController.navigate("emailsync")
-//                } catch (e: Exception) {
-//                    Log.d("EmailSend", e.toString())
-//                }
-//            }
-//        }) {
-//            Text("Send Email")
-//        }
-//    }
-//}
+@Composable
+fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
+    val scope = rememberCoroutineScope()
 
-//
-//@Composable
-//fun ExampleEmailConfirm(firebaseEmailAuth: FirebaseEmailAuth) {
-//    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9124@gmail.com")) }
-//    val scope = rememberCoroutineScope()
-//    var text by remember { mutableStateOf("Sync Email") }
-//
-//    Text(text)
-//    LaunchedEffect(Unit) {
-//        try {
-//            firebaseEmailAuth.confirm(userRegistration, "RESET_PASSWORD")
-//            text = "Reset thy password Successfully!!!"
-//        } catch (e: Exception) {
-//            Log.d("EmailSync", e.toString())
-//        }
-//    }
-//}
-//
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(onClick = {
+            scope.launch {
+                try {
+                    firebaseEmailAuth.sendEmail("maiamtinhthuong8@gmail.com")
+                    navController.navigate("emailconfirm")
+                } catch (e: Exception) {
+                    Log.d("EmailSend", e.toString())
+                }
+            }
+        }) {
+            Text("Send Email")
+        }
+    }
+}
+
+
+@Composable
+fun ExampleEmailConfirm(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
+    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9124@gmail.com")) }
+    val scope = rememberCoroutineScope()
+    var text by remember { mutableStateOf("Confirm Email") }
+
+    Text(text)
+    LaunchedEffect(Unit) {
+        try {
+            firebaseEmailAuth.confirm()
+            navController.navigate("emailsync")
+        } catch (e: Exception) {
+            Log.d("emailConfirm", e.toString())
+        }
+    }
+}
+
+@Composable
+fun ExampleEmailSync() {
+    val scope = rememberCoroutineScope()
+    var text by remember { mutableStateOf("Sync Email") }
+
+    Text(text)
+    LaunchedEffect(Unit) {
+        try {
+            GenAuth.syncForSignUp("abcdxyz", "abcdxyz")
+            text = "Sign up Successfully!!!"
+        } catch (e: Exception) {
+            Log.d("EmailSync", e.toString())
+        }
+    }
+}
+
 //@Composable
 //fun ExampleSMSSend(firebaseSMSAuth: FirebaseSMSAuth, navController: NavController) {
 //    var userRegistration by remember { mutableStateOf(UserRegistration("tenten", "toleron", "ng.nguynv@gmail.com", "ahohe")) }

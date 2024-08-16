@@ -10,7 +10,7 @@ import com.hcmus.tenderus.network.ApiClient.SyncPasswordResetApi
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 
-class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity) {
+class FirebaseSMSAuth(private val act: Activity) {
     private val TAG = "Firebase Auth SMS"
     private var storedVerificationId: String = ""
     private lateinit var resendToken: PhoneAuthProvider.ForceResendingToken
@@ -59,7 +59,7 @@ class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity)
     }
 
     fun sendSMS(phoneNumber: String) {
-        val options = PhoneAuthOptions.newBuilder(auth)
+        val options = PhoneAuthOptions.newBuilder(Firebase.auth)
             .setPhoneNumber(phoneNumber) // Phone number to verify
             .setTimeout(120L, TimeUnit.SECONDS) // Timeout and unit
             .setActivity(act) // Activity (for callback binding)
@@ -72,21 +72,21 @@ class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity)
     suspend fun confirm(otp: String) {
         val credential = PhoneAuthProvider.getCredential(storedVerificationId, otp)
 
-        auth.signInWithCredential(credential).await()
+        Firebase.auth.signInWithCredential(credential).await()
         // Sign in success, update UI with the signed-in user's information
         Log.d(TAG, "confirmSMS:success")
 
     }
 
     suspend fun syncForSignUp(username: String, password: String) {
-        val mUser = auth.currentUser!!
+        val mUser = Firebase.auth.currentUser!!
         val userRegistration = UserRegistration(username, password, mUser.getIdToken(true).await().token!!)
         SyncSignUpApi.sync(userRegistration)
 
     }
 
     suspend fun syncForPasswordReset(password: String) {
-        val mUser = auth.currentUser!!
+        val mUser = Firebase.auth.currentUser!!
         val userRegistration = UserRegistration("", password, mUser.getIdToken(true).await().token!!)
         SyncPasswordResetApi.sync(userRegistration)
 
