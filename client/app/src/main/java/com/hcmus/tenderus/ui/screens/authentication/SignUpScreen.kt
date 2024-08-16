@@ -495,11 +495,10 @@ fun SignUpScreen(
                                 scope.launch {
                                     try {
                                         // call sync
-                                        GenAuth.syncForSignUp(username, password.text)
+                                        errorMessage = GenAuth.syncForSignUp(username, password.text).message
                                         navController.navigate("signin")
                                     } catch (e: Exception) {
                                         Log.d("Signup", e.toString())
-                                        errorMessage = "Sign up failed. Please try again."
                                     }
                                 }
                             }
