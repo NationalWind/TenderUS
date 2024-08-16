@@ -17,8 +17,8 @@ model Account {
   FirebaseUID String @unique
   username String  @unique
   password String
-  email    String?
-  phone    String?
+  email    String? @unique
+  phone    String? @unique
   role     Role
   FCMRegToken String?
 }
