@@ -30,23 +30,23 @@ class FirebaseEmailAuth(private val auth: FirebaseAuth, private val act: Activit
 
     }
 
-    suspend fun confirmAndSync(userRegistration: UserRegistration, syncFor: String) {
+    suspend fun confirm() {
         do {
             delay(1500)
             auth.currentUser!!.reload().await()
-        } while (auth.currentUser!!.isEmailVerified == false)
-        userRegistration.token = auth.currentUser!!.getIdToken(true).await().token!!
-        if (syncFor == "SIGN_UP") {
-            SyncSignUpApi.sync(userRegistration)
-        } else if (syncFor == "RESET_PASSWORD") {
-            SyncPasswordResetApi.sync(userRegistration)
-        } else {
-            throw Exception("Invalid syncFor")
-        }
+        } while (!auth.currentUser!!.isEmailVerified)
     }
-    // New method to check if the email is verified
-    suspend fun isEmailVerifiedSign(): Boolean {
-        auth.currentUser?.reload()?.await()  // Reload the user's data from Firebase
-        return auth.currentUser?.isEmailVerified ?: false
+
+    suspend fun syncForSignUp(username: String, password: String) {
+        val mUser = auth.currentUser!!
+        val userRegistration = UserRegistration(username, password, mUser.getIdToken(true).await().token!!)
+        SyncSignUpApi.sync(userRegistration)
+
+    }
+
+    suspend fun syncForPasswordReset(password: String) {
+        val mUser = auth.currentUser!!
+        val userRegistration = UserRegistration("", password, mUser.getIdToken(true).await().token!!)
+        SyncPasswordResetApi.sync(userRegistration)
     }
 }

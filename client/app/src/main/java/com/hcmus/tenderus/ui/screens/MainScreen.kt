@@ -31,6 +31,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
+import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
@@ -39,15 +40,19 @@ import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.EditProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
-
-
+import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
+import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun MainScreen(auth: FirebaseAuth, matchListVM: MatchListVM, context: Context) {
+fun MainScreen(auth: FirebaseAuth, firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, matchListVM: MatchListVM, context: Context) {
     val mainNavController = rememberNavController()
     var showBar by remember { mutableStateOf(true) }
+    LaunchedEffect (auth == FirebaseAuth.getInstance()) {
+        Log.d("dsoiegh", "ssshhhh")
+    }
+
     Scaffold(
 
         bottomBar = {
@@ -86,6 +91,9 @@ fun MainScreen(auth: FirebaseAuth, matchListVM: MatchListVM, context: Context) {
                     },
 
                 ) {
+                    composable("signup1") {
+                        SignUpScreen(mainNavController, firebaseSMSAuth, firebaseEmailAuth)
+                    }
                     composable("signin") {
                         LaunchedEffect(Unit) {
                             showBar = false

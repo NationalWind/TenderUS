@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -133,7 +135,6 @@ class MainActivity : ComponentActivity() {
         )
         askNotificationPermission()
         TokenManager.init(this)
-        TokenManager.saveToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2OWE3YWIxYTVjMmU5MjM3MjQ3NDhhNyIsInVzZXJuYW1lIjoidGVudGVuIiwicGFzc3dvcmQiOiIkMmIkMTAkaWtXenVwR2U2MElsSTlNNTQxazRldXE4Mzc2eW5BS3hBS1lXVHlTTkU1dlpNaXF4RkZQZHEiLCJlbWFpbCI6Im5nLm5ndXludkBnbWFpbC5jb20iLCJwaG9uZSI6ImFob2hlIiwicm9sZSI6IlVTRVIiLCJGQ01SZWdUb2tlbiI6ImNibFlTaGYxUXNDZk1aYVc3VEZ0WmU6QVBBOTFiRV9NVFBsQV9uMDVkVW1fUm0zTkI5eDVpLXRlVmhiNllpaExfbEdmMFNmT290cGZhbEY3cFJuVVVyaXlWYXR3MTBtb0hnRExKWF9YY1lfSXBvMHkxUzdXYVlxV2s2SEt3OTFTLWJSdHRwUkpiMlNUTm9DWjBoeDZnN3hLdnNCbUdJb0l0bU0iLCJhdmF0YXJJY29uIjpudWxsLCJpYXQiOjE3MjI0ODQzNDl9.ZyQOYaC_QCypf39UjLYcIN4b-VQE6E0bgTZ_3rWrykM")
         requestCameraPermission()
         val auth = Firebase.auth
         // Input this var in every composable that needs to call Firebase services (sendSMS, confirmAndSync)
@@ -153,14 +154,14 @@ class MainActivity : ComponentActivity() {
         Log.d(TAG, "Init")
 
 //        VM init
-        val matchListVM = MatchListVM()
+        val matchListVM by viewModels<MatchListVM>()
 
 
         enableEdgeToEdge()
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "fgpass1") {
+                NavHost(navController, startDestination = "main") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
 //                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
@@ -179,11 +180,11 @@ class MainActivity : ComponentActivity() {
                     composable("fgpass3") { ForgotPasswordScreen3(navController) }
                     composable("houserules") { HouseRulesScreen(navController) }
 //                    composable("main") { MainScreen(navController) }
-                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
-                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
+//                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
+//                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
 //                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
 //                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
-                    composable("main") { MainScreen(auth, matchListVM, applicationContext) }
+                    composable("main") { MainScreen(auth, firebaseSMSAuth, firebaseEmailAuth, matchListVM, applicationContext) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
                     composable("exlogin") { ExampleLogin(navController) }
@@ -212,135 +213,135 @@ fun ExampleLogin(navController: NavController) {
         Text("Luugin")
     }
 }
-@Composable
-fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
-    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9@gmail.com", "hihi")) }
-    val scope = rememberCoroutineScope()
+//@Composable
+//fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavController) {
+//    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9@gmail.com", "hihi")) }
+//    val scope = rememberCoroutineScope()
+//
+//    Box(
+//        modifier = Modifier.fillMaxSize(),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        Button(onClick = {
+//            scope.launch {
+//                try {
+//                    firebaseEmailAuth.sendEmail(userRegistration.email)
+//                    navController.navigate("emailsync")
+//                } catch (e: Exception) {
+//                    Log.d("EmailSend", e.toString())
+//                }
+//            }
+//        }) {
+//            Text("Send Email")
+//        }
+//    }
+//}
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Button(onClick = {
-            scope.launch {
-                try {
-                    firebaseEmailAuth.sendEmail(userRegistration.email)
-                    navController.navigate("emailsync")
-                } catch (e: Exception) {
-                    Log.d("EmailSend", e.toString())
-                }
-            }
-        }) {
-            Text("Send Email")
-        }
-    }
-}
-
-
-@Composable
-fun ExampleEmailSync(firebaseEmailAuth: FirebaseEmailAuth) {
-    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9124@gmail.com")) }
-    val scope = rememberCoroutineScope()
-    var text by remember { mutableStateOf("Sync Email") }
-
-    Text(text)
-    LaunchedEffect(Unit) {
-        try {
-            firebaseEmailAuth.confirmAndSync(userRegistration, "RESET_PASSWORD")
-            text = "Reset thy password Successfully!!!"
-        } catch (e: Exception) {
-            Log.d("EmailSync", e.toString())
-        }
-    }
-}
-
-@Composable
-fun ExampleSMSSend(firebaseSMSAuth: FirebaseSMSAuth, navController: NavController) {
-    var userRegistration by remember { mutableStateOf(UserRegistration("tenten", "toleron", "ng.nguynv@gmail.com", "ahohe")) }
-    var phoneNumber by remember { mutableStateOf("+84772405038") } // Replace with the user's phone number
-    val scope = rememberCoroutineScope()
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Button(onClick = {
-            scope.launch {
-                try {
-                    firebaseSMSAuth.sendSMS(phoneNumber)
-                    // Navigate to OTP verification screen
-                    navController.navigate("otpVerification")
-                } catch (e: Exception) {
-                    Log.d("SMSSend", e.toString())
-                }
-            }
-        }) {
-            Text("Send SMS")
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun OTPVerificationScreen(
-    firebaseSMSAuth: FirebaseSMSAuth,
-    navController: NavController
-) {
-    var otp by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9@gmail.com", "+84772405038")) }
-    var syncFor by remember { mutableStateOf("SIGN_UP") } // Replace with the user's phone number
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Enter the OTP sent to your phone", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (otp.isEmpty()) OutlinedTextField(
-            value = otp,
-            onValueChange = { otp = it },
-            label = { Text("OTP") },
-            visualTransformation = VisualTransformation.None,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        ) else OutlinedTextField(
-            value = otp,
-            onValueChange = { otp = it },
-            label = { Text("OTP") },
-            visualTransformation = PasswordVisualTransformation(),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = {
-            scope.launch {
-                try {
-                    firebaseSMSAuth.confirmAndSync(userRegistration, otp, syncFor)
-                    navController.navigate("home") // Navigate to the home screen or any other screen upon success
-                } catch (e: Exception) {
-                    errorMessage = e.localizedMessage
-                    Log.e("OTPVerification", "Error verifying OTP", e)
-                }
-            }
-        }) {
-            Text("Verify OTP")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        errorMessage?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
-        }
-    }
-}
+//
+//@Composable
+//fun ExampleEmailConfirm(firebaseEmailAuth: FirebaseEmailAuth) {
+//    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9124@gmail.com")) }
+//    val scope = rememberCoroutineScope()
+//    var text by remember { mutableStateOf("Sync Email") }
+//
+//    Text(text)
+//    LaunchedEffect(Unit) {
+//        try {
+//            firebaseEmailAuth.confirm(userRegistration, "RESET_PASSWORD")
+//            text = "Reset thy password Successfully!!!"
+//        } catch (e: Exception) {
+//            Log.d("EmailSync", e.toString())
+//        }
+//    }
+//}
+//
+//@Composable
+//fun ExampleSMSSend(firebaseSMSAuth: FirebaseSMSAuth, navController: NavController) {
+//    var userRegistration by remember { mutableStateOf(UserRegistration("tenten", "toleron", "ng.nguynv@gmail.com", "ahohe")) }
+//    var phoneNumber by remember { mutableStateOf("+84772405038") } // Replace with the user's phone number
+//    val scope = rememberCoroutineScope()
+//
+//    Box(
+//        modifier = Modifier.fillMaxSize(),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        Button(onClick = {
+//            scope.launch {
+//                try {
+//                    firebaseSMSAuth.sendSMS(phoneNumber)
+//                    // Navigate to OTP verification screen
+//                    navController.navigate("otpVerification")
+//                } catch (e: Exception) {
+//                    Log.d("SMSSend", e.toString())
+//                }
+//            }
+//        }) {
+//            Text("Send SMS")
+//        }
+//    }
+//}
+//
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun OTPVerificationScreen(
+//    firebaseSMSAuth: FirebaseSMSAuth,
+//    navController: NavController
+//) {
+//    var otp by remember { mutableStateOf("") }
+//    val scope = rememberCoroutineScope()
+//    var errorMessage by remember { mutableStateOf<String?>(null) }
+//    var userRegistration by remember { mutableStateOf(UserRegistration("tqp912", "nationalwind", "phongtranquoc9@gmail.com", "+84772405038")) }
+//    var syncFor by remember { mutableStateOf("SIGN_UP") } // Replace with the user's phone number
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp),
+//        verticalArrangement = Arrangement.Center,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Text(text = "Enter the OTP sent to your phone", style = MaterialTheme.typography.headlineSmall)
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        if (otp.isEmpty()) OutlinedTextField(
+//            value = otp,
+//            onValueChange = { otp = it },
+//            label = { Text("OTP") },
+//            visualTransformation = VisualTransformation.None,
+//            singleLine = true,
+//            modifier = Modifier.fillMaxWidth()
+//        ) else OutlinedTextField(
+//            value = otp,
+//            onValueChange = { otp = it },
+//            label = { Text("OTP") },
+//            visualTransformation = PasswordVisualTransformation(),
+//            singleLine = true,
+//            modifier = Modifier.fillMaxWidth()
+//        )
+//
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        Button(onClick = {
+//            scope.launch {
+//                try {
+//                    firebaseSMSAuth.confirmAndSync(userRegistration, otp, syncFor)
+//                    navController.navigate("home") // Navigate to the home screen or any other screen upon success
+//                } catch (e: Exception) {
+//                    errorMessage = e.localizedMessage
+//                    Log.e("OTPVerification", "Error verifying OTP", e)
+//                }
+//            }
+//        }) {
+//            Text("Verify OTP")
+//        }
+//
+//        Spacer(modifier = Modifier.height(16.dp))
+//
+//        errorMessage?.let {
+//            Text(text = it, color = MaterialTheme.colorScheme.error)
+//        }
+//    }
+//}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {

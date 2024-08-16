@@ -58,7 +58,7 @@ class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity)
 
     }
 
-    open suspend fun sendSMS(phoneNumber: String) {
+    fun sendSMS(phoneNumber: String) {
         val options = PhoneAuthOptions.newBuilder(auth)
             .setPhoneNumber(phoneNumber) // Phone number to verify
             .setTimeout(120L, TimeUnit.SECONDS) // Timeout and unit
@@ -69,24 +69,26 @@ class FirebaseSMSAuth(private val auth: FirebaseAuth, private val act: Activity)
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    suspend fun confirmAndSync(userRegistration: UserRegistration, otp: String, syncFor: String) {
+    suspend fun confirm(otp: String) {
         val credential = PhoneAuthProvider.getCredential(storedVerificationId, otp)
 
-        val result = auth.signInWithCredential(credential).await()
+        auth.signInWithCredential(credential).await()
         // Sign in success, update UI with the signed-in user's information
         Log.d(TAG, "confirmSMS:success")
 
-        val mUser = result.user
-        val tokenResult = mUser!!.getIdToken(true).await()
-        userRegistration.token = tokenResult.token!!
-        if (syncFor == "SIGN_UP") {
-            SyncSignUpApi.sync(userRegistration)
-        } else if (syncFor == "RESET_PASSWORD") {
-            SyncPasswordResetApi.sync(userRegistration)
-        } else {
-            throw Exception("Invalid syncFor")
-        }
+    }
 
-        Log.d(TAG, "Sync:success")
+    suspend fun syncForSignUp(username: String, password: String) {
+        val mUser = auth.currentUser!!
+        val userRegistration = UserRegistration(username, password, mUser.getIdToken(true).await().token!!)
+        SyncSignUpApi.sync(userRegistration)
+
+    }
+
+    suspend fun syncForPasswordReset(password: String) {
+        val mUser = auth.currentUser!!
+        val userRegistration = UserRegistration("", password, mUser.getIdToken(true).await().token!!)
+        SyncPasswordResetApi.sync(userRegistration)
+
     }
 }

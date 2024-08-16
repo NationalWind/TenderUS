@@ -1,6 +1,8 @@
 package com.hcmus.tenderus.utils.firebase
 
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.network.ApiClient.LoginApi
@@ -18,6 +20,9 @@ class GenAuth {
         suspend fun signOut() {
             SignOutApi.signOut("Bearer " + TokenManager.getToken()!!)
             TokenManager.clearToken()
+            Firebase.auth.signOut()
+
         }
+
     }
 }
