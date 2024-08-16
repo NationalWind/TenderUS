@@ -241,7 +241,14 @@ fun SignUpScreen(
                     Button(
                         onClick = {
                             // Here, you would typically validate the verification code
-                            step = 5
+                            scope.launch {
+                                try {
+                                    firebaseSMSAuth.confirm(verificationCode)
+                                    step = 5
+                                } catch (e: Exception) {
+                                    Log.d("SMSSend", e.toString())
+                                }
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                         modifier = Modifier.fillMaxWidth()
@@ -375,7 +382,6 @@ fun SignUpScreen(
                             scope.launch {
                                 try {
                                     firebaseEmailAuth.confirm()
-
                                     step = 5 // Proceed to the next screen after verification
 
                                 } catch (e: Exception) {
@@ -489,7 +495,8 @@ fun SignUpScreen(
                                 scope.launch {
                                     try {
                                         // call sync
-                                        navController.navigate("login")
+                                        GenAuth.syncForSignUp(username, password.toString())
+                                        navController.navigate("signin")
                                     } catch (e: Exception) {
                                         Log.d("Signup", e.toString())
                                         errorMessage = "Sign up failed. Please try again."

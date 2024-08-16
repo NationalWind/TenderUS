@@ -160,7 +160,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "emailsend") {
+                NavHost(navController, startDestination = "signin") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
 //                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}

@@ -105,8 +105,9 @@ fun LoginScreen(navController: NavController) {
                                 )
                             )) {
                                 //First Time
+                                navController.navigate("profilesetup1")
                             } else {
-                                navController.navigate(BottomNavItem.Discover.route)
+                                navController.navigate("main")
                             }
                         } catch (e: Exception) {
                             Log.d("Login", e.toString())
