@@ -63,6 +63,8 @@ fun SignUpScreen(
     var isSignUpSuccessful by remember { mutableStateOf(false) }
     var isSendingSMS by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var successMessage by remember { mutableStateOf("") }
+    var isResendAllowed by remember { mutableStateOf(true) }
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -75,6 +77,28 @@ fun SignUpScreen(
             while (timer > 0) {
                 delay(1000L)
                 timer--
+            }
+        }
+    }
+
+    // Reset error and success messages on step change
+    LaunchedEffect(step) {
+        errorMessage = null
+        successMessage = ""
+    }
+
+    // Function to resend the verification code
+    fun resendCode() {
+        if (isResendAllowed) {
+            isResendAllowed = false
+            // Call function to resend SMS
+            scope.launch {
+                try {
+                    firebaseSMSAuth.sendSMS(phoneNumber)
+                    timer = 60 // Reset timer
+                } catch (e: Exception) {
+                    errorMessage = "Failed to resend SMS: ${e.message}"
+                }
             }
         }
     }
@@ -172,7 +196,7 @@ fun SignUpScreen(
                         Text("Continue", color = Color.White)
                     }
                     Text(
-                        text = "Or sign up with your email",
+                        text = "or Sign Up with your email",
                         fontSize = 12.sp,
                         color = Color.Red,
                         modifier = Modifier.clickable {
@@ -210,6 +234,15 @@ fun SignUpScreen(
                 2 -> {
                     // Step 2: Verification Code Input
                     Text(
+                        "Enter Verification Code",
+                        fontSize = 30.sp,
+                        color = Color(0xFFB71C1C),
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 36.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
                         text = String.format("%02d:%02d", timer / 60, timer % 60),
                         fontSize = 36.sp,
                         fontWeight = FontWeight.Bold,
@@ -231,13 +264,25 @@ fun SignUpScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "If you didn't receive a code, Resend",
+                        "If you didn't receive a code,",
                         fontSize = 14.sp,
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        "Resend",
+                        fontSize = 14.sp,
+                        color = Color.Blue,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                resendCode()
+                            }
+                            .padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Button(
                         onClick = {
                             // Here, you would typically validate the verification code
@@ -496,17 +541,31 @@ fun SignUpScreen(
                                     try {
                                         // call sync
                                         errorMessage = GenAuth.syncForSignUp(username, password.text).message
-                                        navController.navigate("signin")
+                                        if (isSignUpSuccessful){
+                                            successMessage = "Account created successfully.\n Please log in to set up your profile."
+                                            delay(3000)
+                                            navController.navigate("signin")
+                                        }
                                     } catch (e: Exception) {
                                         Log.d("Signup", e.toString())
                                     }
                                 }
+
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Create an account", color = Color.White)
+                    }
+                    // Display success message
+                    if (successMessage.isNotEmpty()) {
+                        Text(
+                            text = successMessage,
+                            color = Color.Green,
+                            modifier = Modifier.padding(top = 12.dp)
+                        )
+
                     }
                     Row(
                         horizontalArrangement = Arrangement.Center,
@@ -527,6 +586,7 @@ fun SignUpScreen(
                                 navController.navigate("signin") // Navigate to Sign In screen
                             }
                         )
+
                     }
                 }
             }
