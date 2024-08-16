@@ -57,6 +57,9 @@ fun ProfileDetails1Screen(
     var fullName by remember { mutableStateOf("") }
     var dateOfBirth by remember { mutableStateOf("") }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
+    var isButtonClicked by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -69,6 +72,29 @@ fun ProfileDetails1Screen(
 
     val focusManager = LocalFocusManager.current
     val isFormComplete = fullName.isNotEmpty() && dateOfBirth.isNotEmpty() && profileImageUri != null
+
+    // Observe profileUiState
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+
+    // Handle profile data and errors
+    when (profileUiState) {
+        is ProfileUiState.Loading -> {
+            loading = true
+        }
+        is ProfileUiState.Error -> {
+            error = true
+            loading = false
+        }
+        is ProfileUiState.Success -> {
+            // Profile created successfully, navigate to the next screen
+            LaunchedEffect(Unit) {
+                navController.navigate("profilesetup2")
+            }
+        }
+        else -> {
+            loading = false
+        }
+    }
 
     TenderUSTheme {
         Column(
@@ -137,8 +163,19 @@ fun ProfileDetails1Screen(
             )
             Spacer(modifier = Modifier.height(200.dp))
 
+            // Display loading indicator if in loading state
+            if (loading) {
+                CircularProgressIndicator()
+            }
 
-            // Continue Button
+            // Display error message if error state
+            if (error) {
+                Text(
+                    text = "Error occurred. Please try again.",
+                    color = Color.Red
+                )
+            }
+
             Button(
                 onClick = {
                     val profile = Profile(
@@ -154,9 +191,8 @@ fun ProfileDetails1Screen(
                         groups = listOf(),
                         isActive = true
                     )
-
                     profileVM.createUserProfile(token, profile)
-                    navController.navigate("profilesetup2")
+                    isButtonClicked = true
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isFormComplete) Color(0xFFB71C1C) else Color.Gray
