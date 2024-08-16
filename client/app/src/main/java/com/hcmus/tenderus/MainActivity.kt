@@ -63,9 +63,8 @@ import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
 import com.hcmus.tenderus.network.SyncSignUp
 import com.hcmus.tenderus.ui.screens.MainScreen
 import com.hcmus.tenderus.ui.screens.admin.AdminScreen
-import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen1
-import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen2
-import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen3
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen
+
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen
@@ -160,7 +159,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "fgpass1") {
+                NavHost(navController, startDestination = "signup1") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
 //                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
@@ -174,9 +173,7 @@ class MainActivity : ComponentActivity() {
                     composable("filter") { SearchPreferencesScreen(navController) }
                     composable("selGoal") { SelectYourGoalsScreen(navController) }
                     composable("add_photos") { ProfileDetails4Screen(navController) }
-                    composable("fgpass1") { ForgotPasswordScreen1(navController) }
-                    composable("fgpass2") { ForgotPasswordScreen2(navController)}
-                    composable("fgpass3") { ForgotPasswordScreen3(navController) }
+                    composable("fgpass1") { ForgotPasswordScreen(navController) }
                     composable("houserules") { HouseRulesScreen(navController) }
 //                    composable("main") { MainScreen(navController) }
                     composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }

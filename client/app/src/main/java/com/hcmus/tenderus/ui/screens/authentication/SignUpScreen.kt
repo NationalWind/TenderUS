@@ -171,6 +171,15 @@ fun SignUpScreen(
                     ) {
                         Text("Continue", color = Color.White)
                     }
+                    Text(
+                        text = "Or sign up with your email",
+                        fontSize = 12.sp,
+                        color = Color.Red,
+                        modifier = Modifier.clickable {
+                            step = 3
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -232,7 +241,7 @@ fun SignUpScreen(
                     Button(
                         onClick = {
                             // Here, you would typically validate the verification code
-                            step = 3
+                            step = 5
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                         modifier = Modifier.fillMaxWidth()
