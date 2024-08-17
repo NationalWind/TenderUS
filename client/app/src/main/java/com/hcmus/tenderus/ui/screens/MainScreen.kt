@@ -32,6 +32,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.ui.screens.admin.AdminScreen
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
@@ -40,7 +42,11 @@ import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.EditProfileScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails4Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.SelectYourGoalsScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
@@ -147,6 +153,47 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         EditProfileScreen(mainNavController)
                     }
 
+
+                    composable("main") {
+                        MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, context)
+                    }
+                    composable("admin") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        AdminScreen()
+                    }
+
+                    composable("filter") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        SearchPreferencesScreen(mainNavController)
+                    }
+                    composable("selGoal") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        SelectYourGoalsScreen(mainNavController)
+                    }
+                    composable("add_photos") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        ProfileDetails4Screen(mainNavController)
+                    }
+                    composable("fgpass1") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        ForgotPasswordScreen(mainNavController)
+                    }
+                    composable("houserules") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        HouseRulesScreen(mainNavController)
+                    }
                 }
             }
         }

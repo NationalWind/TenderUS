@@ -534,11 +534,12 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                             .clickable {
                                 // Dislike
                                 if (profiles.isNotEmpty()) {
-                                    val newProfiles = profiles.toMutableList().apply {
-                                        removeAt(currentProfileIndex)
-                                    }
-                                    onProfilesUpdated(newProfiles)
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+//                                    val newProfiles = profiles.toMutableList().apply {
+//                                        removeAt(currentProfileIndex)
+//                                    }
+//                                    onProfilesUpdated(newProfiles)
+//                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
@@ -569,11 +570,12 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                             .clickable {
                                 // Like
                                 if (profiles.isNotEmpty()) {
-                                    val newProfiles = profiles.toMutableList().apply {
-                                        removeAt(currentProfileIndex)
-                                    }
-                                    onProfilesUpdated(newProfiles)
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+//                                    val newProfiles = profiles.toMutableList().apply {
+//                                        removeAt(currentProfileIndex)
+//                                    }
+//                                    onProfilesUpdated(newProfiles)
+//                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
