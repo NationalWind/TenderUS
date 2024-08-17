@@ -82,7 +82,7 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
             try {
                 profileService.updateUserProfile("Bearer $token", profile)
                 updateProfileState = ProfileUiState.Success(profile)
-//                getCurrentUserProfile(token)
+                getCurrentUserProfile(token)
             } catch (e: IOException) {
                 updateProfileState = ProfileUiState.Error
             } catch (e: HttpException) {

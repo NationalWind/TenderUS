@@ -1,6 +1,9 @@
 package com.hcmus.tenderus.ui.screens.profilesetup
 
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.hcmus.tenderus.ui.screens.report.ReportIssueDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,20 +22,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.utils.firebase.GenAuth
 import kotlinx.coroutines.launch
+import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Profile
+import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
+import com.hcmus.tenderus.ui.viewmodels.ProfileVM
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileHeader(imageRes: Int, name: String, age: Int) {
+fun ProfileHeader(imageUri: Uri?, name: String, age: Int) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -40,18 +53,32 @@ fun ProfileHeader(imageRes: Int, name: String, age: Int) {
             .padding(16.dp)
             .background(Color.White)
     ) {
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = null,
+        Box(
             modifier = Modifier
                 .size(100.dp)
                 .clip(CircleShape)
                 .border(2.dp, Color.Gray, CircleShape)
-        )
+        ) {
+            imageUri?.let {
+                Image(
+                    painter = rememberAsyncImagePainter(it),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } ?: Image(
+                painter = painterResource(id = R.drawable.profile_placeholder),
+                contentDescription = "Default Profile Image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "$name, $age", style = MaterialTheme.typography.headlineMedium)
     }
 }
+
+
 
 @Composable
 fun ProfileButtons(navController: NavController) {
@@ -130,8 +157,43 @@ fun ProfileButton(text: String, icon: ImageVector, isPrimary: Boolean = false, o
     }
 }
 
+
+
+fun calculateAgeFromDob(dob: String): Int {
+    // Define the date format
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    // Parse the date of birth string into a LocalDate
+    val birthDate = try {
+        LocalDate.parse(dob, formatter)
+    } catch (e: Exception) {
+        // Handle invalid date format
+        return -1
+    }
+
+    // Get today's date
+    val today = LocalDate.now()
+
+    // Calculate the age
+    return Period.between(birthDate, today).years
+}
+
+
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+    var profile by remember { mutableStateOf<Profile?>(null) }
+
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+    }
+
+    LaunchedEffect(profileUiState) {
+        if (profileUiState is ProfileUiState.Success) {
+            profile = (profileUiState as ProfileUiState.Success).profile
+        }
+    }
+
     Scaffold(
         containerColor = Color.White
     ) { paddingValues ->
@@ -147,33 +209,77 @@ fun ProfileScreen(navController: NavController) {
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ProfileHeader(
-                    imageRes = R.drawable.profile_placeholder, // Replace with your image resource
-                    name = "Rachel",
-                    age = 20
-                )
+                profile?.let {
+                    ProfileHeader(
+                        imageUri = it.avatarIcon.takeIf { uri -> uri.isNotEmpty() }?.let { Uri.parse(it) },
+                        name = it.displayName,
+                        age = calculateAgeFromDob(it.birthDate)
+                    )
+                }
                 ProfileButtons(navController)
             }
         }
     }
 }
 
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileScreen(navController: NavController) {
-    var name by remember { mutableStateOf(TextFieldValue("Rachel")) }
+fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
     var phoneNumber by remember { mutableStateOf(TextFieldValue("123456789")) }
     var email by remember { mutableStateOf(TextFieldValue("rachel@example.com")) }
-    var gender by remember { mutableStateOf("Female") }
-    var birthday by remember { mutableStateOf(TextFieldValue("01/01/2000")) }
-
     val genders = listOf("Female", "Male", "Other")
     var expanded by remember { mutableStateOf(false) }
     var isConfirmingPhone by remember { mutableStateOf(false) }
     var isConfirmingEmail by remember { mutableStateOf(false) }
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+    var name by remember { mutableStateOf(TextFieldValue("")) }
+    var birthdate by remember { mutableStateOf(TextFieldValue("")) }
+    var gender by remember { mutableStateOf("") }
+    var profile by remember { mutableStateOf<Profile?>(null) }
+    var successMessage by remember { mutableStateOf("") }
 
     val keyboardController = LocalSoftwareKeyboardController.current
+    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            if (uri != null) {
+                profileImageUri = uri
+            }
+        }
+    )
 
+    // Fetch profile data
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+        Log.d("Profile", "Profile fetched")
+    }
+
+    // Handle profile data and errors
+    LaunchedEffect(profileUiState) {
+        when (profileUiState) {
+            is ProfileUiState.Loading -> {
+                // Display loading indicator
+            }
+            is ProfileUiState.Error -> {
+                // Display error message
+            }
+            is ProfileUiState.Success -> {
+                // Load profile data into the UI
+                val profileData = (profileUiState as ProfileUiState.Success).profile
+                profile = profileData
+                name = TextFieldValue(profileData.displayName)
+                birthdate = TextFieldValue(profileData.birthDate)
+                gender = profileData.identity
+                profileImageUri = profileData.avatarIcon.takeIf { it.isNotEmpty() }?.let { Uri.parse(it) }
+            }
+            is ProfileUiState.PreferencesSuccess -> {
+                // Handle PreferencesSuccess state
+            }
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -206,14 +312,41 @@ fun EditProfileScreen(navController: NavController) {
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.profile_placeholder), // Replace with your image resource
-                contentDescription = null,
+            Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(105.dp)
                     .clip(CircleShape)
                     .background(Color.Gray)
+                    .clickable { imagePickerLauncher.launch("image/*") },
+                contentAlignment = Alignment.Center
+            ) {
+                if (profileImageUri != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(profileImageUri),
+                        contentDescription = "Profile Image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.profile_placeholder),
+                        contentDescription = "Default Profile Image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+            // Camera icon to indicate image change
+            Icon(
+                painter = painterResource(id = R.drawable.icon_camera), // Replace with your camera icon resource
+                contentDescription = "Change Avatar",
+                modifier = Modifier
+                    .offset(x = 40.dp,y = (-22).dp)
+                    .size(36.dp)
+                    .clickable { imagePickerLauncher.launch("image/*") },
+                tint = Color(0xFFB71C1C)
             )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
@@ -299,9 +432,9 @@ fun EditProfileScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = birthday,
-                onValueChange = { birthday = it },
-                label = { Text("Birthday") },
+                value = birthdate,
+                onValueChange = { birthdate = it },
+                label = { Text("Birthdate") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -309,18 +442,34 @@ fun EditProfileScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    // Handle save profile logic here
-                    navController.popBackStack()
+                    profile?.let { profileData ->
+                        val updatedProfile = profileData.copy(
+                            displayName = name.text,
+                            birthDate = birthdate.text,
+                            identity = gender,
+                            avatarIcon = profileImageUri?.toString() ?: profileData.avatarIcon
+                        )
+                        profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                        successMessage ="Profile updated successfully!"
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
             ) {
                 Text("Save")
             }
+            // Display success message
+            if (successMessage.isNotEmpty()) {
+                Text(
+                    text = successMessage,
+                    color = Color.Blue,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+
+            }
         }
     }
 }
-
 
 @Composable
 @Preview(showBackground = true)

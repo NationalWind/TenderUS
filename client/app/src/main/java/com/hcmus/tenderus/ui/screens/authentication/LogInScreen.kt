@@ -31,11 +31,13 @@ import com.hcmus.tenderus.utils.firebase.GenAuth
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errormessage by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -109,9 +111,10 @@ fun LoginScreen(navController: NavController) {
                             } else {
                                 navController.navigate("main")
                             }
-                        } catch (e: Exception) {
+                        } catch (e: retrofit2.HttpException) {
                             Log.d("Login", e.toString())
                             // GUI error message here
+                            errormessage = e.message()
                         }
                     }
                 },
@@ -138,6 +141,8 @@ fun LoginScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = errormessage, color = Color.Red)
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,

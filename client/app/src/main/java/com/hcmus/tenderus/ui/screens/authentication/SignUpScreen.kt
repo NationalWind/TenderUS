@@ -51,7 +51,7 @@ fun SignUpScreen(
     var phoneNumber by remember { mutableStateOf("") }
     var isPhoneNumberValid by remember { mutableStateOf(true) }
     var verificationCode by remember { mutableStateOf("") }
-    var timer by remember { mutableStateOf(60) }
+    var timer by remember { mutableStateOf(120) }
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var isUsernameValid by remember { mutableStateOf(true) }
@@ -73,7 +73,7 @@ fun SignUpScreen(
     // Handle timer countdown for verification code
     LaunchedEffect(step) {
         if (step == 2) {
-            timer = 60
+            timer = 120
             while (timer > 0) {
                 delay(1000L)
                 timer--
@@ -95,7 +95,7 @@ fun SignUpScreen(
             scope.launch {
                 try {
                     firebaseSMSAuth.sendSMS(phoneNumber)
-                    timer = 60 // Reset timer
+                    timer = 120 // Reset timer
                 } catch (e: Exception) {
                     errorMessage = "Failed to resend SMS: ${e.message}"
                 }
@@ -546,8 +546,9 @@ fun SignUpScreen(
                                             delay(3000)
                                             navController.navigate("signin")
                                         }
-                                    } catch (e: Exception) {
+                                    } catch (e: retrofit2.HttpException) {
                                         Log.d("Signup", e.toString())
+                                        errorMessage = e.toString()
                                     }
                                 }
 
@@ -557,6 +558,10 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Create an account", color = Color.White)
+                    }
+                    errorMessage?.let {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = it, color = Color.Red, fontSize = 14.sp)
                     }
                     // Display success message
                     if (successMessage.isNotEmpty()) {
