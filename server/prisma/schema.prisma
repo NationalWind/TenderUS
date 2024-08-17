@@ -35,7 +35,6 @@ enum PenaltyType {
 model Penalty {
   id        String      @id @default(auto()) @map("_id") @db.ObjectId
   type      PenaltyType
-  toDate    DateTime
   accountId String      @db.ObjectId
   Account   Account     @relation(fields: [accountId], references: [id])
 }
