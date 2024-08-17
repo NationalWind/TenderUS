@@ -1,6 +1,5 @@
 package com.hcmus.tenderus.ui.screens.admin
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,25 +38,27 @@ import com.hcmus.tenderus.model.Status
 import com.hcmus.tenderus.ui.screens.admin.composable.ErrorScreen
 import com.hcmus.tenderus.ui.screens.admin.composable.LoadingScreen
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
-import com.hcmus.tenderus.ui.viewmodels.ReportListUiState
+import com.hcmus.tenderus.ui.viewmodels.UiState
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun ReportListScreen(
-    reportListUiState: ReportListUiState,
+    reportListUiState: UiState<List<Report>>,
     retryAction: () -> Unit,
+    detailNavigate: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (reportListUiState) {
-        is ReportListUiState.Loading -> LoadingScreen()
+        is UiState.Loading -> LoadingScreen()
 
-        is ReportListUiState.Error -> ErrorScreen(
+        is UiState.Error -> ErrorScreen(
             retryAction, modifier = modifier.fillMaxSize()
         )
 
-        is ReportListUiState.Success -> ReportList(
-            reportList = reportListUiState.reportList,
+        is UiState.Success -> ReportList(
+            reportList = reportListUiState.data,
+            detailNavigate = detailNavigate,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(vertical = 8.dp)
         )
@@ -68,18 +68,19 @@ fun ReportListScreen(
 @Composable
 fun ReportList(
     reportList: List<Report>,
+    detailNavigate: (String) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     LazyColumn(modifier = modifier, contentPadding = contentPadding) {
         items(reportList) { report ->
-            ReportCard(report = report)
+            ReportCard(report = report, detailNavigate = { detailNavigate(report.id) })
         }
     }
 }
 
 @Composable
-fun ReportCard(report: Report, modifier: Modifier = Modifier) {
+fun ReportCard(report: Report, detailNavigate: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFE)),
@@ -89,7 +90,7 @@ fun ReportCard(report: Report, modifier: Modifier = Modifier) {
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Surface(
-            onClick = { /* TODO: handle navigation to detail page */ },
+            onClick = detailNavigate,
             color = Color(0xFFFEFEFE)
         ) {
             Row(
@@ -171,6 +172,6 @@ fun ReportListPreview() {
         )
     )
     TenderUSTheme {
-        ReportList(reportList = reports)
+        ReportList(reportList = reports, detailNavigate = {})
     }
 }

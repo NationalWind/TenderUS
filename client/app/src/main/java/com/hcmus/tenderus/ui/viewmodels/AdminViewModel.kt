@@ -17,14 +17,15 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
-sealed interface ReportListUiState {
-    data class Success(val reportList: List<Report>) : ReportListUiState
-    data object Error : ReportListUiState
-    data object Loading : ReportListUiState
+sealed interface UiState<out T> {
+    data class Success<T>(val data: T) : UiState<T>
+    data object Error : UiState<Nothing>
+    data object Loading : UiState<Nothing>
 }
 
-class ReportListViewModel(private val tenderUsRepository: TenderUsRepository) : ViewModel() {
-    var reportListUiState: ReportListUiState by mutableStateOf(ReportListUiState.Loading)
+class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewModel() {
+    var reportListUiState: UiState<List<Report>> by mutableStateOf(UiState.Loading)
+    var reportDetailUiState: UiState<Report> by mutableStateOf(UiState.Loading)
 
     init {
         getReportList()
@@ -32,15 +33,30 @@ class ReportListViewModel(private val tenderUsRepository: TenderUsRepository) : 
 
     fun getReportList() {
         viewModelScope.launch {
-            reportListUiState = ReportListUiState.Loading
+            reportListUiState = UiState.Loading
             reportListUiState = try {
-                ReportListUiState.Success(tenderUsRepository.getReportList())
+                UiState.Success(tenderUsRepository.getReportList())
             } catch (e: IOException) {
                 Log.d("AdminReportList", e.message.toString())
-                ReportListUiState.Error
+                UiState.Error
             } catch (e: HttpException) {
                 Log.d("AdminReportList", e.message.toString())
-                ReportListUiState.Error
+                UiState.Error
+            }
+        }
+    }
+
+    fun getReportDetail(id: String) {
+        viewModelScope.launch {
+            reportDetailUiState = UiState.Loading
+            reportDetailUiState = try {
+                UiState.Success(tenderUsRepository.getReportDetail(id))
+            } catch (e: IOException) {
+                Log.d("AdminReportDetail", e.message.toString())
+                UiState.Error
+            } catch (e: HttpException) {
+                Log.d("AdminReportDetail", e.message.toString())
+                UiState.Error
             }
         }
     }
@@ -50,7 +66,7 @@ class ReportListViewModel(private val tenderUsRepository: TenderUsRepository) : 
             initializer {
                 val application = (this[APPLICATION_KEY] as TenderUsApplication)
                 val tenderUsRepository = application.container.tenderUsRepository
-                ReportListViewModel(tenderUsRepository = tenderUsRepository)
+                AdminViewModel(tenderUsRepository = tenderUsRepository)
             }
         }
     }

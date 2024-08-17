@@ -14,7 +14,7 @@ class DefaultAppContainer : AppContainer {
     // 2. Run ipconfig
     // 3. Copy IP4 address (some thing like 192.168.xxx.xxx)
     // 4. Replace the address below
-    private val baseUrl = "http://192.168.42.252:8000/"
+    private val baseUrl = "http://172.29.192.25:8000/"
 
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
