@@ -243,6 +243,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
     var gender by remember { mutableStateOf("") }
     var profile by remember { mutableStateOf<Profile?>(null) }
     var successMessage by remember { mutableStateOf("") }
+    var newImageSelected by remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -251,6 +252,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
         onResult = { uri: Uri? ->
             if (uri != null) {
                 profileImageUri = uri
+                newImageSelected = true
             }
         }
     )
@@ -293,6 +295,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 birthdate = TextFieldValue(profileData.birthDate)
                 gender = profileData.identity
                 profileImageUri = profileData.avatarIcon.takeIf { it.isNotEmpty() }?.let { Uri.parse(it) }
+                newImageSelected = false
             }
             is ProfileUiState.PreferencesSuccess -> {
                 // Handle PreferencesSuccess state
@@ -459,23 +462,44 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
 
             Button(
                 onClick = {
-                    profileImageUri?.let { uri ->
-                        StorageUtil.uploadToStorage(
-                            auth = FirebaseAuth.getInstance(),
-                            uri = uri,
-                            context = context,
-                            type = "Image"
-                        ) { downloadUrl ->
-                            profile?.let { profileData ->
-                                val updatedProfile = profileData.copy(
-                                    displayName = name.text,
-                                    birthDate = birthdate.text,
-                                    identity = gender,
-                                    avatarIcon = downloadUrl // Update with the new URL
-                                )
-                                profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                successMessage = "Profile updated successfully!"
+                    // Check if the profileImageUri is valid
+                    if (newImageSelected) {
+                        try {
+                            // Log the URI for debugging
+                            Log.d("EditProfileScreen", "Uploading image with URI: ${profileImageUri.toString()}")
+
+                            // Proceed with uploading the image
+                            StorageUtil.uploadToStorage(
+                                auth = FirebaseAuth.getInstance(),
+                                uri = profileImageUri!!,
+                                context = context,
+                                type = "Image"
+                            ) { downloadUrl ->
+                                profile?.let { profileData ->
+                                    val updatedProfile = profileData.copy(
+                                        displayName = name.text,
+                                        birthDate = birthdate.text,
+                                        identity = gender,
+                                        avatarIcon = downloadUrl // Update with the new URL
+                                    )
+                                    profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                    successMessage = "Profile updated successfully!"
+                                }
                             }
+                        } catch (e: Exception) {
+                            Log.e("EditProfileScreen", "Error uploading image", e)
+                            // Handle or show an error message if needed
+                        }
+                    } else {
+                        // No image to upload, just update the profile info
+                        profile?.let { profileData ->
+                            val updatedProfile = profileData.copy(
+                                displayName = name.text,
+                                birthDate = birthdate.text,
+                                identity = gender
+                            )
+                            profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                            successMessage = "Profile updated successfully!"
                         }
                     }
                 },

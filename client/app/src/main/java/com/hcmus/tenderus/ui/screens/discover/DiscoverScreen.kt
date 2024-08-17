@@ -395,7 +395,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                         .background(Color.Black.copy(alpha = 0.5f)) // Optional background
                 ) {
                     Image(
-                        painter = rememberAsyncImagePainter(profile.avatarIcon),
+                        painter = rememberAsyncImagePainter(profile.pictures[0]),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -467,13 +467,28 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                         ) {
                             // Profile Image as part of the detailed profile
                             Image(
-                                painter = rememberAsyncImagePainter(profile.avatarIcon),
+                                painter = rememberAsyncImagePainter(profile.pictures[0]),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp) // Adjust height as needed
                             )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Display additional images
+                            profile.pictures.drop(1).forEach { imageUrl ->
+                                Image(
+                                    painter = rememberAsyncImagePainter(imageUrl),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp) // Adjust height as needed
+                                        .padding(vertical = 8.dp) // Add spacing between images
+                                )
+                            }
 
                             Spacer(modifier = Modifier.height(16.dp))
 
