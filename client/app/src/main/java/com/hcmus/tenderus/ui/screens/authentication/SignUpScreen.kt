@@ -567,7 +567,7 @@ fun SignUpScreen(
                     if (successMessage.isNotEmpty()) {
                         Text(
                             text = successMessage,
-                            color = Color.Green,
+                            color = Color.Blue,
                             modifier = Modifier.padding(top = 12.dp)
                         )
 

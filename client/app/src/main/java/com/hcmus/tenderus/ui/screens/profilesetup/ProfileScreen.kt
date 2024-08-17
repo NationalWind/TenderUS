@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -32,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.utils.firebase.GenAuth
 import kotlinx.coroutines.launch
@@ -39,6 +41,7 @@ import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
+import com.hcmus.tenderus.utils.firebase.StorageUtil
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
@@ -50,12 +53,12 @@ fun ProfileHeader(imageUri: Uri?, name: String, age: Int) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+//            .padding(16.dp)
             .background(Color.White)
     ) {
         Box(
             modifier = Modifier
-                .size(100.dp)
+                .size(140.dp)
                 .clip(CircleShape)
                 .border(2.dp, Color.Gray, CircleShape)
         ) {
@@ -227,6 +230,7 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
+    val context = LocalContext.current
     var phoneNumber by remember { mutableStateOf(TextFieldValue("123456789")) }
     var email by remember { mutableStateOf(TextFieldValue("rachel@example.com")) }
     val genders = listOf("Female", "Male", "Other")
@@ -256,6 +260,21 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
         profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
         Log.d("Profile", "Profile fetched")
     }
+
+    // Update the UI state whenever the profile is fetched or changed
+    LaunchedEffect(profileUiState) {
+        if (profileUiState is ProfileUiState.Success) {
+            profile = (profileUiState as ProfileUiState.Success).profile
+        }
+    }
+
+    LaunchedEffect(profileUiState) {
+        if (profileUiState is ProfileUiState.Success) {
+            profile = (profileUiState as ProfileUiState.Success).profile
+            Log.d("ProfileScreen", "Fetched avatarIcon: ${profile?.avatarIcon}")
+        }
+    }
+
 
     // Handle profile data and errors
     LaunchedEffect(profileUiState) {
@@ -314,7 +333,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
         ) {
             Box(
                 modifier = Modifier
-                    .size(105.dp)
+                    .size(115.dp)
                     .clip(CircleShape)
                     .background(Color.Gray)
                     .clickable { imagePickerLauncher.launch("image/*") },
@@ -346,8 +365,6 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                     .clickable { imagePickerLauncher.launch("image/*") },
                 tint = Color(0xFFB71C1C)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = name,
@@ -442,15 +459,24 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
 
             Button(
                 onClick = {
-                    profile?.let { profileData ->
-                        val updatedProfile = profileData.copy(
-                            displayName = name.text,
-                            birthDate = birthdate.text,
-                            identity = gender,
-                            avatarIcon = profileImageUri?.toString() ?: profileData.avatarIcon
-                        )
-                        profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                        successMessage ="Profile updated successfully!"
+                    profileImageUri?.let { uri ->
+                        StorageUtil.uploadToStorage(
+                            auth = FirebaseAuth.getInstance(),
+                            uri = uri,
+                            context = context,
+                            type = "Image"
+                        ) { downloadUrl ->
+                            profile?.let { profileData ->
+                                val updatedProfile = profileData.copy(
+                                    displayName = name.text,
+                                    birthDate = birthdate.text,
+                                    identity = gender,
+                                    avatarIcon = downloadUrl // Update with the new URL
+                                )
+                                profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                successMessage = "Profile updated successfully!"
+                            }
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -458,6 +484,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
             ) {
                 Text("Save")
             }
+
             // Display success message
             if (successMessage.isNotEmpty()) {
                 Text(

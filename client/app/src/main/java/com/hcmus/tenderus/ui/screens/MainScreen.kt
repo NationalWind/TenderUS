@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,13 +49,14 @@ import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.SelectYourGoalsScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
+import com.hcmus.tenderus.ui.viewmodels.ProfileVM
 import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, matchListVM: MatchListVM, context: Context) {
+fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, matchListVM: MatchListVM, context: Context, profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
     val mainNavController = rememberNavController()
     var showBar by remember { mutableStateOf(true) }
 
@@ -79,7 +81,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                     contentDescription = "Main Logo",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 1.dp) // Add padding as needed
+//                        .padding(top = 1.dp) // Add padding as needed
                         .size(30.dp) // Adjust size as needed
                 )
             }
@@ -103,6 +105,10 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         SignUpScreen(mainNavController, firebaseSMSAuth, firebaseEmailAuth)
                     }
                     composable("signin") {
+                        LaunchedEffect(Unit) {
+                            profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+                            Log.d("Profile", "Profile fetched")
+                        }
                         LaunchedEffect(Unit) {
                             showBar = false
                         }

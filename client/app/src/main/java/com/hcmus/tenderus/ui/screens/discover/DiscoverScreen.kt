@@ -388,7 +388,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
             ) {
                 Box(
                     modifier = Modifier
-                        .size(350.dp, 560.dp) // Fixed size for rectangular image
+                        .size(350.dp, 550.dp) // Fixed size for rectangular image
                         .align(Alignment.Center)
                         .offset(y = (-45).dp)
                         .clip(RoundedCornerShape(12.dp)) // Rounded corners
