@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
 import com.hcmus.tenderus.data.TenderUsRepository
 import com.hcmus.tenderus.model.Report
+import com.hcmus.tenderus.model.ReportAction
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -57,6 +58,21 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminReportDetail", e.message.toString())
                 UiState.Error
+            }
+        }
+    }
+
+    fun postReportAction(id: String, reportAction: ReportAction) {
+        viewModelScope.launch {
+            reportDetailUiState = UiState.Loading
+            try {
+                tenderUsRepository.postReportAction(id, reportAction)
+            } catch (e: IOException) {
+                Log.d("AdminReportAction", e.message.toString())
+                reportDetailUiState = UiState.Error
+            } catch (e: HttpException) {
+                Log.d("AdminReportAction", e.message.toString())
+                reportDetailUiState = UiState.Error
             }
         }
     }

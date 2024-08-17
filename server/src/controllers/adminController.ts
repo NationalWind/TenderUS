@@ -53,38 +53,41 @@ const adminController = {
   // POST /api/admin/report/:id
   postReportAction: async (req: Request, res: Response) => {
     console.log(req.body)
-    res.status(200).send("hehe")
-    // try {
-    //   const { id } = req.params;
-    //   const report = await db.report.findUnique({ where: { id } });
-    //   if (report) {
-    //     const { type, date } = req.body;
-    //     if (Object.keys(PenaltyType).includes(type)) {
-    //       const toDate = new Date(date);
-    //       if (!isNaN(toDate.getTime())) {
-    //         // const { id, reported } = report;
-    //         // await db.penalty.create({
-    //         //   data: { type, toDate, accountId: reported },
-    //         // });
-    //         // await db.report.update({ where: { id }, data: { status: "REVIEWED" } });
-    //         // res.status(200).json({ message: "Apply penalty successfully" });
-    //       } else {
-    //         res.status(400).json({ message: "Invalid date" });
-    //       }
-    //     } else {
-    //       res.status(400).json({ message: "Invalid penalty type" });
-    //     }
-    //   } else {
-    //     res.status(404).json({ message: "Report not found" });
-    //   }
-    // } catch (error) {
-    //   if (error instanceof PrismaClientKnownRequestError) {
-    //     if (error.code === "P2023") res.status(400).json({ message: "Invalid ID" });
-    //   } else {
-    //     console.log(error);
-    //     res.status(500).json({ message: error.message });
-    //   }
-    // }
+    try {
+      const { id } = req.params;
+      const report = await db.report.findUnique({ where: { id } });
+      if (report) {
+        const { penalty, deleteContent } = req.body;
+        if (["NONE", "RESTRICT_DISCOVER", "RESTRICT_MESSAGE", "RESTRICT_BOTH", "BAN"].includes(penalty)) {
+          const { id, reportedId } = report;
+          // Restrict
+          if (penalty === "RESTRICT_BOTH") {
+            await db.penalty.create({ data: { type: "RESTRICT_DISCOVER", accountId: reportedId } });
+            await db.penalty.create({ data: { type: "RESTRICT_MESSAGE", accountId: reportedId } });
+          } else if (penalty !== "NONE") {
+            await db.penalty.create({ data: { type: penalty, accountId: reportedId } });
+          }
+          // Delete content
+          if (deleteContent) {
+            // TODO: delete content, implement when client report done
+          }
+          // Update status
+          await db.report.update({ where: { id }, data: { status: "REVIEWED" } });
+          res.status(200).json({message: "Success"})
+        } else {
+          res.status(400).json({ message: "Invalid penalty type" });
+        }
+      } else {
+        res.status(404).json({ message: "Report not found" });
+      }
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === "P2023") res.status(400).json({ message: "Invalid ID" });
+      } else {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+      }
+    }
   },
   getAccountList: async (req: Request, res: Response) => { },
   getAccountDetail: async (req: Request, res: Response) => { },

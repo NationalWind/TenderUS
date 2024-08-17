@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.model.Report
+import com.hcmus.tenderus.model.ReportAction
 import com.hcmus.tenderus.model.Status
 import com.hcmus.tenderus.ui.screens.admin.composable.ErrorScreen
 import com.hcmus.tenderus.ui.screens.admin.composable.LoadingScreen
@@ -59,6 +60,7 @@ fun ReportDetailScreen(
     reportDetailUiState: UiState<Report>,
     retryAction: () -> Unit,
     backAction: () -> Unit,
+    saveAction: (reportAction: ReportAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (reportDetailUiState) {
@@ -71,13 +73,19 @@ fun ReportDetailScreen(
         is UiState.Success -> ReportDetail(
             report = reportDetailUiState.data,
             backAction = backAction,
+            saveAction = saveAction,
             modifier = Modifier.fillMaxSize(),
         )
     }
 }
 
 @Composable
-fun ReportDetail(report: Report, backAction: () -> Unit, modifier: Modifier = Modifier) {
+fun ReportDetail(
+    report: Report,
+    backAction: () -> Unit,
+    saveAction: (reportAction: ReportAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
@@ -176,29 +184,40 @@ fun ReportDetail(report: Report, backAction: () -> Unit, modifier: Modifier = Mo
             }
             Text(text = report.message)
         }
-        ActionMenu(backAction = backAction)
+        ActionMenu(backAction = backAction, saveAction = saveAction)
     }
 }
 
 @Composable
-fun ActionMenu(backAction: () -> Unit, modifier: Modifier = Modifier) {
+fun ActionMenu(
+    backAction: () -> Unit,
+    saveAction: (reportAction: ReportAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val actions = listOf("Nothing", "Restrict", "Ban")
     var selectedAction by remember { mutableStateOf(actions[0]) }
+    var restrictDiscover by remember { mutableStateOf(false) }
+    var restrictMessage by remember { mutableStateOf(false) }
+    var deleteContent by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         SelectField(options = actions, selected = selectedAction, select = { selectedAction = it })
         if (selectedAction === "Restrict") {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = false, onCheckedChange = { })
+                Checkbox(
+                    checked = restrictDiscover,
+                    onCheckedChange = { restrictDiscover = !restrictDiscover })
                 Text("Restrict discover")
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = false, onCheckedChange = { })
+                Checkbox(
+                    checked = restrictMessage,
+                    onCheckedChange = { restrictMessage = !restrictMessage })
                 Text("Restrict message")
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = false, onCheckedChange = { })
+            Checkbox(checked = deleteContent, onCheckedChange = { deleteContent = !deleteContent })
             Text("Also delete reported content")
         }
 
@@ -215,7 +234,25 @@ fun ActionMenu(backAction: () -> Unit, modifier: Modifier = Modifier) {
                 Text(text = "Cancel")
             }
             Button(
-                onClick = { },
+                onClick = {
+                    val penalty = if (selectedAction === "Nothing") {
+                        "NONE"
+                    } else if (selectedAction === "Restrict") {
+                        if (restrictDiscover && restrictMessage) {
+                            "RESTRICT_BOTH"
+                        } else if (restrictDiscover) {
+                            "RESTRICT_DISCOVER"
+                        } else if (restrictMessage) {
+                            "RESTRICT_MESSAGE"
+                        } else {
+                            "NONE"
+                        }
+                    } else {
+                        "BAN"
+                    }
+                    val reportAction = ReportAction(penalty, deleteContent)
+                    saveAction(reportAction)
+                },
                 shape = RoundedCornerShape(4.dp),
                 modifier = Modifier.weight(1f)
             ) {
@@ -240,6 +277,6 @@ fun ReportDetailScreenPreview() {
     )
 
     TenderUSTheme {
-        ReportDetail(report = report, backAction = {})
+        ReportDetail(report = report, backAction = {}, saveAction = {})
     }
 }
