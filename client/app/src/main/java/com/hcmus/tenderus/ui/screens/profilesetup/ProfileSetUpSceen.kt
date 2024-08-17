@@ -47,8 +47,6 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
-val token = TokenManager.getToken() ?: ""
-
 @Composable
 fun ProfileDetails1Screen(
     navController: NavHostController,
@@ -191,7 +189,8 @@ fun ProfileDetails1Screen(
                         groups = listOf(),
                         isActive = true
                     )
-                    profileVM.createUserProfile(token, profile)
+                    profileVM.createUserProfile(TokenManager.getToken() ?: "", profile)
+                    Log.d("ProfileDetails1Screen", "profile created")
                     isButtonClicked = true
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -224,7 +223,7 @@ fun ProfileDetails2Screen(
     val icons = listOf(R.drawable.male, R.drawable.female, R.drawable.othergender)
 
     LaunchedEffect(Unit) {
-        profileVM.getCurrentUserProfile(token)
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
     }
 
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
@@ -323,7 +322,8 @@ fun ProfileDetails2Screen(
                 onClick = {
                     if (profile != null) {
                         val updatedProfile = profile!!.copy(identity = selectedGender)
-                        profileVM.updateUserProfile(token, updatedProfile)
+                        profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                        Log.d("ProfileDetails2Screen", "profile updated")
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -356,7 +356,7 @@ fun ProfileDetails3Screen(
 
 
     LaunchedEffect(Unit) {
-        profileVM.getCurrentUserProfile(token)
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
     }
 
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
@@ -467,7 +467,8 @@ fun ProfileDetails3Screen(
                     onClick = {
                         profile?.let {
                             val updatedProfile = it.copy(interests = selectedInterests.toList())
-                            profileVM.updateUserProfile(token, updatedProfile)
+                            profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                            Log.d("ProfileDetails3Screen", "profile updated")
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
@@ -523,6 +524,11 @@ fun ProfileDetails4Screen(
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+        Log.d("Photos", "profile Fetched")
+    }
+
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
     val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
 
@@ -530,7 +536,7 @@ fun ProfileDetails4Screen(
     when (profileUiState) {
         is ProfileUiState.Success -> {
             profile = (profileUiState as ProfileUiState.Success).profile
-            imageUris = profile?.pictures?.map { Uri.parse(it) } ?: emptyList()
+//            imageUris = profile?.pictures?.map { Uri.parse(it) } ?: emptyList()
         }
         is ProfileUiState.Error -> {
             error = true
@@ -635,7 +641,8 @@ fun ProfileDetails4Screen(
                 onClick = {
                     profile?.let {
                         val updatedProfile = it.copy(pictures = imageUris.map { uri -> uri.toString() })
-                        profileVM.updateUserProfile(token, updatedProfile)
+                        profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                        Log.d("ProfileDetails4Screen", "profile updated")
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),

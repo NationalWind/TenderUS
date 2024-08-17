@@ -14,17 +14,47 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Preference
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
+import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
+import com.hcmus.tenderus.ui.viewmodels.ProfileVM
+
 
 @Composable
-fun SearchPreferencesScreen(navController: NavHostController) {
+fun SearchPreferencesScreen(navController: NavHostController,
+                            profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
     var selectedGender by remember { mutableStateOf("Female") }
     var location by remember { mutableStateOf("Ho Chi Minh city, VietNam") }
     var distance by remember { mutableStateOf(40f) }
     var startAge by remember { mutableStateOf(20f) }
     var endAge by remember { mutableStateOf(28f) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
+
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+
+    when (profileUiState) {
+        is ProfileUiState.Loading -> {
+            loading = true
+        }
+        is ProfileUiState.Error -> {
+            error = true
+            loading = false
+        }
+        is ProfileUiState.PreferencesSuccess -> {
+            // Profile created successfully, navigate to the next screen
+            LaunchedEffect(Unit) {
+                navController.navigate("selGoal")
+            }
+        }
+        else -> {
+            loading = false
+        }
+    }
 
     TenderUSTheme {
         Column(
@@ -96,7 +126,10 @@ fun SearchPreferencesScreen(navController: NavHostController) {
 
             // Continue Button
             Button(
-                onClick = { navController.navigate("selGoal") },
+                onClick = {
+                    val preference = Preference(startAge.toInt(), endAge.toInt(), distance, selectedGender)
+                    profileVM.createUserPreferences(TokenManager.getToken() ?: "", preference)
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                 modifier = Modifier.fillMaxWidth()
             ) {

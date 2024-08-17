@@ -160,7 +160,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "signup1") {
+                NavHost(navController, startDestination = "signin") {
 //                NavHost(navController, startDestination = "messages") {
                     composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
 //                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
@@ -170,7 +170,7 @@ class MainActivity : ComponentActivity() {
                     composable("signup1") { SignUpScreen(navController, firebaseSMSAuth, firebaseEmailAuth) }
                     composable("profilesetup1") { ProfileDetails1Screen(navController) }
                     composable("profilesetup2") { ProfileDetails2Screen(navController ) }
-                    composable("profilesetup3") { ProfileDetails3Screen(navController ) }  // user preferences
+                    composable("profilesetup3") { ProfileDetails3Screen(navController ) }
                     composable("filter") { SearchPreferencesScreen(navController) }
                     composable("selGoal") { SelectYourGoalsScreen(navController) }
                     composable("add_photos") { ProfileDetails4Screen(navController) }
