@@ -165,10 +165,6 @@ fun ProfileDetails1Screen(
             )
             Spacer(modifier = Modifier.height(200.dp))
 
-            // Display loading indicator if in loading state
-            if (loading) {
-                CircularProgressIndicator()
-            }
 
             // Display error message if error state
             if (error) {
@@ -511,9 +507,6 @@ fun ProfileDetails3Screen(
                 }
             }
 
-            if (loading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
 
             if (error) {
                 Text("An error occurred. Please try again.", color = Color.Red, modifier = Modifier.align(Alignment.Center))
@@ -704,9 +697,6 @@ fun ProfileDetails4Screen(
             }
         }
 
-        if (loading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
 
         if (error) {
             Text("An error occurred. Please try again.", color = Color.Red, modifier = Modifier.align(Alignment.Center))

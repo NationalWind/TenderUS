@@ -42,8 +42,11 @@ import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
+import com.hcmus.tenderus.ui.screens.profilesetup.Add_Photos
+//import com.hcmus.tenderus.ui.screens.profilesetup.Add_Photoss
 import com.hcmus.tenderus.ui.screens.profilesetup.EditProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.Interest
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails4Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
@@ -158,7 +161,19 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         }
                         EditProfileScreen(mainNavController)
                     }
+                    composable("interest") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        Interest(mainNavController)
+                    }
 
+                    composable("addphoto") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        Add_Photos(mainNavController)
+                    }
 
                     composable("main") {
                         MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, context)
