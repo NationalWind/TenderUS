@@ -859,58 +859,40 @@ fun Add_Photos(
 
                 Button(
                     onClick = {
-                        val imageUrls = Collections.synchronizedList(mutableListOf<String>())
-                        val totalImages = imageUris.size
+                        val imageUrls = mutableListOf<String>()
+                        val newImageUris = imageUris.filter { it?.scheme == "content" }
+                        val existingImageUrls = imageUris.filter { it?.scheme != "content" }.map { it.toString() }
+
+                        val totalImages = newImageUris.size + existingImageUrls.size
                         var uploadCount = 0
-                        val appContext = context // Avoid shadowing
 
                         profile?.let { userProfile ->
-                            imageUris.forEachIndexed { _, uri ->
+                            newImageUris.forEach { uri ->
                                 uri?.let { imageUri ->
-                                    // Check if it's a valid content URI or Firebase Storage URL
-                                    if (imageUri.scheme == "content") {
-                                        // Valid content URI, proceed with upload
-                                        StorageUtil.uploadToStorage(
-                                            auth = FirebaseAuth.getInstance(),
-                                            uri = imageUri,
-                                            context = appContext,
-                                            type = "Image"
-                                        ) { downloadUrl ->
-                                            synchronized(imageUrls) {
-                                                imageUrls.add(downloadUrl)
-                                                uploadCount++
-
-                                                if (uploadCount == totalImages) {
-                                                    Handler(Looper.getMainLooper()).post {
-                                                        val updatedProfile = userProfile.copy(pictures = imageUrls)
-                                                        profileVM.updateUserProfile(
-                                                            TokenManager.getToken() ?: "",
-                                                            updatedProfile
-                                                        )
-                                                        Log.d("Add Photos", "Profile updated")
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } else if (imageUri.toString().startsWith("https://")) {
-                                        // If it's a Firebase URL, directly add it
-                                        imageUrls.add(imageUri.toString())
+                                    StorageUtil.uploadToStorage(
+                                        auth = FirebaseAuth.getInstance(),
+                                        uri = imageUri,
+                                        context = context,
+                                        type = "Image"
+                                    ) { downloadUrl ->
+                                        imageUrls.add(downloadUrl)
                                         uploadCount++
 
-                                        if (uploadCount == totalImages) {
-                                            Handler(Looper.getMainLooper()).post {
-                                                val updatedProfile = userProfile.copy(pictures = imageUrls)
-                                                profileVM.updateUserProfile(
-                                                    TokenManager.getToken() ?: "",
-                                                    updatedProfile
-                                                )
-                                                Log.d("Add Photos", "Profile updated")
-                                            }
+                                        if (uploadCount == newImageUris.size) {
+                                            imageUrls.addAll(existingImageUrls)
+                                            val updatedProfile = userProfile.copy(pictures = imageUrls)
+                                            profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                            Log.d("Add Photos", "Profile updated with new images")
                                         }
-                                    } else {
-                                        Log.e("Add Photos", "Invalid URI: $imageUri")
                                     }
                                 }
+                            }
+
+                            if (newImageUris.isEmpty()) {
+                                imageUrls.addAll(existingImageUrls)
+                                val updatedProfile = userProfile.copy(pictures = imageUrls)
+                                profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                Log.d("Add Photos", "Profile updated with existing images only")
                             }
                         } ?: run {
                             Log.e("Add Photos", "Profile is null, cannot update.")
@@ -924,6 +906,7 @@ fun Add_Photos(
                 ) {
                     Text("Save", color = Color.White)
                 }
+
             }
 
             if (error) {
@@ -969,7 +952,6 @@ fun Add_Photos(
         }
     }
 }
-
 
 @Composable
 @Preview(showBackground = true)
