@@ -48,7 +48,9 @@ fun SignUpScreen(
     firebaseEmailAuth: FirebaseEmailAuth
 ) {
     var step by remember { mutableStateOf(1) }
+    var selectedCountryCode by remember { mutableStateOf("+84") }
     var phoneNumber by remember { mutableStateOf("") }
+    var fullPhoneNumber by remember { mutableStateOf("") }
     var isPhoneNumberValid by remember { mutableStateOf(true) }
     var verificationCode by remember { mutableStateOf("") }
     var timer by remember { mutableStateOf(120) }
@@ -70,6 +72,10 @@ fun SignUpScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
 
+    // Country codes data
+    val countryCodes = listOf("+84","+1", "+44", "+33", "+49", "+34", "+39", "+81", "+82", "+86", "+91", "+61", "+55", "+7", "+27", "+30", "+31", "+32", "+41", "+43", "+46", "+47", "+48", "+60", "+63", "+64", "+65", "+66", "+70", "+71", "+72", "+73", "+74", "+75", "+76", "+77", "+78", "+79", "+80", "+81", "+82", "+83")
+    var expanded by remember { mutableStateOf(false) }
+
     // Handle timer countdown for verification code
     LaunchedEffect(step) {
         if (step == 2) {
@@ -87,11 +93,20 @@ fun SignUpScreen(
         successMessage = ""
     }
 
+    // Function to combine country code and phone number
+    fun formatPhoneNumber(): String {
+        return "$selectedCountryCode$phoneNumber"
+    }
+
+    // Function to validate phone number
+    fun isPhoneNumberValid(phone: String): Boolean {
+        return phone.matches("^\\+[1-9]\\d{1,14}\$".toRegex())
+    }
+
     // Function to resend the verification code
     fun resendCode() {
         if (isResendAllowed) {
             isResendAllowed = false
-            // Call function to resend SMS
             scope.launch {
                 try {
                     firebaseSMSAuth.sendSMS(phoneNumber)
@@ -141,19 +156,54 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    BasicTextField(
-                        value = phoneNumber,
-                        onValueChange = {
-                            phoneNumber = it
-                            isPhoneNumberValid = validatePhoneNumber(phoneNumber)
-                        },
-                        textStyle = TextStyle(fontSize = 18.sp),
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
-                    )
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Country Code Dropdown
+                        Box(
+                            modifier = Modifier
+//                                .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                                .clickable { expanded = !expanded }
+                                .padding(16.dp)
+                        ) {
+                            Text(text = selectedCountryCode, fontSize = 18.sp)
+                            Spacer(modifier = Modifier.width(57.dp))
+                            Icon(
+                                painter = painterResource(id = R.drawable.drdown),
+                                contentDescription = "Dropdown",
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .size(20.dp)
+                            )
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                countryCodes.forEach { code ->
+                                    DropdownMenuItem(
+                                        text = { Text(text = code) },
+                                        onClick = {
+                                            selectedCountryCode = code
+                                            expanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        // Phone Number Input Field
+                        TextField(
+                            value = phoneNumber,
+                            onValueChange = { phoneNumber = it },
+                            placeholder = { Text("Phone Number") },
+                            modifier = Modifier
+                                .weight(1f) // Take up the remaining space
+                        )
+                    }
+
                     if (!isPhoneNumberValid) {
                         Text(
                             "Invalid phone number",
@@ -172,12 +222,13 @@ fun SignUpScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
                         onClick = {
-                            if (isPhoneNumberValid && !isSendingSMS) {
+                            fullPhoneNumber = formatPhoneNumber()
+                            if (isPhoneNumberValid(fullPhoneNumber) && !isSendingSMS) {
                                 isSendingSMS = true
                                 scope.launch {
                                     try {
-                                        Log.d("SignUp", "Sending SMS to $phoneNumber")
-                                        firebaseSMSAuth.sendSMS(phoneNumber)
+                                        Log.d("SignUp", "Sending SMS to $fullPhoneNumber")
+                                        firebaseSMSAuth.sendSMS(fullPhoneNumber)
                                         step = 2
                                     } catch (e: Exception) {
                                         errorMessage = "Failed to send SMS: ${e.message}"
@@ -197,13 +248,14 @@ fun SignUpScreen(
                     }
                     Text(
                         text = "or Sign Up with your email",
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         color = Color.Red,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
                             step = 3
                         }
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -548,7 +600,7 @@ fun SignUpScreen(
                                         }
                                     } catch (e: retrofit2.HttpException) {
                                         Log.d("Signup", e.toString())
-                                        errorMessage = e.toString()
+                                        errorMessage = "Internal server error. This could be due to a duplicate username or other server issues. Please try again later."
                                     }
                                 }
 
@@ -597,13 +649,6 @@ fun SignUpScreen(
             }
         }
     }
-}
-
-// Function to validate the phone number
-fun validatePhoneNumber(phoneNumber: String): Boolean {
-    // Example validation: Check if the phone number is not empty and contains exactly 10 digits
-//    return phoneNumber.length == 10 && phoneNumber.all { it.isDigit() }
-    return true
 }
 
 // Function to validate the password
