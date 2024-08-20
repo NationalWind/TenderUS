@@ -2,6 +2,7 @@ package com.hcmus.tenderus.utils.firebase
 
 import android.app.Activity
 import android.util.Log
+import com.google.firebase.Firebase
 import com.google.firebase.auth.*
 import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
@@ -11,17 +12,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 
 
-class FirebaseEmailAuth(private val auth: FirebaseAuth, private val act: Activity) {
+class FirebaseEmailAuth(private val act: Activity) {
     private val TAG = "Firebase Auth Email"
 
     suspend fun sendEmail(email: String) {
         try {
-            auth.createUserWithEmailAndPassword(email, email).await()
+            Firebase.auth.createUserWithEmailAndPassword(email, email).await()
         } catch(e: FirebaseAuthUserCollisionException) {
-            auth.signInWithEmailAndPassword(email, email).await()
+            Firebase.auth.signInWithEmailAndPassword(email, email).await()
         }
         // Sign in success, update UI with the signed-in user's information
-        val user = auth.currentUser
+        val user = Firebase.auth.currentUser
         if (user!!.isEmailVerified) {
             throw Exception("Email has already been taken")
         }
@@ -30,18 +31,12 @@ class FirebaseEmailAuth(private val auth: FirebaseAuth, private val act: Activit
 
     }
 
-    suspend fun confirmAndSync(userRegistration: UserRegistration, syncFor: String) {
+    suspend fun confirm() {
         do {
             delay(1500)
-            auth.currentUser!!.reload().await()
-        } while (auth.currentUser!!.isEmailVerified == false)
-        userRegistration.token = auth.currentUser!!.getIdToken(true).await().token!!
-        if (syncFor == "SIGN_UP") {
-            SyncSignUpApi.sync(userRegistration)
-        } else if (syncFor == "RESET_PASSWORD") {
-            SyncPasswordResetApi.sync(userRegistration)
-        } else {
-            throw Exception("Invalid syncFor")
-        }
+            Firebase.auth.currentUser!!.reload().await()
+        } while (!Firebase.auth.currentUser!!.isEmailVerified)
     }
+
+
 }

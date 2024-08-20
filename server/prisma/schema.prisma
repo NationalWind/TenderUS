@@ -19,6 +19,7 @@ model Account {
   email       String?
   phone       String?
   role        Role
+  FirebaseUID String @unique
   FCMRegToken String?
   penalty     Penalty[]
   reporter    Report[]  @relation("reporter")
@@ -56,6 +57,7 @@ model Profile {
   age       Int
   interests String[]
   groups    String[]
+  birthDate        String
 
   isActive Boolean
 }
@@ -72,17 +74,17 @@ model Preference {
 }
 
 model Like {
-  doc_id  String @id @default(auto()) @map("_id") @db.ObjectId
-  id      String
-  likedID String
+  doc_id   String  @id @default(auto()) @map("_id") @db.ObjectId
+  username       String
+  likedUsername  String
 
-  @@index(id)
+  @@index(username)
 }
 
 model Pass_A {
-  doc_id   String @id @default(auto()) @map("_id") @db.ObjectId
-  id       String
-  passedID String
+  doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  username        String
+  passedUsername  String
 }
 
 /// user1 < user2

@@ -17,44 +17,44 @@ const MatchFCM = async (username: string) => {
 
 const matchPollers: { [key: string]: { res: Response, timeout: NodeJS.Timeout } } = {};
 
-// POST /like {token: String, likedID: String}
+// POST /like {token: String, likedUsername: String}
 const swipeController = {
   like: async (req: Request, res: Response) => {
     try {
       interface LikeRequest {
-        id: string;
-        likedID: string;
+        username: string;
+        likedUsername: string;
       }
       const data: LikeRequest = {
-        id: req.body.id,
-        likedID: req.body.likedID,
+        username: req.body.username,
+        likedUsername: req.body.likedUsername,
       }
 
-      if (!data.id || !data.likedID || data.id === data.likedID) {
+      if (!data.username || !data.likedUsername || data.username === data.likedUsername) {
         res.status(400).json({ message: "Bad request" });
         return;
       }
 
 
       await db.like.create({ data });
-      const checked = await db.like.findFirst({ where: { id: data.likedID, likedID: data.id } });
+      const checked = await db.like.findFirst({ where: { username: data.likedUsername, likedUsername: data.username } });
       var match = false;
       if (checked) {
         match = true;
-        if (data.id > data.likedID) {
-          await db.match.create({ data: { user1: data.likedID, user2: data.id, createdAt: new Date() } });
+        if (data.username > data.likedUsername) {
+          await db.match.create({ data: { user1: data.likedUsername, user2: data.username, createdAt: new Date() } });
         } else {
-          await db.match.create({ data: { user1: data.id, user2: data.likedID, createdAt: new Date() } });
+          await db.match.create({ data: { user1: data.username, user2: data.likedUsername, createdAt: new Date() } });
         }
-        /*await */MatchFCM(data.likedID);
-        if (matchPollers[data.likedID]) {
-          clearTimeout(matchPollers[data.likedID].timeout);
+        /*await */MatchFCM(data.likedUsername);
+        if (matchPollers[data.likedUsername]) {
+          clearTimeout(matchPollers[data.likedUsername].timeout);
           try {
-            matchPollers[data.likedID].res.status(200).json(data);
+            matchPollers[data.likedUsername].res.status(200).json(data);
           } catch (error) {
             console.log(error);
           }
-          delete matchPollers[data.likedID];
+          delete matchPollers[data.likedUsername];
         }
 
       }
@@ -66,19 +66,19 @@ const swipeController = {
     }
   },
 
-  // POST /pass {token: String, passedID: String}
+  // POST /pass {token: String, passedUsername: String}
   pass: async (req: Request, res: Response) => {
     try {
       interface PassRequest {
-        id: string;
-        passedID: string;
+        username: string;
+        passedUsername: string;
       }
       const data: PassRequest = {
-        id: req.body.id,
-        passedID: req.body.passedID
+        username: req.body.username,
+        passedUsername: req.body.passedUsername
       }
 
-      if (!data.id || !data.passedID || data.id === data.passedID) {
+      if (!data.username || !data.passedUsername || data.username === data.passedUsername) {
         res.status(400).json({ message: "Bad request" });
         return;
       }
@@ -94,7 +94,7 @@ const swipeController = {
   // GET /swipe/polling
   matchLongPoll: async (req: Request, res: Response) => {
     try {
-      const username = req.body.id;
+      const username = req.body.username;
       if (matchPollers[username]) {
         clearTimeout(matchPollers[username].timeout);
       }

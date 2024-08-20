@@ -21,7 +21,7 @@ const messageController = {
   // GET /api/message/matches
   getMatches: async (req: Request, res: Response) => {
     try {
-      const username = req.body.id;
+      const username = req.body.username;
 
       const matches = await db.match.aggregateRaw({
         pipeline: [
@@ -143,7 +143,7 @@ const messageController = {
   // GET /api/message/polling
   messageLongPoll: async (req: Request, res: Response) => {
     try {
-      const username = req.body.id;
+      const username = req.body.username;
       if (messagePollers[username]) {
         clearTimeout(messagePollers[username].timeout);
       }
@@ -163,7 +163,7 @@ const messageController = {
   // Must post multimedia first then use this endpoint with content = url
   send: async (req: Request, res: Response) => {
     try {
-      const requiredFields = ["id", "receiver", "msgType", "content"];
+      const requiredFields = ["receiver", "msgType", "content"];
       const missingFields = requiredFields.filter(field => !req.body[field]);
 
       if (missingFields.length > 0) {
@@ -177,11 +177,11 @@ const messageController = {
       }
 
 
-      var user1 = req.body.id
+      var user1 = req.body.username
       var user2 = req.body.receiver
-      if (req.body.id > req.body.receiver) {
+      if (req.body.username > req.body.receiver) {
         user1 = req.body.receiver
-        user2 = req.body.id
+        user2 = req.body.username
       }
 
       const match = await db.match.findFirst({
@@ -212,7 +212,7 @@ const messageController = {
         data = {
           conversationID: convo.doc_id,
           msgID: 0,
-          sender: req.body.id,
+          sender: req.body.username,
           receiver: req.body.receiver,
           msgType: req.body.msgType,
           content: req.body.content,
@@ -225,11 +225,11 @@ const messageController = {
             conversationID: converation.doc_id
           }
         });
-        console.log(msg, converation, typeof (converation.doc_id))
+
         data = {
           conversationID: converation.doc_id,
           msgID: msg!.msgID + 1,
-          sender: req.body.id,
+          sender: req.body.username,
           receiver: req.body.receiver,
           msgType: req.body.msgType,
           content: req.body.content,
@@ -275,7 +275,7 @@ const messageController = {
         return;
       }
       const page_size = parseInt(req.query.page_size);;
-      const sender = req.body.id;
+      const sender = req.body.username;
 
       var messages: Message[] = [];
       var user1 = sender

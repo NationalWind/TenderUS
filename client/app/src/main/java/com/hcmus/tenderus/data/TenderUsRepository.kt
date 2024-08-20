@@ -28,6 +28,10 @@ object TokenManager {
         return sharedPreferences.getString(TOKEN_KEY, null)
     }
 
+    fun clearToken() {
+        sharedPreferences.edit().remove(TOKEN_KEY).apply()
+    }
+
 
 }
 

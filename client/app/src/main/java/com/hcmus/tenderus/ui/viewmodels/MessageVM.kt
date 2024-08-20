@@ -15,6 +15,7 @@ import com.hcmus.tenderus.model.Match
 import com.hcmus.tenderus.model.Message
 import com.hcmus.tenderus.network.ApiClient.GetMatchesApi
 import com.hcmus.tenderus.network.ApiClient.HaveReadMessageApi
+import com.hcmus.tenderus.network.ApiClient.MessageLoadingApi
 import com.hcmus.tenderus.network.ApiClient.MessagePollingApi
 import com.hcmus.tenderus.network.ApiClient.MessageSendingApi
 import com.hcmus.tenderus.network.HaveReadMessageRequest
@@ -36,24 +37,29 @@ data class MatchState(
 class MatchListVM: ViewModel() {
     val matches = mutableStateListOf<MatchState>()
     var curReceiver by mutableStateOf("")
+    var isInit = false
 
-    init {
+    fun init() {
+        if (isInit) return
+        isInit = true
         getMatches()
         viewModelScope.launch {
             while (true) {
                 try {
-                    val newMsg =
-                        MessagePollingApi.getNewMessage("Bearer " + TokenManager.getToken()!!)
-                    val idx = matches.indexOfFirst { it.username == newMsg.sender }
-                    if (idx == 0) {
-                        matches[idx].messageArr.add(0, newMsg)
-                    } else {
-                        val match = matches[idx]
-                        matches.removeAt(idx)
-                        match.messageArr.add(0, newMsg)
-                        matches.add(0, match)
+                    TokenManager.getToken()?.let { token ->
+                        val newMsg =
+                            MessagePollingApi.getNewMessage("Bearer $token")
+                        val idx = matches.indexOfFirst { it.username == newMsg.sender }
+                        if (idx == 0) {
+                            matches[idx].messageArr.add(0, newMsg)
+                        } else {
+                            val match = matches[idx]
+                            matches.removeAt(idx)
+                            match.messageArr.add(0, newMsg)
+                            matches.add(0, match)
+                        }
+                        matches[0].isRead = false
                     }
-                    matches[0].isRead = false
 
                 } catch (e: Exception) {
                     Log.d("MsgPolling", e.toString())
@@ -66,40 +72,43 @@ class MatchListVM: ViewModel() {
     fun getMatches() {
         viewModelScope.launch {
             try {
-                val matchesList =
-                    GetMatchesApi.getMatches("Bearer " + TokenManager.getToken()!!).toMutableList()
-                matchesList.sortWith { a, b ->
-                    if (a.messageArr.isEmpty() && b.messageArr.isNotEmpty()) {
-                        -1
-                    } else if (a.messageArr.isNotEmpty() && b.messageArr.isEmpty()) {
-                        1
-                    } else if (a.messageArr.isNotEmpty() && subtractInMinutes(
-                            a.messageArr.first().createdAt,
-                            b.messageArr.first().createdAt
-                        ) != 0L
-                    ) {
-                        subtractInMinutes(
-                            a.messageArr.first().createdAt,
-                            b.messageArr.first().createdAt
-                        ).toInt()
-                    } else {
-                        subtractInMinutes(a.createdAt, b.createdAt).toInt()
-                    }
+                TokenManager.getToken()?.let { token ->
+                    val matchesList =
+                        GetMatchesApi.getMatches("Bearer $token")
+                            .toMutableList()
+                    matchesList.sortWith { a, b ->
+                        if (a.messageArr.isEmpty() && b.messageArr.isNotEmpty()) {
+                            -1
+                        } else if (a.messageArr.isNotEmpty() && b.messageArr.isEmpty()) {
+                            1
+                        } else if (a.messageArr.isNotEmpty() && subtractInMinutes(
+                                a.messageArr.first().createdAt,
+                                b.messageArr.first().createdAt
+                            ) != 0L
+                        ) {
+                            subtractInMinutes(
+                                a.messageArr.first().createdAt,
+                                b.messageArr.first().createdAt
+                            ).toInt()
+                        } else {
+                            subtractInMinutes(a.createdAt, b.createdAt).toInt()
+                        }
 
-                }
-                for (m in matchesList) {
-                    matches.add(
-                        MatchState(
-                            m.username,
-                            m.avatarIcon,
-                            m.displayName,
-                            m.createdAt,
-                            m.isActive,
-                            m.isRead
+                    }
+                    for (m in matchesList) {
+                        matches.add(
+                            MatchState(
+                                m.username,
+                                m.avatarIcon,
+                                m.displayName,
+                                m.createdAt,
+                                m.isActive,
+                                m.isRead
+                            )
                         )
-                    )
-                    for (msg in m.messageArr) {
-                        matches.last().messageArr.add(msg)
+                        for (msg in m.messageArr) {
+                            matches.last().messageArr.add(msg)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -123,6 +132,20 @@ class MatchListVM: ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.d("MsgSending", e.toString())
+            }
+        }
+
+    }
+
+    fun loadMessage() {
+        viewModelScope.launch {
+            try {
+                matches.first { it.username == curReceiver }.let {
+                    val messages = MessageLoadingApi.loadMessage("Bearer " + TokenManager.getToken()!!, curReceiver, 20, it.messageArr.last().msgID)
+                    it.messageArr.addAll(messages)
+                }
+            } catch (e: Exception) {
+                Log.d("MsgLoading", e.toString())
             }
         }
 

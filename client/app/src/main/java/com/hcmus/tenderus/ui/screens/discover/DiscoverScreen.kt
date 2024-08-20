@@ -22,6 +22,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -59,10 +62,28 @@ import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import coil.compose.rememberAsyncImagePainter
 import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.Period
 import kotlin.math.roundToInt
+
+fun calculateAgeFromDob(dob: String): Int {
+    // Extract the year from the last 4 characters of the date of birth string
+    val yearStr = dob.take(4)
+
+    // Convert extracted year to integer
+    val yearOfBirth = yearStr.toIntOrNull() ?: return -1 // Return -1 for invalid year format
+
+    // Create LocalDate with the extracted year and default month and day
+    val today = LocalDate.now()
+    val birthday = LocalDate.of(yearOfBirth, today.month, today.dayOfMonth)
+
+    // Calculate age
+    return Period.between(birthday, today).years
+}
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
@@ -199,7 +220,7 @@ fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewMod
                     CircularProgressIndicator()
                 }
                 is DiscoverUiState.Success -> {
-                    var profiles = (discoverUiState as DiscoverUiState.Success).profiles.map { it.avatarIcon }
+                    var profiles = (discoverUiState as DiscoverUiState.Success).profiles
                     SwipeableProfiles(profiles) { updatedProfiles ->
                         profiles = updatedProfiles
                     }
@@ -275,19 +296,25 @@ fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewMod
 //}
 
 @Composable
-fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) -> Unit) {
+fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>) -> Unit) {
     var currentProfileIndex by remember { mutableStateOf(0) }
     var showProfileDetails by remember { mutableStateOf(false) }
     val offsetX = remember { mutableStateOf(0f) }
     val offsetY = remember { mutableStateOf(0f) }
     val coroutineScope = rememberCoroutineScope()
 
-    if (profiles.isNotEmpty()) {
-        val profileUrl = profiles[currentProfileIndex]
+    // State for button animation
+    var isLikeButtonActive by remember { mutableStateOf(false) }
+    var isDislikeButtonActive by remember { mutableStateOf(false) }
 
-        // Example user information (replace with actual data as needed)
-        val userName = "John Doe"
-        val userAge = "25"
+    // Reset button states when the profile changes
+    LaunchedEffect(currentProfileIndex) {
+        isLikeButtonActive = false
+        isDislikeButtonActive = false
+    }
+
+    if (profiles.isNotEmpty()) {
+        val profile = profiles[currentProfileIndex]
 
         Box(
             modifier = Modifier
@@ -301,15 +328,22 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                         onDrag = { change, dragAmount ->
                             offsetX.value += dragAmount.x // Update offset based on drag amount
                             offsetY.value += dragAmount.y // Update offset based on drag amount
+
+                            isLikeButtonActive = offsetX.value > 100f
+                            isDislikeButtonActive = offsetX.value < -100f
+
                             change.consume()
                         },
                         onDragCancel = {
                             offsetX.value = 0f // Reset offset when drag is canceled
                             offsetY.value = 0f // Reset offset when drag is canceled
+                            isLikeButtonActive = false // Deactivate buttons when drag is canceled
+                            isDislikeButtonActive = false
                         },
                         onDragEnd = {
                             coroutineScope.launch {
-                                if (offsetX.value > 300f || offsetX.value < -300f) {
+                                if (offsetX.value > 300f) {
+                                    // Like
                                     val newProfiles = profiles.toMutableList().apply {
                                         removeAt(currentProfileIndex)
                                     }
@@ -318,14 +352,26 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
-                                } else if (offsetY.value < -300f) {
-                                    // Swiped up to show full profile
-                                    showProfileDetails = true
+                                    isLikeButtonActive = false // Deactivate buttons when drag is canceled
+                                    isDislikeButtonActive = false
+                                } else if (offsetX.value < -300f) {
+                                    // Dislike
+                                    val newProfiles = profiles.toMutableList().apply {
+                                        removeAt(currentProfileIndex)
+                                    }
+                                    onProfilesUpdated(newProfiles)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    offsetX.value = 0f
                                     offsetY.value = 0f
+                                    showProfileDetails = false // Collapse profile details on swipe
+                                    isLikeButtonActive = false // Deactivate buttons when drag is canceled
+                                    isDislikeButtonActive = false
                                 } else {
                                     // Reset offset if swipe is not significant
                                     offsetX.value = 0f
                                     offsetY.value = 0f
+                                    isLikeButtonActive = false
+                                    isDislikeButtonActive = false
                                 }
                             }
                         }
@@ -340,54 +386,61 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                         rotationZ = offsetX.value / 20f
                     }
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(profileUrl),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                // Overlay profile information
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .align(Alignment.BottomStart),
-                    contentAlignment = Alignment.BottomStart
+                        .size(350.dp, 550.dp) // Fixed size for rectangular image
+                        .align(Alignment.Center)
+                        .offset(y = (-45).dp)
+                        .clip(RoundedCornerShape(12.dp)) // Rounded corners
+                        .background(Color.Black.copy(alpha = 0.5f)) // Optional background
                 ) {
-                    if (!showProfileDetails) {
-                        Column(
-                            modifier = Modifier
-                                .background(Color.Black.copy(alpha = 0.5f))
-                                .padding(8.dp)
-                        ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(profile.pictures[0]),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                // Overlay profile information
+                if (!showProfileDetails) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(bottom = 100.dp)
+                            .padding(start = 20.dp)
+                            .wrapContentWidth()
+                            .wrapContentHeight()
+                            .background(Color.Black.copy(alpha = 0.5f))
+                    ) {
+                        Column {
                             Row {
                                 Text(
-                                    text = userName,
+                                    text = profile.displayName,
                                     color = Color.White,
-                                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp), // Adjust font size
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp),
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = userAge,
+                                    text = "${calculateAgeFromDob(profile.birthDate)}",
                                     color = Color.White,
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp) // Adjust font size
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp)
                                 )
                             }
                         }
                     }
                 }
 
+                // Profile button at the bottom right
                 if (!showProfileDetails) {
-                    // Profile button at the bottom right
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(16.dp)
-                            .size(64.dp)
+                            .size(60.dp)
+                            .offset(x = (-10).dp, y = (-60).dp)
                             .clickable { showProfileDetails = true }
-                            .background(Color.Transparent)
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.profile_button),
@@ -414,7 +467,7 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                         ) {
                             // Profile Image as part of the detailed profile
                             Image(
-                                painter = rememberAsyncImagePainter(profileUrl),
+                                painter = rememberAsyncImagePainter(profile.pictures[0]),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
@@ -424,27 +477,42 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Text("User Name", style = MaterialTheme.typography.headlineSmall)
-                            Text("Age: 25", style = MaterialTheme.typography.bodyLarge)
-                            Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                "About: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum.",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            // Add more profile details here
+                            // Display additional images
+                            profile.pictures.drop(1).forEach { imageUrl ->
+                                Image(
+                                    painter = rememberAsyncImagePainter(imageUrl),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp) // Adjust height as needed
+                                        .padding(vertical = 8.dp) // Add spacing between images
+                                )
+                            }
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // Use profile_button image as collapse button
+                            Text(profile.displayName, style = MaterialTheme.typography.headlineSmall)
+                            Text("Age: ${calculateAgeFromDob(profile.birthDate)}", style = MaterialTheme.typography.bodyLarge)
+                            Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                profile.description,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Use collapse button image for collapsing profile details
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.End)
                                     .size(64.dp)
+                                    .offset(x = (-10).dp, y = (-60).dp)
                                     .clickable { showProfileDetails = false }
                                     .background(Color.Transparent)
                             ) {
                                 Image(
-                                    painter = painterResource(id = R.drawable.collapse_button), // Use the same image for collapsing
+                                    painter = painterResource(id = R.drawable.collapse_button),
                                     contentDescription = "Collapse Profile",
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier.fillMaxSize()
@@ -454,9 +522,97 @@ fun SwipeableProfiles(profiles: List<String>, onProfilesUpdated: (List<String>) 
                     }
                 }
             }
+
+            // Action buttons at the bottom center (always visible)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .align(Alignment.BottomCenter) // Align buttons at the bottom center of the screen
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // Dislike Button
+                    Box(
+                        modifier = Modifier
+                            .size(115.dp) // Increased size
+                            .graphicsLayer(
+                                scaleX = if (isDislikeButtonActive) 1.3f else 1f,
+                                scaleY = if (isDislikeButtonActive) 1.3f else 1f,
+                                alpha = if (isDislikeButtonActive) 0.5f else 1f
+                            )
+                            .offset(x = (-12).dp, y = (10).dp)
+                            .background(Color.Transparent)
+                            .clickable {
+                                // Dislike
+                                if (profiles.isNotEmpty()) {
+//                                    val newProfiles = profiles.toMutableList().apply {
+//                                        removeAt(currentProfileIndex)
+//                                    }
+//                                    onProfilesUpdated(newProfiles)
+//                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+                                    offsetX.value = 0f
+                                    offsetY.value = 0f
+                                    showProfileDetails = false // Collapse profile details on swipe
+                                }
+                            }
+                    ) {
+                        Image(
+                            painter = painterResource(
+                                id = if (isDislikeButtonActive) R.drawable.big_dislike else R.drawable.dislike
+                            ),
+                            contentDescription = "Dislike",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    // Like Button
+                    Box(
+                        modifier = Modifier
+                            .size(95.dp) // Increased size
+                            .graphicsLayer(
+                                scaleX = if (isLikeButtonActive) 1.5f else 1f,
+                                scaleY = if (isLikeButtonActive) 1.5f else 1f,
+                                alpha = if (isLikeButtonActive) 0.5f else 1f
+                            )
+                            .offset(x = (10).dp, y = (10).dp)
+                            .background(Color.Transparent)
+                            .clickable {
+                                // Like
+                                if (profiles.isNotEmpty()) {
+//                                    val newProfiles = profiles.toMutableList().apply {
+//                                        removeAt(currentProfileIndex)
+//                                    }
+//                                    onProfilesUpdated(newProfiles)
+//                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+                                    offsetX.value = 0f
+                                    offsetY.value = 0f
+                                    showProfileDetails = false // Collapse profile details on swipe
+                                }
+                            }
+                    ) {
+                        Image(
+                            painter = painterResource(
+                                id = if (isLikeButtonActive) R.drawable.big_like else R.drawable.like
+                            ),
+                            contentDescription = "Like",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
         }
     }
 }
+
+
 
 @Composable
 fun GenderSelection(selectedGender: String, onGenderSelected: (String) -> Unit) {
@@ -605,19 +761,8 @@ fun AgeRangeSlider(
     }
 }
 
-
-
-
-
-// eg to run
-@Composable
-fun MessageScreen(navController: NavController) {
-
-}
 @Composable
 fun MatchesScreen(navController: NavController) {
 
 }
-
-
 

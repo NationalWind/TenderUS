@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.*
 
 object ApiClient {
-    private const val BASE_URL = "https://10.0.2.2:8000/"
+    private const val BASE_URL = "https://4.217.254.66:8000/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -55,6 +55,15 @@ object ApiClient {
     }
     val GetProfile by lazy {
         create(GetProfile::class.java)
+    }
+    val ProcessProfile by lazy {
+        create(ProfileService::class.java)
+    }
+    val SignOutApi by lazy {
+        create(SignOut::class.java)
+    }
+    val MessageLoadingApi by lazy {
+        create(MessageLoading::class.java)
     }
 
 

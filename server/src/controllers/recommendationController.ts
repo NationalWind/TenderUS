@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import db from "../lib/db";
+import { getAge } from "../lib/timeUtil";
 import { Account, Role, Profile, Preference } from "@prisma/client";
 import { firebaseFCM } from "../lib/firebase";
 import { parse } from "dotenv";
+
 
 const validGroups = ["Free Tonight", "Study Group", "Open Day", "Binge Watchers", "Self Care"]
 
@@ -20,7 +22,7 @@ const recommendationController = {
   // POST /api/recommendation/join { id(username): String, group: String }
   join: async (req: Request, res: Response) => {
     try {
-      const username: string = req.body.id;
+      const username: string = req.body.username;
       if (!req.body.group || typeof req.body.group !== "string" || !validGroups.includes(req.body.group)) {
         res.status(400).json({ message: "Bad request" });
         return;
@@ -63,8 +65,8 @@ const recommendationController = {
         return;
       }
 
-      const cur_pref = await db.preference.findUnique({ where: { username: req.body.id } });
-      const cur_prof = await db.profile.findUnique({ where: { username: req.body.id } });
+      const cur_pref = await db.preference.findUnique({ where: { username: req.body.username } });
+      const cur_prof = await db.profile.findUnique({ where: { username: req.body.username } });
 
       if (!cur_prof || !cur_pref) {
         res.status(404).json({ message: "User requesting not found" });
@@ -81,16 +83,16 @@ const recommendationController = {
         where: {
           username: {
             not: cur_prof.username
-          },
-          age: {
-            gte: cur_pref.ageMin,
-            lte: cur_pref.ageMax
           }
         }
       });
 
       const recs: Profile[] = [];
+
       for (const user of users) {
+        const age = getAge(user.birthDate);
+        if (age > cur_pref.ageMax || age < cur_pref.ageMin) continue;
+        if (cur_pref.showMe != user.identity && cur_pref.showMe != "Both") continue;
         if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.maxDist * cur_pref.maxDist) {
           if (req.query.group) {
             if (user.groups.includes(req.query.group)) {
@@ -100,6 +102,11 @@ const recommendationController = {
             recs.push(user);
           }
         }
+      }
+
+      if (recs.length == 0) {
+        res.status(200).json({ profiles: [] });
+        return;
       }
 
       // Recommend by interests
@@ -112,14 +119,14 @@ const recommendationController = {
       if (!cur_pref.recPage) {
         cur_pref.recPage = 0;
         await db.preference.update({
-          where: { username: req.body.id },
+          where: { username: req.body.username },
           data: {
             recPage: 1
           }
         });
       } else {
         await db.preference.update({
-          where: { username: req.body.id },
+          where: { username: req.body.username },
           data: {
             recPage: (cur_pref.recPage + 1) % 1e9
           }
