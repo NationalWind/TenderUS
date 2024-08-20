@@ -107,24 +107,37 @@ const adminController = {
       res.status(500).json({ message: error.message });
     }
   },
+  // GET /api/admin/account/:id
   getAccountDetail: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const account = await db.account.findUnique({
         where: { id },
-        include: { Profile: { select: { avatarIcon: true } }, penalty: { select: { type: true } } }
+        include: { Profile: { select: { avatarIcon: true } }, penalty: { select: { id: true, type: true } } }
       })
       if (account) {
         res.status(200).json(
           {
             ...account,
             avatar: account.Profile?.avatarIcon,
-            penalty: account.penalty.map((penalty) => penalty.type)
           }
         );
       } else {
         res.status(404).json({ message: "Account not found" })
       }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+  // POST /api/admin/account/:id
+  postAccountAction: async (req: Request, res: Response) => {
+    try {
+      const { penaltyDeleted } = req.body
+      for (let penalty of penaltyDeleted) {
+        await db.penalty.delete({ where: { id: penalty.id } })
+      }
+      res.status(200).json({ message: "Success" })
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: error.message });

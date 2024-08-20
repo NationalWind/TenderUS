@@ -98,7 +98,7 @@ fun AccountCard(account: Account, detailNavigate: () -> Unit, modifier: Modifier
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(96.dp)
-                    .padding(start = 16.dp, top = 12.dp, bottom = 12.dp)
+                    .padding(12.dp)
             ) {
                 AsyncImage(
                     model = account.avatar,
@@ -147,9 +147,7 @@ fun AccountCard(account: Account, detailNavigate: () -> Unit, modifier: Modifier
                         )
                     }
                 }
-                IconButton(onClick = {}) {
-                    Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = "View")
-                }
+                Icon(imageVector = Icons.Filled.ChevronRight, contentDescription = "View")
             }
         }
     }

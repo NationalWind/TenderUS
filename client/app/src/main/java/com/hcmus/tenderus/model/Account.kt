@@ -9,6 +9,6 @@ data class Account(
     val avatar: String?,
     val email: String?,
     val phone: String?,
-    val penalty: List<String> = listOf(),
+    val penalty: List<Penalty> = listOf(),
     val FCMRegToken: String = "",
 )

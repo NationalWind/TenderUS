@@ -1,6 +1,7 @@
 package com.hcmus.tenderus.network
 
 import com.hcmus.tenderus.model.Account
+import com.hcmus.tenderus.model.AccountAction
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.ReportAction
 import retrofit2.http.Body
@@ -23,4 +24,7 @@ interface TenderUsApiService {
 
     @GET("api/admin/account/{id}")
     suspend fun getAccountDetail(@Path("id") id: String): Account
+
+    @POST("api/admin/account/{id}")
+    suspend fun postAccountAction(@Path("id") id: String, @Body accountAction: AccountAction)
 }

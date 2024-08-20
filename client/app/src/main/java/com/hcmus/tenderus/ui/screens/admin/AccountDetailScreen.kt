@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +21,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ReportProblem
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +50,7 @@ import coil.compose.AsyncImage
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.model.Account
 import com.hcmus.tenderus.model.AccountAction
+import com.hcmus.tenderus.model.Penalty
 import com.hcmus.tenderus.model.Role
 import com.hcmus.tenderus.ui.screens.admin.composable.ErrorScreen
 import com.hcmus.tenderus.ui.screens.admin.composable.LoadingScreen
@@ -187,11 +188,13 @@ fun AccountAnalytics(modifier: Modifier = Modifier) {
 
 @Composable
 fun AccountActionMenu(
-    accountPenalty: List<String>,
+    accountPenalty: List<Penalty>,
     backAction: () -> Unit,
     saveAction: (accountAction: AccountAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var penaltyDeleted by remember { mutableStateOf(listOf<Penalty>()) }
+
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -209,23 +212,46 @@ fun AccountActionMenu(
                 fontWeight = FontWeight.Bold,
             )
         }
-        for (penalty in accountPenalty) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = penalty)
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = "Delete penalty",
-                        tint = PinkPrimary
+        if (accountPenalty.isEmpty()) {
+            Text(text = "This account have no penalty")
+        } else {
+            for (penalty in accountPenalty) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = penalty.type,
+                        textDecoration = if (penaltyDeleted.contains(penalty)) {
+                            TextDecoration.LineThrough
+                        } else {
+                            TextDecoration.None
+                        }
                     )
+                    IconButton(onClick = {
+                        if (penaltyDeleted.contains(penalty)) {
+                            penaltyDeleted -= penalty
+                        } else {
+                            penaltyDeleted += penalty
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (penaltyDeleted.contains(penalty)) {
+                                Icons.Filled.Delete
+                            } else {
+                                Icons.Outlined.Delete
+                            },
+                            contentDescription = "Delete penalty",
+                            tint = PinkPrimary
+                        )
+                    }
                 }
             }
         }
-//        Spacer(modifier = Modifier.height(8.dp))
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = backAction,
@@ -237,7 +263,10 @@ fun AccountActionMenu(
                 Text(text = "Cancel")
             }
             Button(
-                onClick = {},
+                onClick = {
+                    val accountAction = AccountAction(penaltyDeleted = penaltyDeleted)
+                    saveAction(accountAction)
+                },
                 shape = RoundedCornerShape(4.dp),
                 modifier = Modifier.weight(1f)
             ) {

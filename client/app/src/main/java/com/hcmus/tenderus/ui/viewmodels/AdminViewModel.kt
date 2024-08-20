@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
 import com.hcmus.tenderus.data.TenderUsRepository
 import com.hcmus.tenderus.model.Account
+import com.hcmus.tenderus.model.AccountAction
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.ReportAction
 import kotlinx.coroutines.launch
@@ -107,6 +108,21 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminAccountDetail", e.message.toString())
                 UiState.Error
+            }
+        }
+    }
+
+    fun postAccountAction(id: String, accountAction: AccountAction) {
+        viewModelScope.launch {
+            accountDetailUiState = UiState.Loading
+            try {
+                tenderUsRepository.postAccountAction(id, accountAction)
+            } catch (e: IOException) {
+                Log.d("AdminAccountAction", e.message.toString())
+                reportDetailUiState = UiState.Error
+            } catch (e: HttpException) {
+                Log.d("AdminAccountAction", e.message.toString())
+                reportDetailUiState = UiState.Error
             }
         }
     }

@@ -6,5 +6,5 @@ data class ReportAction(
 )
 
 data class AccountAction(
-    val penaltyDeleted: List<String>
+    val penaltyDeleted: List<Penalty>
 )

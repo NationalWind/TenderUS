@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.hcmus.tenderus.model.AccountAction
 import com.hcmus.tenderus.model.ReportAction
 import com.hcmus.tenderus.ui.screens.admin.composable.BottomNav
 import com.hcmus.tenderus.ui.screens.admin.composable.BottomNavigationBar
@@ -81,7 +82,8 @@ fun AdminScreen() {
                         accountDetailUiState = adminViewModel.accountDetailUiState,
                         retryAction = { adminViewModel.getAccountDetail(id) },
                         backAction = { navController.popBackStack() },
-                        saveAction = {
+                        saveAction = { accountAction: AccountAction ->
+                            adminViewModel.postAccountAction(id, accountAction)
                             navController.popBackStack()
                         }
                     )
