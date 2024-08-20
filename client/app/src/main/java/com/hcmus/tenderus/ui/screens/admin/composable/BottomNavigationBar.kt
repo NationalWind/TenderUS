@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.People
@@ -47,10 +46,10 @@ sealed class BottomNav(
         contentDescription = "Reports"
     )
 
-    data object Users : BottomNav(
-        route = "users",
+    data object Accounts : BottomNav(
+        route = "accounts",
         icon = Icons.Filled.People,
-        contentDescription = "Users"
+        contentDescription = "Accounts"
     )
 
     data object Settings : BottomNav(
@@ -65,7 +64,7 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
     val screens = listOf(
         BottomNav.Analytics,
         BottomNav.Reports,
-        BottomNav.Users,
+        BottomNav.Accounts,
         BottomNav.Settings
     )
 

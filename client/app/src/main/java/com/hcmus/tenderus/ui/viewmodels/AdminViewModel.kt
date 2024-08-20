@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
 import com.hcmus.tenderus.data.TenderUsRepository
+import com.hcmus.tenderus.model.Account
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.ReportAction
 import kotlinx.coroutines.launch
@@ -27,9 +28,11 @@ sealed interface UiState<out T> {
 class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewModel() {
     var reportListUiState: UiState<List<Report>> by mutableStateOf(UiState.Loading)
     var reportDetailUiState: UiState<Report> by mutableStateOf(UiState.Loading)
+    var accountListUiState: UiState<List<Account>> by mutableStateOf(UiState.Loading)
 
     init {
         getReportList()
+        getAccountList()
     }
 
     fun getReportList() {
@@ -73,6 +76,21 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminReportAction", e.message.toString())
                 reportDetailUiState = UiState.Error
+            }
+        }
+    }
+
+    fun getAccountList() {
+        viewModelScope.launch {
+            accountListUiState = UiState.Loading
+            accountListUiState = try {
+                UiState.Success(tenderUsRepository.getAccountList())
+            } catch (e: IOException) {
+                Log.d("AdminAccountList", e.message.toString())
+                UiState.Error
+            } catch (e: HttpException) {
+                Log.d("AdminAccountList", e.message.toString())
+                UiState.Error
             }
         }
     }

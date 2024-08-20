@@ -1,7 +1,6 @@
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import db from "../lib/db";
 import { Request, Response } from "express";
-import { PenaltyType } from "@prisma/client";
 
 const adminController = {
   // GET /api/admin/report
@@ -73,7 +72,7 @@ const adminController = {
           }
           // Update status
           await db.report.update({ where: { id }, data: { status: "REVIEWED" } });
-          res.status(200).json({message: "Success"})
+          res.status(200).json({ message: "Success" })
         } else {
           res.status(400).json({ message: "Invalid penalty type" });
         }
@@ -89,7 +88,21 @@ const adminController = {
       }
     }
   },
-  getAccountList: async (req: Request, res: Response) => { },
+  // GET /api/admin/account
+  getAccountList: async (req: Request, res: Response) => {
+    try {
+      const accountList = await db.account.findMany({ include: { Profile: { select: { avatarIcon: true } } } })
+      res.status(200).json(
+        accountList.map((account) => ({
+          ...account,
+          avatar: account.Profile?.avatarIcon,
+        }))
+      );
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: error.message });
+    }
+  },
   getAccountDetail: async (req: Request, res: Response) => { },
   getAccountStatistics: async (req: Request, res: Response) => { },
 };

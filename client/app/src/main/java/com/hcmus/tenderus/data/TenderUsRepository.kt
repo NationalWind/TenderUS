@@ -2,6 +2,7 @@ package com.hcmus.tenderus.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.hcmus.tenderus.model.Account
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.ReportAction
 import com.hcmus.tenderus.network.TenderUsApiService
@@ -33,6 +34,7 @@ interface TenderUsRepository {
     suspend fun getReportList(): List<Report>
     suspend fun getReportDetail(id: String): Report
     suspend fun postReportAction(id: String, reportAction: ReportAction)
+    suspend fun getAccountList(): List<Account>
 }
 
 class NetworkTenderUsRepository(
@@ -44,4 +46,6 @@ class NetworkTenderUsRepository(
 
     override suspend fun postReportAction(id: String, reportAction: ReportAction) =
         tenderUsApiService.postReportAction(id, reportAction)
+
+    override suspend fun getAccountList(): List<Account> = tenderUsApiService.getAccountList()
 }

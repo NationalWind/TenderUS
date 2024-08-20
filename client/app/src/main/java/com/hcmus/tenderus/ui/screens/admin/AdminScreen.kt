@@ -62,8 +62,18 @@ fun AdminScreen() {
                     )
                 }
             }
-            composable(BottomNav.Users.route) {
-                Text(text = BottomNav.Users.route)
+            composable(BottomNav.Accounts.route) {
+                AccountListScreen(
+                    accountListUiState = adminViewModel.accountListUiState,
+                    retryAction = adminViewModel::getAccountList,
+                    detailNavigate = { id: String ->
+                        navController.navigate("${BottomNav.Accounts.route}/${id}")
+                    }
+                )
+            }
+            composable("${BottomNav.Accounts.route}/{id}") { navBackStackEntry ->
+                val id = navBackStackEntry.arguments?.getString("id")
+                Text(text = id.toString())
             }
             composable(BottomNav.Settings.route) {
                 Text(text = BottomNav.Settings.route)
