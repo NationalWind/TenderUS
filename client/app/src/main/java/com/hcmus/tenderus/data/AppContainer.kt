@@ -9,7 +9,12 @@ interface AppContainer {
 }
 
 class DefaultAppContainer : AppContainer {
-    private val baseUrl = "http://localhost:8000"
+    // You may get an error here
+    // 1. Make sure your client and server are on the same network
+    // 2. Run ipconfig
+    // 3. Copy IP4 address (some thing like 192.168.xxx.xxx)
+    // 4. Replace the address below
+    private val baseUrl = "http://172.29.192.25:8000/"
 
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
