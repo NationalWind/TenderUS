@@ -3,6 +3,9 @@ package com.hcmus.tenderus.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.hcmus.tenderus.model.Account
+import com.hcmus.tenderus.model.AccountAction
+import com.hcmus.tenderus.model.Report
+import com.hcmus.tenderus.model.ReportAction
 import com.hcmus.tenderus.network.TenderUsApiService
 
 object TokenManager {
@@ -30,15 +33,31 @@ object TokenManager {
     }
 
 
-
 }
 
 interface TenderUsRepository {
-    suspend fun getAccounts(): List<Account>
+    suspend fun getReportList(): List<Report>
+    suspend fun getReportDetail(id: String): Report
+    suspend fun postReportAction(id: String, reportAction: ReportAction)
+    suspend fun getAccountList(): List<Account>
+    suspend fun getAccountDetail(id: String): Account
+    suspend fun postAccountAction(id: String, accountAction: AccountAction)
 }
 
 class NetworkTenderUsRepository(
     private val tenderUsApiService: TenderUsApiService
 ) : TenderUsRepository {
-    override suspend fun getAccounts(): List<Account> = tenderUsApiService.getAccounts()
+    override suspend fun getReportList(): List<Report> = tenderUsApiService.getReportList()
+    override suspend fun getReportDetail(id: String): Report =
+        tenderUsApiService.getReportDetail(id)
+
+    override suspend fun postReportAction(id: String, reportAction: ReportAction) =
+        tenderUsApiService.postReportAction(id, reportAction)
+
+    override suspend fun getAccountList(): List<Account> = tenderUsApiService.getAccountList()
+    override suspend fun getAccountDetail(id: String): Account =
+        tenderUsApiService.getAccountDetail(id)
+
+    override suspend fun postAccountAction(id: String, accountAction: AccountAction) =
+        tenderUsApiService.postAccountAction(id, accountAction)
 }
