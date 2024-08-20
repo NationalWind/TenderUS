@@ -22,7 +22,7 @@ sealed interface AccountUiState {
     data object Loading : AccountUiState
 }
 
-class AccountViewModel(private val tenderUsRepository: TenderUsRepository): ViewModel() {
+class AccountVM(private val tenderUsRepository: TenderUsRepository): ViewModel() {
     var accountUiState: AccountUiState by mutableStateOf(AccountUiState.Loading)
         private set
 
@@ -49,7 +49,7 @@ class AccountViewModel(private val tenderUsRepository: TenderUsRepository): View
             initializer {
                 val application = (this[APPLICATION_KEY] as TenderUsApplication)
                 val tenderUsRepository = application.container.tenderUsRepository
-                AccountViewModel(tenderUsRepository)
+                AccountVM(tenderUsRepository)
             }
         }
     }

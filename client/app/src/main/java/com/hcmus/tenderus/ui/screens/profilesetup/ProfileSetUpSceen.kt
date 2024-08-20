@@ -35,6 +35,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
@@ -42,21 +43,25 @@ import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
+import com.hcmus.tenderus.utils.firebase.StorageUtil
 import java.io.File
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-
-val token = TokenManager.getToken() ?: ""
 
 @Composable
 fun ProfileDetails1Screen(
     navController: NavHostController,
     profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
 ) {
+    val context = LocalContext.current
     var fullName by remember { mutableStateOf("") }
     var dateOfBirth by remember { mutableStateOf("") }
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
+    var isButtonClicked by remember { mutableStateOf(false) }
+    var newImageSelected by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -69,6 +74,29 @@ fun ProfileDetails1Screen(
 
     val focusManager = LocalFocusManager.current
     val isFormComplete = fullName.isNotEmpty() && dateOfBirth.isNotEmpty() && profileImageUri != null
+
+    // Observe profileUiState
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+
+    // Handle profile data and errors
+    when (profileUiState) {
+        is ProfileUiState.Loading -> {
+            loading = true
+        }
+        is ProfileUiState.Error -> {
+            error = true
+            loading = false
+        }
+        is ProfileUiState.Success -> {
+            // Profile created successfully, navigate to the next screen
+            LaunchedEffect(Unit) {
+                navController.navigate("profilesetup2")
+            }
+        }
+        else -> {
+            loading = false
+        }
+    }
 
     TenderUSTheme {
         Column(
@@ -138,25 +166,60 @@ fun ProfileDetails1Screen(
             Spacer(modifier = Modifier.height(200.dp))
 
 
-            // Continue Button
+            // Display error message if error state
+            if (error) {
+                Text(
+                    text = "Error occurred. Please try again.",
+                    color = Color.Red
+                )
+            }
+
             Button(
                 onClick = {
-                    val profile = Profile(
-                        displayName = fullName,
-                        avatarIcon = profileImageUri.toString(),
-                        pictures = listOf(),
-                        description = "",
-                        longitude = 0f,
-                        latitude = 0f,
-                        identity = "",
-                        birthDate = dateOfBirth,
-                        interests = listOf(),
-                        groups = listOf(),
-                        isActive = true
-                    )
-
-                    profileVM.createUserProfile(token, profile)
-                    navController.navigate("profilesetup2")
+                    if (newImageSelected) {
+                        profileImageUri?.let { uri ->
+                            StorageUtil.uploadToStorage(
+                                auth = FirebaseAuth.getInstance(),
+                                uri = uri,
+                                context = context,
+                                type = "Image"
+                            ) { downloadUrl ->
+                                val profile = Profile(
+                                    displayName = fullName,
+                                    avatarIcon = downloadUrl, // Update with the new URL
+                                    pictures = listOf(),
+                                    description = "",
+                                    longitude = 0f,
+                                    latitude = 0f,
+                                    identity = "",
+                                    birthDate = dateOfBirth,
+                                    interests = listOf(),
+                                    groups = listOf(),
+                                    isActive = true
+                                )
+                                profileVM.createUserProfile(TokenManager.getToken() ?: "", profile)
+                                Log.d("ProfileDetails1Screen", "profile created")
+                                isButtonClicked = true
+                            }
+                        }
+                    } else {
+                        val profile = Profile(
+                            displayName = fullName,
+                            avatarIcon = "https://cdn.vectorstock.com/i/1000v/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.avif", // No new image URL
+                            pictures = listOf(),
+                            description = "",
+                            longitude = 0f,
+                            latitude = 0f,
+                            identity = "",
+                            birthDate = dateOfBirth,
+                            interests = listOf(),
+                            groups = listOf(),
+                            isActive = true
+                        )
+                        profileVM.createUserProfile(TokenManager.getToken() ?: "", profile)
+                        Log.d("ProfileDetails1Screen", "profile created")
+                        isButtonClicked = true
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isFormComplete) Color(0xFFB71C1C) else Color.Gray
@@ -188,7 +251,7 @@ fun ProfileDetails2Screen(
     val icons = listOf(R.drawable.male, R.drawable.female, R.drawable.othergender)
 
     LaunchedEffect(Unit) {
-        profileVM.getCurrentUserProfile(token)
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
     }
 
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
@@ -254,8 +317,9 @@ fun ProfileDetails2Screen(
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Start)
-                            .padding(start = 10.dp)
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(start = 10.dp)
             )
             Spacer(modifier = Modifier.height(100.dp))
             genders.forEachIndexed { index, gender ->
@@ -287,7 +351,8 @@ fun ProfileDetails2Screen(
                 onClick = {
                     if (profile != null) {
                         val updatedProfile = profile!!.copy(identity = selectedGender)
-                        profileVM.updateUserProfile(token, updatedProfile)
+                        profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                        Log.d("ProfileDetails2Screen", "profile updated")
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -320,7 +385,7 @@ fun ProfileDetails3Screen(
 
 
     LaunchedEffect(Unit) {
-        profileVM.getCurrentUserProfile(token)
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
     }
 
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
@@ -431,7 +496,8 @@ fun ProfileDetails3Screen(
                     onClick = {
                         profile?.let {
                             val updatedProfile = it.copy(interests = selectedInterests.toList())
-                            profileVM.updateUserProfile(token, updatedProfile)
+                            profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                            Log.d("ProfileDetails3Screen", "profile updated")
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
@@ -441,9 +507,6 @@ fun ProfileDetails3Screen(
                 }
             }
 
-            if (loading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
 
             if (error) {
                 Text("An error occurred. Please try again.", color = Color.Red, modifier = Modifier.align(Alignment.Center))
@@ -487,6 +550,11 @@ fun ProfileDetails4Screen(
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+        Log.d("Photos", "profile Fetched")
+    }
+
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
     val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
 
@@ -494,7 +562,7 @@ fun ProfileDetails4Screen(
     when (profileUiState) {
         is ProfileUiState.Success -> {
             profile = (profileUiState as ProfileUiState.Success).profile
-            imageUris = profile?.pictures?.map { Uri.parse(it) } ?: emptyList()
+//            imageUris = profile?.pictures?.map { Uri.parse(it) } ?: emptyList()
         }
         is ProfileUiState.Error -> {
             error = true
@@ -597,9 +665,28 @@ fun ProfileDetails4Screen(
 
             Button(
                 onClick = {
-                    profile?.let {
-                        val updatedProfile = it.copy(pictures = imageUris.map { uri -> uri.toString() })
-                        profileVM.updateUserProfile(token, updatedProfile)
+                    // Upload images and get URLs
+                    val imageUrls = mutableListOf<String>()
+                    loading = true
+                    imageUris.forEachIndexed { index, uri ->
+                        uri?.let {
+                            StorageUtil.uploadToStorage(
+                                auth = FirebaseAuth.getInstance(),
+                                uri = it,
+                                context = context,
+                                type = "Image"
+                            ) { downloadUrl ->
+                                imageUrls.add(downloadUrl)
+                                // Update profile when all images are uploaded
+                                if (imageUrls.size == imageUris.size) {
+                                    profile?.let {
+                                        val updatedProfile = it.copy(pictures = imageUrls)
+                                        profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                        Log.d("ProfileDetails4Screen", "profile updated")
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
@@ -610,9 +697,6 @@ fun ProfileDetails4Screen(
             }
         }
 
-        if (loading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
 
         if (error) {
             Text("An error occurred. Please try again.", color = Color.Red, modifier = Modifier.align(Alignment.Center))
@@ -636,6 +720,7 @@ fun ProfileDetails4Screen(
         )
     }
 }
+
 
 @Composable
 fun ChooseImageSourceDialog(

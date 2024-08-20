@@ -10,6 +10,7 @@ import com.hcmus.tenderus.network.ApiClient.LoginApi
 import com.hcmus.tenderus.network.ApiClient.SignOutApi
 import com.hcmus.tenderus.network.ApiClient.SyncPasswordResetApi
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
+import com.hcmus.tenderus.network.AuthOKResponse
 import kotlinx.coroutines.tasks.await
 
 class GenAuth {
@@ -27,11 +28,10 @@ class GenAuth {
 
         }
 
-        suspend fun syncForSignUp(username: String, password: String) {
+        suspend fun syncForSignUp(username: String, password: String): AuthOKResponse {
             val mUser = Firebase.auth.currentUser!!
             val userRegistration = UserRegistration(username, password, mUser.getIdToken(true).await().token!!)
-            SyncSignUpApi.sync(userRegistration)
-
+            return SyncSignUpApi.sync(userRegistration)
         }
 
         suspend fun syncForPasswordReset(password: String) {

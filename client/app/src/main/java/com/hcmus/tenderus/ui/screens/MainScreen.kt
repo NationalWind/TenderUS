@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,6 +33,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.ui.screens.admin.AdminScreen
+import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
@@ -39,16 +42,24 @@ import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
+import com.hcmus.tenderus.ui.screens.profilesetup.Add_Photos
+//import com.hcmus.tenderus.ui.screens.profilesetup.Add_Photoss
 import com.hcmus.tenderus.ui.screens.profilesetup.EditProfileScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.Interest
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails4Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
+import com.hcmus.tenderus.ui.screens.profilesetup.SelectYourGoalsScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
+import com.hcmus.tenderus.ui.viewmodels.ProfileVM
 import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, matchListVM: MatchListVM, context: Context) {
+fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, matchListVM: MatchListVM, context: Context, profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
     val mainNavController = rememberNavController()
     var showBar by remember { mutableStateOf(true) }
 
@@ -73,7 +84,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                     contentDescription = "Main Logo",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 1.dp) // Add padding as needed
+//                        .padding(top = 1.dp) // Add padding as needed
                         .size(30.dp) // Adjust size as needed
                 )
             }
@@ -97,6 +108,10 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         SignUpScreen(mainNavController, firebaseSMSAuth, firebaseEmailAuth)
                     }
                     composable("signin") {
+                        LaunchedEffect(Unit) {
+                            profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+                            Log.d("Profile", "Profile fetched")
+                        }
                         LaunchedEffect(Unit) {
                             showBar = false
                         }
@@ -146,7 +161,60 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         }
                         EditProfileScreen(mainNavController)
                     }
+                    composable("interest") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        Interest(mainNavController)
+                    }
 
+                    composable("addphoto") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        Add_Photos(mainNavController)
+                    }
+
+                    composable("main") {
+                        MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, context)
+                    }
+                    composable("admin") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        AdminScreen()
+                    }
+
+                    composable("filter") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        SearchPreferencesScreen(mainNavController)
+                    }
+                    composable("selGoal") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        SelectYourGoalsScreen(mainNavController)
+                    }
+                    composable("add_photos") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        ProfileDetails4Screen(mainNavController)
+                    }
+                    composable("fgpass1") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        ForgotPasswordScreen(mainNavController)
+                    }
+                    composable("houserules") {
+                        LaunchedEffect(Unit) {
+                            showBar = false
+                        }
+                        HouseRulesScreen(mainNavController)
+                    }
                 }
             }
         }

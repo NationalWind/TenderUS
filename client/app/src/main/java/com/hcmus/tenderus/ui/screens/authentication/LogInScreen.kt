@@ -21,21 +21,21 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.model.UserLogin
-import com.hcmus.tenderus.network.ApiClient.LoginApi
-import com.hcmus.tenderus.ui.screens.BottomNavItem
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.utils.firebase.GenAuth
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import kotlinx.coroutines.launch
+import org.json.JSONObject
+import retrofit2.HttpException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -93,24 +93,29 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick =
-                { /* Handle login logic here */
+                onClick = {
                     scope.launch {
                         try {
                             if (GenAuth.login(
-                                UserLogin(
-                                    username,
-                                    password,
-                                    FCMRegToken = TenderUSPushNotificationService.token!!
-                                )
-                            )) {
-                                //First Time
+                                    UserLogin(
+                                        username,
+                                        password,
+                                        FCMRegToken = TenderUSPushNotificationService.token!!
+                                    )
+                                )) {
+                                // First Time
+                                navController.navigate("profilesetup1")
                             } else {
-                                navController.navigate(BottomNavItem.Discover.route)
+                                navController.navigate("main")
                             }
-                        } catch (e: Exception) {
+                        } catch (e: HttpException) {
+                            val errorBody = e.response()?.errorBody()?.string()
+                            val errorJson = errorBody?.let { JSONObject(it) }
+                            errorMessage = errorJson?.optString("message") ?: "An error occurred"
                             Log.d("Login", e.toString())
-                            // GUI error message here
+                        } catch (e: Exception) {
+                            errorMessage = "An unexpected error occurred"
+                            Log.d("Login", e.toString())
                         }
                     }
                 },
@@ -123,7 +128,6 @@ fun LoginScreen(navController: NavController) {
                 Text(text = "LOGIN")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = { /* Handle login as guest logic here */ },
@@ -138,6 +142,12 @@ fun LoginScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            if (errorMessage.isNotEmpty()) {
+                Text(text = errorMessage, color = Color.Red,  fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
@@ -145,18 +155,17 @@ fun LoginScreen(navController: NavController) {
                 Text(
                     text = "Forgot password?",
                     modifier = Modifier.clickable {
-                        // Handle forgot password click
                         navController.navigate("fgpass1")
                     },
-                    color = Color.Red
+                    color = Color(0xFFB71C1C)
                 )
-                Spacer(modifier = Modifier.width(32.dp)) // Use width instead of height for horizontal spacing
+                Spacer(modifier = Modifier.width(40.dp))
                 Text(
                     text = "Don't have an account? Sign up",
                     modifier = Modifier.clickable {
                         navController.navigate("signup1")
                     },
-                    color = Color.Red
+                    color = Color(0xFFB71C1C)
                 )
             }
 

@@ -10,11 +10,11 @@ import retrofit2.http.Header
 
 interface ProfileService {
 
-    @GET("api/profile/prof")
-    suspend fun getCurrentUserProfile(@Header("Authorization") token: String): Profile
-
     @GET("api/profile/pref")
     suspend fun getCurrentUserPreferences(@Header("Authorization") token: String): Preference
+
+    @GET("api/profile/prof")
+    suspend fun getCurrentUserProfile(@Header("Authorization") token: String): Profile
 
     @POST("api/profile/uPref")
     suspend fun updateUserPreferences(@Header("Authorization") token: String, @Body preferences: Preference)

@@ -115,7 +115,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                         ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("SEND RESET CODE")
+                        Text("SEND")
                     }
                     TextButton(onClick = { step = 3 }) {
                         Text("Use Email Instead", color = Color(0xFFB71C1C))
