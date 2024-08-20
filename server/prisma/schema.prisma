@@ -17,10 +17,12 @@ model Account {
   FirebaseUID String @unique
   username String  @unique
   password String
-  email    String? @unique
-  phone    String? @unique
+  email    String? 
+  phone    String? 
   role     Role
   FCMRegToken String?
+
+  @@unique([email, phone])
 }
 
 model Profile {
