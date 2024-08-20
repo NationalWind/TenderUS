@@ -37,13 +37,17 @@ const adminController = {
           reported: { select: { username: true, Profile: { select: { avatarIcon: true } } } },
         }
       });
-      res.status(200).json({
-        ...report,
-        reporter: report?.reporter.username,
-        reporterAvatar: report?.reporter.Profile?.avatarIcon,
-        reported: report?.reported.username,
-        reportedAvatar: report?.reported.Profile?.avatarIcon,
-      });
+      if (report) {
+        res.status(200).json({
+          ...report,
+          reporter: report.reporter.username,
+          reporterAvatar: report.reporter.Profile?.avatarIcon,
+          reported: report.reported.username,
+          reportedAvatar: report.reported.Profile?.avatarIcon,
+        });
+      } else {
+        res.status(404).json({ message: "Report not found" })
+      }
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: error.message });
@@ -89,7 +93,7 @@ const adminController = {
     }
   },
   // GET /api/admin/account
-  getAccountList: async (req: Request, res: Response) => {
+  getAccountList: async (_req: Request, res: Response) => {
     try {
       const accountList = await db.account.findMany({ include: { Profile: { select: { avatarIcon: true } } } })
       res.status(200).json(
@@ -103,7 +107,29 @@ const adminController = {
       res.status(500).json({ message: error.message });
     }
   },
-  getAccountDetail: async (req: Request, res: Response) => { },
+  getAccountDetail: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const account = await db.account.findUnique({
+        where: { id },
+        include: { Profile: { select: { avatarIcon: true } }, penalty: { select: { type: true } } }
+      })
+      if (account) {
+        res.status(200).json(
+          {
+            ...account,
+            avatar: account.Profile?.avatarIcon,
+            penalty: account.penalty.map((penalty) => penalty.type)
+          }
+        );
+      } else {
+        res.status(404).json({ message: "Account not found" })
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: error.message });
+    }
+  },
   getAccountStatistics: async (req: Request, res: Response) => { },
 };
 

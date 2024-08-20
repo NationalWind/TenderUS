@@ -184,12 +184,12 @@ fun ReportDetail(
             }
             Text(text = report.message)
         }
-        ActionMenu(backAction = backAction, saveAction = saveAction)
+        ReportActionMenu(backAction = backAction, saveAction = saveAction)
     }
 }
 
 @Composable
-fun ActionMenu(
+fun ReportActionMenu(
     backAction: () -> Unit,
     saveAction: (reportAction: ReportAction) -> Unit,
     modifier: Modifier = Modifier

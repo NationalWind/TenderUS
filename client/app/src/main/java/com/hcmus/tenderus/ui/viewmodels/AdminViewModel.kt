@@ -29,6 +29,7 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
     var reportListUiState: UiState<List<Report>> by mutableStateOf(UiState.Loading)
     var reportDetailUiState: UiState<Report> by mutableStateOf(UiState.Loading)
     var accountListUiState: UiState<List<Account>> by mutableStateOf(UiState.Loading)
+    var accountDetailUiState: UiState<Account> by mutableStateOf(UiState.Loading)
 
     init {
         getReportList()
@@ -90,6 +91,21 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
                 UiState.Error
             } catch (e: HttpException) {
                 Log.d("AdminAccountList", e.message.toString())
+                UiState.Error
+            }
+        }
+    }
+
+    fun getAccountDetail(id: String) {
+        viewModelScope.launch {
+            accountDetailUiState = UiState.Loading
+            accountDetailUiState = try {
+                UiState.Success(tenderUsRepository.getAccountDetail(id))
+            } catch (e: IOException) {
+                Log.d("AdminAccountDetail", e.message.toString())
+                UiState.Error
+            } catch (e: HttpException) {
+                Log.d("AdminAccountDetail", e.message.toString())
                 UiState.Error
             }
         }

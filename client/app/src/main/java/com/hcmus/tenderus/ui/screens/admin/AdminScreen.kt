@@ -73,7 +73,19 @@ fun AdminScreen() {
             }
             composable("${BottomNav.Accounts.route}/{id}") { navBackStackEntry ->
                 val id = navBackStackEntry.arguments?.getString("id")
-                Text(text = id.toString())
+                if (id != null) {
+                    LaunchedEffect(id) {
+                        adminViewModel.getAccountDetail(id)
+                    }
+                    AccountDetailScreen(
+                        accountDetailUiState = adminViewModel.accountDetailUiState,
+                        retryAction = { adminViewModel.getAccountDetail(id) },
+                        backAction = { navController.popBackStack() },
+                        saveAction = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
             }
             composable(BottomNav.Settings.route) {
                 Text(text = BottomNav.Settings.route)

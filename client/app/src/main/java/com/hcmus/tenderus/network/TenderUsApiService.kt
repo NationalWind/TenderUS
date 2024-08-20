@@ -20,4 +20,7 @@ interface TenderUsApiService {
 
     @GET("api/admin/account")
     suspend fun getAccountList(): List<Account>
+
+    @GET("api/admin/account/{id}")
+    suspend fun getAccountDetail(@Path("id") id: String): Account
 }

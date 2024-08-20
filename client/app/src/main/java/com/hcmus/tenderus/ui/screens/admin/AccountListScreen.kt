@@ -51,7 +51,7 @@ fun AccountListScreen(
 ) {
     when (accountListUiState) {
         is UiState.Loading -> LoadingScreen()
-//
+
         is UiState.Error -> ErrorScreen(
             retryAction, modifier = modifier.fillMaxSize()
         )

@@ -35,6 +35,7 @@ interface TenderUsRepository {
     suspend fun getReportDetail(id: String): Report
     suspend fun postReportAction(id: String, reportAction: ReportAction)
     suspend fun getAccountList(): List<Account>
+    suspend fun getAccountDetail(id: String): Account
 }
 
 class NetworkTenderUsRepository(
@@ -48,4 +49,6 @@ class NetworkTenderUsRepository(
         tenderUsApiService.postReportAction(id, reportAction)
 
     override suspend fun getAccountList(): List<Account> = tenderUsApiService.getAccountList()
+    override suspend fun getAccountDetail(id: String): Account =
+        tenderUsApiService.getAccountDetail(id)
 }
