@@ -152,21 +152,17 @@ class MainActivity : ComponentActivity() {
         })
         Log.d(TAG, "Init")
 
-//        VM init
-        val matchListVM by viewModels<MatchListVM>()
-
-
         enableEdgeToEdge()
         setContent {
             TenderUSTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = "signin") {
+                NavHost(navController, startDestination = "main") {
 //                NavHost(navController, startDestination = "messages") {
-                    composable("messages") { MatchList(navController = navController, matchListVM = matchListVM) }
+                    composable("messages") { MatchList(navController = navController) }
 //                    composable("inchat") { InChatScreen(navController = navController, matchListVM = matchListVM)}
                     composable("splash") { SplashScreen(navController = navController) }
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
-                    composable("signin") { LoginScreen(navController = navController) }
+//                    composable("signin") { LoginScreen(navController = navController) }
                     composable("signup1") { SignUpScreen(navController, firebaseSMSAuth, firebaseEmailAuth) }
                     composable("profilesetup1") { ProfileDetails1Screen(navController) }
                     composable("profilesetup2") { ProfileDetails2Screen(navController ) }
@@ -182,7 +178,7 @@ class MainActivity : ComponentActivity() {
                     composable("emailsync") { ExampleEmailSync() }
 //                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
 //                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
-                    composable("main") { MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, applicationContext) }
+                    composable("main") { MainScreen(firebaseSMSAuth, firebaseEmailAuth, applicationContext) }
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
                     composable("exlogin") { ExampleLogin(navController) }

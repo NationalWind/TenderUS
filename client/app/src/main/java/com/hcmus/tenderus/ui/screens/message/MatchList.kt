@@ -42,6 +42,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -139,7 +140,7 @@ fun NewMatchItem(match: MatchState, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MatchList(navController: NavController, matchListVM: MatchListVM) {
+fun MatchList(navController: NavController, matchListVM: MatchListVM = viewModel()) {
     val matches = matchListVM.matches
     var searchText by remember { mutableStateOf("") }
 

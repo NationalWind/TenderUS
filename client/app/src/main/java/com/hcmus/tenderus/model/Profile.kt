@@ -1,18 +1,18 @@
 package com.hcmus.tenderus.model
 
 data class Profile(
-    var displayName: String = "",
-    var avatarIcon: String = "",
-    val pictures: List<String> = listOf(),
-    val description: String = "",
+    var displayName: String? = null,
+    var avatarIcon: String? = null,
+    val pictures: List<String>? = null,
+    val description: String? = null,
 
-    val longitude: Float,
-    val latitude: Float,
+    val longitude: Float? = null,
+    val latitude: Float? = null,
 
-    var identity: String = "",
-    var birthDate: String = "",
-    val interests: List<String> = listOf(),
-    val groups: List<String> = listOf(),
+    var identity: String? = null,
+    var birthDate: String? = null,
+    val interests: List<String>? = null,
+    val groups: List<String>? = null,
 
-    val isActive: Boolean
+    val isActive: Boolean? = null
 )

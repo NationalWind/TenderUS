@@ -395,7 +395,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                         .background(Color.Black.copy(alpha = 0.5f)) // Optional background
                 ) {
                     Image(
-                        painter = rememberAsyncImagePainter(profile.pictures[0]),
+                        painter = rememberAsyncImagePainter(profile.avatarIcon!!),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -416,14 +416,14 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                         Column {
                             Row {
                                 Text(
-                                    text = profile.displayName,
+                                    text = profile.displayName!!,
                                     color = Color.White,
                                     style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp),
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "${calculateAgeFromDob(profile.birthDate)}",
+                                    text = "${calculateAgeFromDob(profile.birthDate!!)}",
                                     color = Color.White,
                                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp)
                                 )
@@ -467,7 +467,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                         ) {
                             // Profile Image as part of the detailed profile
                             Image(
-                                painter = rememberAsyncImagePainter(profile.pictures[0]),
+                                painter = rememberAsyncImagePainter(profile.avatarIcon!!),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
@@ -478,7 +478,7 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                             Spacer(modifier = Modifier.height(16.dp))
 
                             // Display additional images
-                            profile.pictures.drop(1).forEach { imageUrl ->
+                            profile.pictures!!.drop(1).forEach { imageUrl ->
                                 Image(
                                     painter = rememberAsyncImagePainter(imageUrl),
                                     contentDescription = null,
@@ -492,11 +492,11 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Text(profile.displayName, style = MaterialTheme.typography.headlineSmall)
-                            Text("Age: ${calculateAgeFromDob(profile.birthDate)}", style = MaterialTheme.typography.bodyLarge)
+                            Text(profile.displayName!!, style = MaterialTheme.typography.headlineSmall)
+                            Text("Age: ${calculateAgeFromDob(profile.birthDate!!)}", style = MaterialTheme.typography.bodyLarge)
                             Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                profile.description,
+                                profile.description!!,
                                 style = MaterialTheme.typography.bodyMedium
                             )
 

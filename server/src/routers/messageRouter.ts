@@ -12,5 +12,8 @@ messageRouter.get("/", authMiddeware.checkUser, messageController.loadMessage);
 messageRouter.get("/matches", authMiddeware.checkUser, messageController.getMatches);
 
 messageRouter.post("/read", authMiddeware.checkUser, messageController.haveRead);
+
+messageRouter.get("/activity/:matched", authMiddeware.checkUser, messageController.getActivityStatus);
+
 export default messageRouter;
 

@@ -22,7 +22,8 @@ model Account {
   role     Role
   FCMRegToken String?
 
-  @@unique([email, phone])
+  @@index(email)
+  @@index(phone)
 }
 
 model Profile {

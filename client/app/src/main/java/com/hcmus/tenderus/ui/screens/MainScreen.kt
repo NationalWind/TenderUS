@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.screens
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -33,6 +34,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Profile
+import com.hcmus.tenderus.network.ApiClient.ProcessProfile
 import com.hcmus.tenderus.ui.screens.admin.AdminScreen
 import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
@@ -47,6 +50,7 @@ import com.hcmus.tenderus.ui.screens.profilesetup.Add_Photos
 import com.hcmus.tenderus.ui.screens.profilesetup.EditProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.Interest
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails4Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
@@ -57,70 +61,78 @@ import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 
 
+@SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, matchListVM: MatchListVM, context: Context, profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
-    val mainNavController = rememberNavController()
-    var showBar by remember { mutableStateOf(true) }
+fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, context: Context) {
+    var isLoggedIn by remember {
+        mutableStateOf(TokenManager.getToken() != null)
+    }
+    var firstTime by remember {
+        mutableStateOf(false)
+    }
 
-    Scaffold(
+    if (!isLoggedIn) {
+        val mainNavController = rememberNavController()
+        NavHost(
+            navController = mainNavController,
+            startDestination = "signin"
+        ) {
+            composable("signin") {
+                LoginScreen(navController = mainNavController) {
+                    isLoggedIn = true
+                    firstTime = it
+                }
+            }
+            composable("signup1") {
+                SignUpScreen(mainNavController, firebaseSMSAuth, firebaseEmailAuth)
+            }
+        }
 
-        bottomBar = {
-
-            if (showBar) BottomNavigationBar(mainNavController)
+    } else {
+        val mainNavController = rememberNavController()
+        var showBar by remember { mutableStateOf(true) }
+        LaunchedEffect(Unit) {
+            try {
+                ProcessProfile.updateUserProfile("Bearer " + TokenManager.getToken()!!, profile = Profile(isActive = true))
+            } catch (e: Exception) {
+                Log.d("Profile", "Activity Status Update Failed")
+            }
 
         }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(Color.White)
-        ) {
-            // Logo at the top of the screen
-            if (showBar) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_mainscreen), // Replace with your logo resource
-                    contentDescription = "Main Logo",
-                    modifier = Modifier
-                        .fillMaxWidth()
-//                        .padding(top = 1.dp) // Add padding as needed
-                        .size(30.dp) // Adjust size as needed
-                )
+        Scaffold(
+            bottomBar = {
+                if (showBar) BottomNavigationBar(mainNavController)
             }
-            Log.d("dsoiegh", TokenManager.getToken()?:"" )
-            // Main content (NavHost)
-            Box(
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .background(Color.White)
             ) {
+                // Logo at the top of the screen
+                if (showBar) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_mainscreen), // Replace with your logo resource
+                        contentDescription = "Main Logo",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            //                        .padding(top = 1.dp) // Add padding as needed
+                            .size(30.dp) // Adjust size as needed
+                    )
+                }
+                Log.d("dsoiegh", TokenManager.getToken() ?: "")
+                // Main content (NavHost)
                 NavHost(
                     navController = mainNavController,
-                    startDestination = if (TokenManager.getToken() == null) {
-                        "signin"
-                    } else {
-                        BottomNavItem.Discover.route
-                    },
+                    startDestination = if (firstTime) "profilesetup1" else BottomNavItem.Discover.route
 
                 ) {
-                    composable("signup1") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        SignUpScreen(mainNavController, firebaseSMSAuth, firebaseEmailAuth)
-                    }
-                    composable("signin") {
-                        LaunchedEffect(Unit) {
-                            profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-                            Log.d("Profile", "Profile fetched")
-                        }
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        LoginScreen(navController = mainNavController)
-                    }
+
                     composable(BottomNavItem.Discover.route) {
                         LaunchedEffect(Unit) {
                             showBar = true
-                            matchListVM.init()
                         }
                         DiscoverScreen(mainNavController/*navController*/)
                     }
@@ -140,21 +152,31 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         LaunchedEffect(Unit) {
                             showBar = true
                         }
-                        MatchList(mainNavController, matchListVM = matchListVM)
+                        MatchList(mainNavController)
                     }
                     composable("inchat") {
                         LaunchedEffect(Unit) {
                             showBar = false
                         }
-                        InChatScreen(navController = mainNavController, matchListVM = matchListVM, context)
+                        val loginBackStackEntry = remember { mainNavController.getBackStackEntry(BottomNavItem.Chat.route) }
+                        InChatScreen(navController = mainNavController, context, viewModel(loginBackStackEntry))
                     }
-//                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
+                    //                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
                     composable(BottomNavItem.Profile.route) {
                         LaunchedEffect(Unit) {
                             showBar = true
                         }
-                        ProfileScreen(mainNavController)
+                        ProfileScreen(mainNavController) {
+                            isLoggedIn = false
+                        }
                     }
+
+
+
+                    composable("profilesetup1") {
+                        ProfileDetails1Screen(mainNavController)
+                    }
+
                     composable("editprofile") {
                         LaunchedEffect(Unit) {
                             showBar = false
@@ -175,9 +197,9 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         Add_Photos(mainNavController)
                     }
 
-                    composable("main") {
-                        MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, context)
-                    }
+                    //                    composable("main") {
+                    //                        MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, context)
+                    //                    }
                     composable("admin") {
                         LaunchedEffect(Unit) {
                             showBar = false
@@ -216,6 +238,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         HouseRulesScreen(mainNavController)
                     }
                 }
+
             }
         }
     }

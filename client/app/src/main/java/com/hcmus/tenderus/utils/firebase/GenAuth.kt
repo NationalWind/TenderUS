@@ -1,12 +1,15 @@
 package com.hcmus.tenderus.utils.firebase
 
+import android.app.PendingIntent.getActivity
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.LoginApi
+import com.hcmus.tenderus.network.ApiClient.ProcessProfile
 import com.hcmus.tenderus.network.ApiClient.SignOutApi
 import com.hcmus.tenderus.network.ApiClient.SyncPasswordResetApi
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
@@ -22,6 +25,7 @@ class GenAuth {
             return res.firstTime
         }
         suspend fun signOut() {
+            ProcessProfile.updateUserProfile("Bearer " + TokenManager.getToken()!!, Profile(isActive = false))
             SignOutApi.signOut("Bearer " + TokenManager.getToken()!!)
             TokenManager.clearToken()
             Firebase.auth.signOut()

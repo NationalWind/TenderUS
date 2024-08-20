@@ -13,6 +13,7 @@ import com.hcmus.tenderus.data.TokenManager
 
 import com.hcmus.tenderus.model.Match
 import com.hcmus.tenderus.model.Message
+import com.hcmus.tenderus.network.ApiClient.GetActivityStatusApi
 import com.hcmus.tenderus.network.ApiClient.GetMatchesApi
 import com.hcmus.tenderus.network.ApiClient.HaveReadMessageApi
 import com.hcmus.tenderus.network.ApiClient.MessageLoadingApi
@@ -21,6 +22,7 @@ import com.hcmus.tenderus.network.ApiClient.MessageSendingApi
 import com.hcmus.tenderus.network.HaveReadMessageRequest
 import com.hcmus.tenderus.network.MessageSendingRequest
 import com.hcmus.tenderus.utils.subtractInMinutes
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class MatchState(
@@ -37,11 +39,9 @@ data class MatchState(
 class MatchListVM: ViewModel() {
     val matches = mutableStateListOf<MatchState>()
     var curReceiver by mutableStateOf("")
-    var isInit = false
 
-    fun init() {
-        if (isInit) return
-        isInit = true
+
+    init {
         getMatches()
         viewModelScope.launch {
             while (true) {
@@ -64,6 +64,20 @@ class MatchListVM: ViewModel() {
                 } catch (e: Exception) {
                     Log.d("MsgPolling", e.toString())
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            try {
+                TokenManager.getToken()?.let {
+                    for (match in matches) {
+                        match.isActive = GetActivityStatusApi.get("Bearer $it", match.username).isActive
+                        delay(180000)
+                    }
+
+                }
+            } catch (e: Exception) {
+                Log.d("Active Status", e.toString())
             }
         }
 

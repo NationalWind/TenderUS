@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -94,7 +95,7 @@ fun ProfileHeader(imageUri: Uri?, name: String, age: Int) {
 
 
 @Composable
-fun ProfileButtons(navController: NavController) {
+fun ProfileButtons(navController: NavController, onSignedOut: () -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     Column(
@@ -132,7 +133,7 @@ fun ProfileButtons(navController: NavController) {
                 scope.launch {
                     try {
                         GenAuth.signOut()
-                        navController.navigate("signin")
+                        onSignedOut()
                     } catch (e: Exception) {
                         // GUI error message here
                     }
@@ -193,7 +194,7 @@ fun calculateAgeFromDob(dob: String): Int {
 
 
 @Composable
-fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)) {
+fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory), onSignedOut: () -> Unit) {
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
     var profile by remember { mutableStateOf<Profile?>(null) }
 
@@ -208,6 +209,10 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(
+            top =  0.dp,
+            bottom = 0.dp
+        ),
         containerColor = Color.White
     ) { paddingValues ->
         Box(
@@ -224,12 +229,12 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
             ) {
                 profile?.let {
                     ProfileHeader(
-                        imageUri = it.avatarIcon.takeIf { uri -> uri.isNotEmpty() }?.let { Uri.parse(it) },
-                        name = it.displayName,
-                        age = calculateAgeFromDob(it.birthDate)
+                        imageUri = it.avatarIcon!!.takeIf { uri -> uri.isNotEmpty() }?.let { Uri.parse(it) },
+                        name = it.displayName!!,
+                        age = calculateAgeFromDob(it.birthDate!!)
                     )
                 }
-                ProfileButtons(navController)
+                ProfileButtons(navController, onSignedOut)
             }
         }
     }
@@ -282,10 +287,10 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 // Load profile data into the UI
                 val profileData = (profileUiState as ProfileUiState.Success).profile
                 profile = profileData
-                name = TextFieldValue(profileData.displayName)
-                birthdate = TextFieldValue(profileData.birthDate)
-                gender = profileData.identity
-                profileImageUri = profileData.avatarIcon.takeIf { it.isNotEmpty() }?.let { Uri.parse(it) }
+                name = TextFieldValue(profileData.displayName!!)
+                birthdate = TextFieldValue(profileData.birthDate!!)
+                gender = profileData.identity!!
+                profileImageUri = profileData.avatarIcon!!.takeIf { it.isNotEmpty() }?.let { Uri.parse(it) }
                 newImageSelected = false
             }
             is ProfileUiState.PreferencesSuccess -> {
@@ -294,8 +299,16 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
         }
     }
     Scaffold(
+        contentWindowInsets = WindowInsets(
+            top =  0.dp,
+            bottom = 0.dp
+        ),
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(
+                    top =  0.dp,
+                    bottom = 0.dp
+                ),
                 title = {
                     Text("Edit Profile", color = Color(0xFFB71C1C))
                 },
@@ -589,8 +602,16 @@ fun Interest(
 
     TenderUSTheme {
         Scaffold(
+            contentWindowInsets = WindowInsets(
+                top =  0.dp,
+                bottom = 0.dp
+            ),
             topBar = {
                 TopAppBar(
+                    windowInsets = WindowInsets(
+                        top =  0.dp,
+                        bottom = 0.dp
+                    ),
                     title = {
                         Text("Interests", color = Color(0xFFB71C1C))
                     },
@@ -769,8 +790,16 @@ fun Add_Photos(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(
+            top =  0.dp,
+            bottom = 0.dp
+        ),
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(
+                    top =  0.dp,
+                    bottom = 0.dp
+                ),
                 title = {
                     Text("Add Photos", color = Color(0xFFB71C1C))
                 },
@@ -953,8 +982,8 @@ fun Add_Photos(
     }
 }
 
-@Composable
-@Preview(showBackground = true)
-fun ProfileScreenPreview() {
-    ProfileScreen(rememberNavController())
-}
+//@Composable
+//@Preview(showBackground = true)
+//fun ProfileScreenPreview() {
+//    ProfileScreen(rememberNavController())
+//}
