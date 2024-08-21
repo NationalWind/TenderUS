@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.data.baseUrl
 import com.hcmus.tenderus.model.Account
 import com.hcmus.tenderus.model.AccountAction
 import com.hcmus.tenderus.model.Penalty
@@ -58,6 +59,7 @@ import com.hcmus.tenderus.ui.screens.admin.composable.SelectField
 import com.hcmus.tenderus.ui.theme.PinkPrimary
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.UiState
+import java.util.Locale
 
 @Composable
 fun AccountDetailScreen(
@@ -139,7 +141,7 @@ fun AccountDetail(
             Text(text = "Email: ${account.email ?: "None"}")
             Text(text = "Phone: ${account.phone ?: "None"}")
         }
-        AccountAnalytics()
+        AccountAnalytics(account = account)
         AccountActionMenu(
             accountPenalty = account.penalty,
             backAction = backAction,
@@ -149,8 +151,8 @@ fun AccountDetail(
 }
 
 @Composable
-fun AccountAnalytics(modifier: Modifier = Modifier) {
-    val durations = listOf("Daily", "Weekly", "Monthly", "Yearly")
+fun AccountAnalytics(account: Account, modifier: Modifier = Modifier) {
+    val durations = listOf("Daily", "Monthly", "Yearly")
     var selectedDuration by remember { mutableStateOf(durations[0]) }
 
     Column(modifier = modifier) {
@@ -175,14 +177,24 @@ fun AccountAnalytics(modifier: Modifier = Modifier) {
             selected = selectedDuration,
             select = { selectedDuration = it }
         )
-        Text(text = "Average session duration")
-        Text(text = "Insert chart $selectedDuration")
         Text(text = "Messages sent")
-        Text(text = "Insert chart $selectedDuration")
+        AsyncImage(
+            model = "${baseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=MESSAGE_SENT&accountId=${account.id}",
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth()
+        )
         Text(text = "Matches made")
-        Text(text = "Insert chart $selectedDuration")
+        AsyncImage(
+            model = "${baseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=MATCH_MADE&accountId=${account.id}",
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth()
+        )
         Text(text = "Profile views")
-        Text(text = "Insert chart $selectedDuration")
+        AsyncImage(
+            model = "${baseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=PROFILE_VIEW&accountId=${account.id}",
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
