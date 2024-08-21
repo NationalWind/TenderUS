@@ -119,7 +119,7 @@ const authController = {
 
                     const firstTime = await db.profile.findUnique({ where: { username: data.username } }) == null;
 
-                    res.status(200).json({ token, firebaseToken, firstTime });
+                    res.status(200).json({ token, firebaseToken, firstTime, role: foundAccount.role });
                 } else {
                     res.status(401).json({ message: "Wrong password" });
                 }

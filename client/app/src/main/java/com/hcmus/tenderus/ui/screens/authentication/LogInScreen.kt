@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.model.UserLogin
+import com.hcmus.tenderus.network.LoginOKResponse
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.utils.firebase.GenAuth
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
@@ -32,7 +33,7 @@ import retrofit2.HttpException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController, onLoggedIn: (firstTime: Boolean) -> Unit) {
+fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }

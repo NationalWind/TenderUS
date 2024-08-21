@@ -2,6 +2,8 @@ package com.hcmus.tenderus.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
@@ -57,6 +59,7 @@ import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.SelectYourGoalsScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
+import com.hcmus.tenderus.utils.ActivityStatusService
 import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 
@@ -71,6 +74,9 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
     var firstTime by remember {
         mutableStateOf(false)
     }
+    var isAdmin by remember {
+        mutableStateOf(false)
+    }
 
     if (!isLoggedIn) {
         val mainNavController = rememberNavController()
@@ -81,7 +87,8 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
             composable("signin") {
                 LoginScreen(navController = mainNavController) {
                     isLoggedIn = true
-                    firstTime = it
+                    firstTime = it.firstTime
+                    isAdmin = it.role == "ADMIN"
                 }
             }
             composable("signup1") {
@@ -95,6 +102,9 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
         LaunchedEffect(Unit) {
             try {
                 ProcessProfile.updateUserProfile("Bearer " + TokenManager.getToken()!!, profile = Profile(isActive = true))
+                val intent = Intent(context, ActivityStatusService::class.java)
+                context.startService(intent)
+
             } catch (e: Exception) {
                 Log.d("Profile", "Activity Status Update Failed")
             }

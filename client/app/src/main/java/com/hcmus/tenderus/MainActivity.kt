@@ -56,11 +56,13 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 import com.hcmus.tenderus.model.UserRegistration
 import com.hcmus.tenderus.network.ApiClient.LoginApi
+import com.hcmus.tenderus.network.ApiClient.ProcessProfile
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
 import com.hcmus.tenderus.network.SyncSignUp
 import com.hcmus.tenderus.ui.screens.MainScreen
@@ -81,7 +83,11 @@ import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.utils.firebase.GenAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     private val TAG = "MainAct"
@@ -189,6 +195,10 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
+
+
 }
 
 @Composable

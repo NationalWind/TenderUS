@@ -14,18 +14,18 @@ import com.hcmus.tenderus.network.ApiClient.SignOutApi
 import com.hcmus.tenderus.network.ApiClient.SyncPasswordResetApi
 import com.hcmus.tenderus.network.ApiClient.SyncSignUpApi
 import com.hcmus.tenderus.network.AuthOKResponse
+import com.hcmus.tenderus.network.LoginOKResponse
 import kotlinx.coroutines.tasks.await
 
 class GenAuth {
     companion object {
-        suspend fun login(userLogin: UserLogin): Boolean {
+        suspend fun login(userLogin: UserLogin): LoginOKResponse {
             val res = LoginApi.login(userLogin)
             Firebase.auth.signInWithCustomToken(res.firebaseToken).await()
             TokenManager.saveToken(res.token)
-            return res.firstTime
+            return res
         }
         suspend fun signOut() {
-            ProcessProfile.updateUserProfile("Bearer " + TokenManager.getToken()!!, Profile(isActive = false))
             SignOutApi.signOut("Bearer " + TokenManager.getToken()!!)
             TokenManager.clearToken()
             Firebase.auth.signOut()

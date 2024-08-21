@@ -59,6 +59,7 @@ class MatchListVM: ViewModel() {
                             matches.add(0, match)
                         }
                         matches[0].isRead = false
+                        matches[0].isActive = true
                     }
 
                 } catch (e: Exception) {
