@@ -83,6 +83,9 @@ const recommendationController = {
                 where: {
                     username: {
                         not: cur_prof.username
+                    },
+                    account: {
+                        role: Role.USER
                     }
                 }
             });

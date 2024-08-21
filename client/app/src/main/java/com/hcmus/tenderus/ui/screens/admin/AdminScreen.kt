@@ -16,11 +16,12 @@ import com.hcmus.tenderus.model.ReportAction
 import com.hcmus.tenderus.ui.screens.admin.composable.BottomNav
 import com.hcmus.tenderus.ui.screens.admin.composable.BottomNavigationBar
 import com.hcmus.tenderus.ui.screens.admin.composable.TopBar
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.AdminViewModel
 
 @Composable
-fun AdminScreen() {
+fun AdminScreen(onSignedOut: () -> Unit = {}) {
     val navController = rememberNavController()
 
     val adminViewModel: AdminViewModel = viewModel(factory = AdminViewModel.Factory)
@@ -90,7 +91,7 @@ fun AdminScreen() {
                 }
             }
             composable(BottomNav.Settings.route) {
-                Text(text = BottomNav.Settings.route)
+                ProfileScreen(navController, onSignedOut = onSignedOut)
             }
         }
     }

@@ -22,14 +22,13 @@ class GenAuth {
         suspend fun login(userLogin: UserLogin): LoginOKResponse {
             val res = LoginApi.login(userLogin)
             Firebase.auth.signInWithCustomToken(res.firebaseToken).await()
-            TokenManager.saveToken(res.token)
+            TokenManager.saveToken(res)
             return res
         }
         suspend fun signOut() {
             SignOutApi.signOut("Bearer " + TokenManager.getToken()!!)
-            TokenManager.clearToken()
             Firebase.auth.signOut()
-
+            TokenManager.clearToken()
         }
 
         suspend fun syncForSignUp(username: String, password: String): AuthOKResponse {

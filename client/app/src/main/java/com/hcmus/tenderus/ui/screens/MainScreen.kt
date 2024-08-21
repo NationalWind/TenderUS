@@ -72,10 +72,10 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
         mutableStateOf(TokenManager.getToken() != null)
     }
     var firstTime by remember {
-        mutableStateOf(false)
+        mutableStateOf(TokenManager.getFirstTime())
     }
     var isAdmin by remember {
-        mutableStateOf(false)
+        mutableStateOf(TokenManager.getRole() == "ADMIN")
     }
 
     if (!isLoggedIn) {
@@ -97,158 +97,172 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
         }
 
     } else {
-        val mainNavController = rememberNavController()
-        var showBar by remember { mutableStateOf(true) }
-        LaunchedEffect(Unit) {
-            try {
-                ProcessProfile.updateUserProfile("Bearer " + TokenManager.getToken()!!, profile = Profile(isActive = true))
-                val intent = Intent(context, ActivityStatusService::class.java)
-                context.startService(intent)
-
-            } catch (e: Exception) {
-                Log.d("Profile", "Activity Status Update Failed")
+        if (isAdmin) {
+            AdminScreen {
+                isLoggedIn = false
             }
-
-        }
-        Scaffold(
-            bottomBar = {
-                if (showBar) BottomNavigationBar(mainNavController)
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(Color.White)
-            ) {
-                // Logo at the top of the screen
-                if (showBar) {
-                    Image(
-                        painter = painterResource(id = R.drawable.logo_mainscreen), // Replace with your logo resource
-                        contentDescription = "Main Logo",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            //                        .padding(top = 1.dp) // Add padding as needed
-                            .size(30.dp) // Adjust size as needed
+        } else {
+            val mainNavController = rememberNavController()
+            var showBar by remember { mutableStateOf(true) }
+            LaunchedEffect(Unit) {
+                try {
+                    ProcessProfile.updateUserProfile(
+                        "Bearer " + TokenManager.getToken()!!,
+                        profile = Profile(isActive = true)
                     )
-                }
-                Log.d("dsoiegh", TokenManager.getToken() ?: "")
-                // Main content (NavHost)
-                NavHost(
-                    navController = mainNavController,
-                    startDestination = if (firstTime) "profilesetup1" else BottomNavItem.Discover.route
+                    val intent = Intent(context, ActivityStatusService::class.java)
+                    context.startService(intent)
 
+                } catch (e: Exception) {
+                    Log.d("Profile", "Activity Status Update Failed")
+                }
+
+            }
+            Scaffold(
+                bottomBar = {
+                    if (showBar) BottomNavigationBar(mainNavController)
+                }
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .background(Color.White)
                 ) {
+                    // Logo at the top of the screen
+                    if (showBar) {
+                        Image(
+                            painter = painterResource(id = R.drawable.logo_mainscreen), // Replace with your logo resource
+                            contentDescription = "Main Logo",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                //                        .padding(top = 1.dp) // Add padding as needed
+                                .size(30.dp) // Adjust size as needed
+                        )
+                    }
+                    Log.d("dsoiegh", TokenManager.getToken() ?: "")
+                    // Main content (NavHost)
+                    NavHost(
+                        navController = mainNavController,
+                        startDestination = if (firstTime) "profilesetup1" else BottomNavItem.Discover.route
 
-                    composable(BottomNavItem.Discover.route) {
-                        LaunchedEffect(Unit) {
-                            showBar = true
+                    ) {
+
+                        composable(BottomNavItem.Discover.route) {
+                            LaunchedEffect(Unit) {
+                                showBar = true
+                            }
+                            DiscoverScreen(mainNavController/*navController*/)
                         }
-                        DiscoverScreen(mainNavController/*navController*/)
-                    }
-                    composable(BottomNavItem.Matches.route) {
-                        LaunchedEffect(Unit) {
-                            showBar = true
+                        composable(BottomNavItem.Matches.route) {
+                            LaunchedEffect(Unit) {
+                                showBar = true
+                            }
+                            MatchesScreen(mainNavController/*navController*/)
                         }
-                        MatchesScreen(mainNavController/*navController*/)
-                    }
-                    composable(BottomNavItem.Explore.route) {
-                        LaunchedEffect(Unit) {
-                            showBar = true
+                        composable(BottomNavItem.Explore.route) {
+                            LaunchedEffect(Unit) {
+                                showBar = true
+                            }
+                            ExploreScreen(mainNavController/*navController*/)
                         }
-                        ExploreScreen(mainNavController/*navController*/)
-                    }
-                    composable(BottomNavItem.Chat.route) {
-                        LaunchedEffect(Unit) {
-                            showBar = true
+                        composable(BottomNavItem.Chat.route) {
+                            LaunchedEffect(Unit) {
+                                showBar = true
+                            }
+                            MatchList(mainNavController)
                         }
-                        MatchList(mainNavController)
-                    }
-                    composable("inchat") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
+                        composable("inchat") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            val loginBackStackEntry =
+                                remember { mainNavController.getBackStackEntry(BottomNavItem.Chat.route) }
+                            InChatScreen(
+                                navController = mainNavController,
+                                context,
+                                viewModel(loginBackStackEntry)
+                            )
                         }
-                        val loginBackStackEntry = remember { mainNavController.getBackStackEntry(BottomNavItem.Chat.route) }
-                        InChatScreen(navController = mainNavController, context, viewModel(loginBackStackEntry))
-                    }
-                    //                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
-                    composable(BottomNavItem.Profile.route) {
-                        LaunchedEffect(Unit) {
-                            showBar = true
+                        //                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
+                        composable(BottomNavItem.Profile.route) {
+                            LaunchedEffect(Unit) {
+                                showBar = true
+                            }
+                            ProfileScreen(mainNavController) {
+                                isLoggedIn = false
+                            }
                         }
-                        ProfileScreen(mainNavController) {
-                            isLoggedIn = false
-                        }
-                    }
 
 
 
-                    composable("profilesetup1") {
-                        ProfileDetails1Screen(mainNavController)
+                        composable("profilesetup1") {
+                            ProfileDetails1Screen(mainNavController)
+                        }
+
+                        composable("editprofile") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            EditProfileScreen(mainNavController)
+                        }
+                        composable("interest") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            Interest(mainNavController)
+                        }
+
+                        composable("addphoto") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            Add_Photos(mainNavController)
+                        }
+
+                        //                    composable("main") {
+                        //                        MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, context)
+                        //                    }
+                        composable("admin") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            AdminScreen()
+                        }
+
+                        composable("filter") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            SearchPreferencesScreen(mainNavController)
+                        }
+                        composable("selGoal") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            SelectYourGoalsScreen(mainNavController)
+                        }
+                        composable("add_photos") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            ProfileDetails4Screen(mainNavController)
+                        }
+                        composable("fgpass1") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            ForgotPasswordScreen(mainNavController)
+                        }
+                        composable("houserules") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            HouseRulesScreen(mainNavController)
+                        }
                     }
 
-                    composable("editprofile") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        EditProfileScreen(mainNavController)
-                    }
-                    composable("interest") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        Interest(mainNavController)
-                    }
-
-                    composable("addphoto") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        Add_Photos(mainNavController)
-                    }
-
-                    //                    composable("main") {
-                    //                        MainScreen(firebaseSMSAuth, firebaseEmailAuth, matchListVM, context)
-                    //                    }
-                    composable("admin") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        AdminScreen()
-                    }
-
-                    composable("filter") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        SearchPreferencesScreen(mainNavController)
-                    }
-                    composable("selGoal") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        SelectYourGoalsScreen(mainNavController)
-                    }
-                    composable("add_photos") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        ProfileDetails4Screen(mainNavController)
-                    }
-                    composable("fgpass1") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        ForgotPasswordScreen(mainNavController)
-                    }
-                    composable("houserules") {
-                        LaunchedEffect(Unit) {
-                            showBar = false
-                        }
-                        HouseRulesScreen(mainNavController)
-                    }
                 }
-
             }
         }
     }

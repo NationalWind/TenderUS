@@ -6,13 +6,15 @@ import com.hcmus.tenderus.model.Account
 import com.hcmus.tenderus.model.AccountAction
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.ReportAction
+import com.hcmus.tenderus.network.LoginOKResponse
 import com.hcmus.tenderus.network.TenderUsApiService
 
 object TokenManager {
 
-    private const val PREF_NAME = "MyAppPreferences"
-    private const val TOKEN_KEY = "jwt_token"
-//    private const val USERNAME_KEY = "username"
+    private const val PREF_NAME = "TENDER_US"
+    private const val TOKEN_KEY = "TOKEN"
+    private const val ROLE_KEY = "ROLE"
+    private const val FIRST_TIME_KEY = "FIRST_TIME"
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -20,16 +22,29 @@ object TokenManager {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
     }
 
-    fun saveToken(token: String) {
-        sharedPreferences.edit().putString(TOKEN_KEY, token).apply()
+    fun saveToken(res: LoginOKResponse) {
+        sharedPreferences.edit().putString(TOKEN_KEY, res.token).apply()
+        sharedPreferences.edit().putString(ROLE_KEY, res.role).apply()
+        sharedPreferences.edit().putBoolean(FIRST_TIME_KEY, res.firstTime).apply()
     }
 
     fun getToken(): String? {
         return sharedPreferences.getString(TOKEN_KEY, null)
     }
 
+    fun getRole(): String? {
+        return sharedPreferences.getString(ROLE_KEY, "USER")
+    }
+
+    fun getFirstTime(): Boolean {
+        return sharedPreferences.getBoolean(FIRST_TIME_KEY, false)
+    }
+
+
     fun clearToken() {
         sharedPreferences.edit().remove(TOKEN_KEY).apply()
+        sharedPreferences.edit().remove(ROLE_KEY).apply()
+        sharedPreferences.edit().remove(FIRST_TIME_KEY).apply()
     }
 
 

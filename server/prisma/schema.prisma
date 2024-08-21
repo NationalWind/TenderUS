@@ -48,7 +48,7 @@ model Penalty {
 model Profile {
   doc_id      String  @id @default(auto()) @map("_id") @db.ObjectId
 
-  account     Account @relation(fields: [username], references: [id])
+  account     Account @relation(fields: [username], references: [username])
 
   username    String @unique
   displayName String
