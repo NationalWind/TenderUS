@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
+import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.model.Preference
 import com.hcmus.tenderus.network.ApiClient.GetProfile
@@ -76,7 +77,7 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
         }
     }
 
-    fun updateUserProfile(token: String, profile: Profile) {
+    fun updateUserProfile(token: String = TokenManager.getToken()!!, profile: Profile) {
         viewModelScope.launch {
             updateProfileState = ProfileUiState.Loading
             try {

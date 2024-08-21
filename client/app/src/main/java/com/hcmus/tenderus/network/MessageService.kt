@@ -7,9 +7,11 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 data class OKResponse (private val message: String)
+data class ActivityOKResponse (val isActive: Boolean)
 data class MessageSendingRequest(
     val receiver: String,
     val msgType: String,
@@ -42,4 +44,9 @@ interface MessageLoading {
 interface HaveReadMessage {
     @POST("api/message/read")
     suspend fun update(@Header("Authorization") authorization: String, @Body req: HaveReadMessageRequest): OKResponse
+}
+
+interface GetActivityStatus {
+    @POST("api/message/activity/{matched}")
+    suspend fun get(@Header("Authorization") authorization: String, @Path("matched") matched: String): ActivityOKResponse
 }

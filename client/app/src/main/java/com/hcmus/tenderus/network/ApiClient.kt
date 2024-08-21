@@ -65,6 +65,9 @@ object ApiClient {
     val MessageLoadingApi by lazy {
         create(MessageLoading::class.java)
     }
+    val GetActivityStatusApi by lazy {
+        create(GetActivityStatus::class.java)
+    }
 
 
 

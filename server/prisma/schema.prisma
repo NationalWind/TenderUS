@@ -21,11 +21,15 @@ model Account {
   role        Role
   FirebaseUID String    @unique
   FCMRegToken String?
+
   penalty     Penalty[]
   reporter    Report[]  @relation("reporter")
   reported    Report[]  @relation("reported")
   Profile     Profile?
   history     History[]
+
+  @@index(email)
+  @@index(phone)
 }
 
 enum PenaltyType {
@@ -43,8 +47,10 @@ model Penalty {
 
 model Profile {
   doc_id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  accountId   String  @unique @db.ObjectId
-  account     Account @relation(fields: [accountId], references: [id])
+
+  account     Account @relation(fields: [username], references: [id])
+
+  username    String @unique
   displayName String
 
   avatarIcon  String
@@ -55,7 +61,6 @@ model Profile {
   latitude  Float
 
   identity  String
-  age       Int
   interests String[]
   groups    String[]
   birthDate String

@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -80,15 +81,11 @@ import kotlin.time.Duration.Companion.seconds
 
 
 @Composable
-fun VoiceMessage(audioUrl: String) {
+fun VoiceMessage(audioUrl: String, isSender: Boolean) {
     var isPlaying by remember { mutableStateOf(false) }
     val mediaPlayer = remember {MediaPlayer()}
     var currentValue by remember { mutableFloatStateOf(0f) }
     var isPrepared by remember { mutableStateOf(false) }
-
-
-
-
 
     DisposableEffect(Unit) {
         onDispose {
@@ -141,7 +138,10 @@ fun VoiceMessage(audioUrl: String) {
 
                     isPlaying = true
 
-                })
+                },
+                colorFilter = if (isSender) null else ColorFilter.tint(Color(0xFF333333))
+            )
+
         }
         AnimatedVisibility(isPlaying) {
             Image(painter = painterResource(id = R.drawable.pausecircle), contentDescription = null, modifier = Modifier
@@ -150,9 +150,14 @@ fun VoiceMessage(audioUrl: String) {
                 .clickable {
                     mediaPlayer.pause()
                     isPlaying = false
-                })
+                },
+                colorFilter = if (isSender) null else ColorFilter.tint(Color(0xFF333333))
+            )
         }
 
+
+
+        var sliderColors = if (isSender) SliderDefaults.colors(thumbColor = Color(0xFFE94057), activeTrackColor = Color(0xFFE94057), inactiveTrackColor = Color(0xFFEFB8C8)) else SliderDefaults.colors(thumbColor = Color(0xFF333333), activeTrackColor = Color(0xFF333333), inactiveTrackColor = Color(0xFF747474))
         Spacer(modifier = Modifier.weight(0.2f))
         Slider(
             value = currentValue,
@@ -161,7 +166,7 @@ fun VoiceMessage(audioUrl: String) {
                 currentValue = it
             },
             modifier = Modifier.weight(5f),
-            colors = SliderDefaults.colors(thumbColor = Color(0xFFE94057), activeTrackColor = Color(0xFFE94057), inactiveTrackColor = Color.LightGray)
+            colors = sliderColors
         )
     }
 }
@@ -202,7 +207,7 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InChatScreen(navController: NavController, matchListVM: MatchListVM, context: Context) {
+fun InChatScreen(navController: NavController, context: Context, matchListVM: MatchListVM) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var messageTexting by remember { mutableStateOf("") }
@@ -388,7 +393,7 @@ fun InChatScreen(navController: NavController, matchListVM: MatchListVM, context
                                                 style = Typography.bodyMedium
                                             )
                                         } else if (matches[idx].messageArr[msgIdx].msgType == "Audio") {
-                                            VoiceMessage(audioUrl = matches[idx].messageArr[msgIdx].content)
+                                            VoiceMessage(audioUrl = matches[idx].messageArr[msgIdx].content, isSender = matches[idx].messageArr[msgIdx].sender != usernameInChat)
                                         }
                                     }
                                 }

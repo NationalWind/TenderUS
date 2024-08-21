@@ -10,7 +10,7 @@ const authController = {
     // GET /api/auth/account
     getAccount: async (req: Request, res: Response) => {
         try {
-            const { username } = req.body.username;
+            const { username } = req.body;
             const account = await db.account.findUnique({ where: { username } });
             res.status(200).json(account);
         } catch (error) {
@@ -37,6 +37,15 @@ const authController = {
                     res.status(403).json({ message: "No permission" });
                     return;
                 }
+                const check = await db.account.findFirst({
+                    where: {
+                        email: decodedToken.email
+                    }
+                });
+                if (check) {
+                    res.status(403).json({ message: "The email address has already been registered" })
+                    return;
+                }
                 await AdmGetAuth().updateUser(decodedToken.uid, { emailVerified: false });
                 const data: Omit<Account, "id" | "phone" | "FCMRegToken"> = {
                     FirebaseUID: decodedToken.uid,
@@ -49,6 +58,16 @@ const authController = {
                 await db.account.create({ data });
                 res.status(200).json({ message: "OK" });
             } else if (decodedToken.phone_number) {
+                const check = await db.account.findFirst({
+                    where: {
+                        phone: decodedToken.phone_number
+                    }
+                });
+                if (check) {
+                    res.status(403).json({ message: "The phone number has already been registered" })
+                    return;
+                }
+
                 const data: Omit<Account, "id" | "email" | "FCMRegToken"> = {
                     FirebaseUID: decodedToken.uid,
                     username: request.username,
@@ -100,7 +119,7 @@ const authController = {
 
                     const firstTime = await db.profile.findUnique({ where: { username: data.username } }) == null;
 
-                    res.status(200).json({ token, firebaseToken, firstTime });
+                    res.status(200).json({ token, firebaseToken, firstTime, role: foundAccount.role });
                 } else {
                     res.status(401).json({ message: "Wrong password" });
                 }
@@ -133,14 +152,14 @@ const authController = {
                 }
                 await AdmGetAuth().updateUser(decodedToken.uid, { emailVerified: false });
                 const newPassword = await bcrypt.hash(data.password, 10);
-                await db.account.update({
+                await db.account.updateMany({
                     where: { email: decodedToken.email },
                     data: { password: newPassword },
                 });
                 res.status(200).json({ message: "OK" });
             } else if (decodedToken.phone_number) {
                 const newPassword = await bcrypt.hash(data.password, 10);
-                await db.account.update({
+                await db.account.updateMany({
                     where: { phone: decodedToken.phone_number },
                     data: { password: newPassword },
                 });
