@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -14,18 +14,19 @@ enum Role {
 
 model Account {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  FirebaseUID String @unique
-  username String  @unique
-  password String
-  email    String? 
-  phone    String? 
-  role     Role
+  username    String    @unique
+  password    String
+  email       String?
+  phone       String?
+  role        Role
+  FirebaseUID String    @unique
   FCMRegToken String?
 
   penalty     Penalty[]
   reporter    Report[]  @relation("reporter")
   reported    Report[]  @relation("reported")
   Profile     Profile?
+  history     History[]
 
   @@index(email)
   @@index(phone)
@@ -62,7 +63,7 @@ model Profile {
   identity  String
   interests String[]
   groups    String[]
-  birthDate        String
+  birthDate String
 
   isActive Boolean
 }
@@ -79,17 +80,17 @@ model Preference {
 }
 
 model Like {
-  doc_id   String  @id @default(auto()) @map("_id") @db.ObjectId
-  username       String
-  likedUsername  String
+  doc_id        String @id @default(auto()) @map("_id") @db.ObjectId
+  username      String
+  likedUsername String
 
   @@index(username)
 }
 
 model Pass_A {
-  doc_id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  username        String
-  passedUsername  String
+  doc_id         String @id @default(auto()) @map("_id") @db.ObjectId
+  username       String
+  passedUsername String
 }
 
 /// user1 < user2
@@ -136,4 +137,20 @@ model Report {
   date       DateTime
   status     Status   @default(PENDING)
   message    String
+}
+
+enum Event {
+  ACCOUNT_CREATED
+  ACCOUNT_ONLINE
+  MESSAGE_SENT
+  MATCH_MADE
+  PROFILE_VIEW
+}
+
+model History {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  event     Event
+  time      DateTime
+  accountId String   @db.ObjectId
+  account   Account  @relation(fields: [accountId], references: [id])
 }

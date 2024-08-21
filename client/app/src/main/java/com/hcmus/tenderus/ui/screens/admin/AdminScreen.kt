@@ -35,7 +35,7 @@ fun AdminScreen() {
             modifier = Modifier.padding(contentPadding)
         ) {
             composable(BottomNav.Analytics.route) {
-                Text(text = BottomNav.Analytics.route)
+                StatisticsScreen()
             }
             composable(BottomNav.Reports.route) {
                 ReportListScreen(
