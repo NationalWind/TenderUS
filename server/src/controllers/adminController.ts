@@ -270,8 +270,8 @@ const adminController = {
         },
       });
 
-      res.send(`<img src="${myChart.getUrl()}" />`);
-      // res.redirect(myChart.getUrl());
+      // res.send(`<img src="${myChart.getUrl()}" />`);
+      res.redirect(myChart.getUrl());
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2023")
