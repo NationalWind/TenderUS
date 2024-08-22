@@ -32,7 +32,6 @@ class ActivityStatusService: Service() {
 
         runBlocking {
             token?.let {
-
                 ProcessProfile.updateUserProfile("Bearer $it", Profile(isActive = false))
             }
         }

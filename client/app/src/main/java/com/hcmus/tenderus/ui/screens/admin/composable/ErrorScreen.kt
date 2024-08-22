@@ -19,7 +19,7 @@ import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 
 @Composable
-fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
+fun ErrorScreen(modifier: Modifier = Modifier, retryAction: () -> Unit) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -45,6 +45,6 @@ fun ErrorScreen(retryAction: () -> Unit, modifier: Modifier = Modifier) {
 @Composable
 fun ErrorScreenPreview() {
     TenderUSTheme {
-        ErrorScreen({})
+        ErrorScreen(retryAction = {})
     }
 }

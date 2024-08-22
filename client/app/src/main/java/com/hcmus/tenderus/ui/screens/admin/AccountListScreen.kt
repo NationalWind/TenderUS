@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,7 +52,7 @@ fun AccountListScreen(
         is UiState.Loading -> LoadingScreen()
 
         is UiState.Error -> ErrorScreen(
-            retryAction, modifier = modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize(), retryAction
         )
 
         is UiState.Success -> AccountList(

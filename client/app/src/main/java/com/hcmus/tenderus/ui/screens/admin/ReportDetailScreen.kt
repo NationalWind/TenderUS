@@ -67,7 +67,7 @@ fun ReportDetailScreen(
         is UiState.Loading -> LoadingScreen()
 
         is UiState.Error -> ErrorScreen(
-            retryAction, modifier = modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize(), retryAction
         )
 
         is UiState.Success -> ReportDetail(

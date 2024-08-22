@@ -1,45 +1,50 @@
 package com.hcmus.tenderus.ui.screens.message
 
+import android.Manifest
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.AudioManager
 import android.media.MediaPlayer
+import android.net.Uri
 import android.util.Log
-import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,34 +56,54 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.pointer.pointerInput
+
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.network.MessageSendingRequest
-import com.hcmus.tenderus.ui.screens.BottomNavItem
 import com.hcmus.tenderus.ui.theme.Typography
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.MatchState
 import com.hcmus.tenderus.utils.AudioRecorder
+import com.hcmus.tenderus.utils.convertIsoToHanoiTime
+import com.hcmus.tenderus.utils.convertIsoToHumanReadableDate
+import com.hcmus.tenderus.utils.convertIsoToHumanReadableDateTime
 import com.hcmus.tenderus.utils.firebase.StorageUtil.Companion.uploadToStorage
+import com.hcmus.tenderus.utils.getCurrentDateTimeIso
+import com.hcmus.tenderus.utils.subtractInMinutes
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
-
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ImageMessage(
+    url: String,
+    onClick: () -> Unit,
+) {
+        AsyncImage(
+            model = url,
+            contentDescription = null,
+            modifier = Modifier
+                .sizeIn(maxWidth = 250.dp, maxHeight = 250.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .clickable {
+                    onClick()
+                }
+        )
+}
 
 @Composable
 fun VoiceMessage(audioUrl: String, isSender: Boolean) {
@@ -180,16 +205,8 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(match.avatarIcon).build(),
-            placeholder = painterResource(R.drawable.profile_placeholder),
-            error = painterResource(R.drawable.profile_placeholder),
-            modifier = Modifier
-                .clip(shape = CircleShape)
-                .size(56.dp),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
+        AvatarIcon(match)
+
         Spacer(modifier = Modifier.weight(0.25f))
         Column(
             modifier = Modifier.weight(5f)
@@ -214,14 +231,40 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
     var isRecording by remember { mutableStateOf(false) }
     val matches = matchListVM.matches
     val usernameInChat = matchListVM.curReceiver
+    var heldImage by remember { mutableStateOf("") }
+
     val audioRecorder = remember { AudioRecorder(context) }
     val file = remember {File(context.cacheDir.toString(), "audio.mp3")}
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            isRecording = true
+            audioRecorder.start(file)
+        }
+    }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            if (uri != null) {
+                scope.launch {
+                    matchListVM.uiState = MatchListVM.MessageStatus.LOADING
+                    uploadToStorage(Firebase.auth, uri, context, "Image") {
+                        matchListVM.sendMessage(MessageSendingRequest(usernameInChat, "Image", it))
+                    }
+                }
+            }
+        }
+    )
 
     val idx = matches.indexOfFirst { it.username == usernameInChat }
     if (!matches[idx].isRead && matches[idx].messageArr.isNotEmpty()) {
         matchListVM.haveReadMessage(matches[idx].messageArr.first().conversationID)
         matches[idx].isRead = true
     }
+
+
 
     Scaffold(
         containerColor = Color.White,
@@ -257,16 +300,11 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                         modifier = Modifier
                             .size(50.dp)
                             .clickable {
-
-                                matchListVM.sendMessage(
-                                    MessageSendingRequest(
-                                        usernameInChat,
-                                        "Text",
-                                        messageTexting
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
                                     )
                                 )
-                                messageTexting = ""
-
                             },
                         contentDescription = null,
                     )
@@ -294,8 +332,7 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                         modifier = Modifier
                             .size(55.dp)
                             .clickable {
-                                isRecording = true
-                                audioRecorder.start(file)
+                                launcher.launch(Manifest.permission.RECORD_AUDIO)
                             },
                         contentDescription = null,
                     )
@@ -308,6 +345,7 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                             .size(55.dp)
                             .clickable {
                                 audioRecorder.stop()
+                                matchListVM.uiState = MatchListVM.MessageStatus.LOADING
                                 uploadToStorage(Firebase.auth, file.toUri(), context, "Audio") {
                                     matchListVM.sendMessage(
                                         MessageSendingRequest(
@@ -370,33 +408,65 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                 Box(modifier = Modifier.weight(1f)) {
                     LazyColumn(state = listState, reverseLayout = true) {
                         items(matches[idx].messageArr.size) { msgIdx ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp),
-                                    horizontalArrangement = if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Arrangement.End else Arrangement.Start
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .widthIn(max = 250.dp)
-                                            .clip(RoundedCornerShape(16.dp))
-                                            .background(
-                                                if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Color(
-                                                    0xFFFDF1F3
-                                                ) else Color.LightGray
-                                            )
-                                            .padding(16.dp)
-                                    ) {
-                                        if (matches[idx].messageArr[msgIdx].msgType == "Text") {
-                                            Text(
-                                                text = matches[idx].messageArr[msgIdx].content,
-                                                style = Typography.bodyMedium
-                                            )
-                                        } else if (matches[idx].messageArr[msgIdx].msgType == "Audio") {
-                                            VoiceMessage(audioUrl = matches[idx].messageArr[msgIdx].content, isSender = matches[idx].messageArr[msgIdx].sender != usernameInChat)
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+
+                            ) {
+                                val isToday = convertIsoToHumanReadableDate(matches[idx].messageArr[msgIdx].createdAt) == convertIsoToHumanReadableDate(getCurrentDateTimeIso())
+                                val text = if (isToday) convertIsoToHanoiTime(matches[idx].messageArr[msgIdx].createdAt) else convertIsoToHumanReadableDateTime(matches[idx].messageArr[msgIdx].createdAt)
+                                if (msgIdx == matches[idx].messageArr.size - 1) {
+                                    Text(text)
+                                } else {
+                                    if (convertIsoToHumanReadableDate(matches[idx].messageArr[msgIdx].createdAt) != convertIsoToHumanReadableDate(matches[idx].messageArr[msgIdx + 1].createdAt)) {
+                                        Text(text)
+                                    } else {
+                                        if (isToday && subtractInMinutes(matches[idx].messageArr[msgIdx + 1].createdAt, matches[idx].messageArr[msgIdx].createdAt) >= 15) {
+                                            Text(text)
                                         }
                                     }
                                 }
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Arrangement.End else Arrangement.Start
+                                ) {
+                                    if (matches[idx].messageArr[msgIdx].msgType == "Image") {
+                                        ImageMessage(
+                                            url = matches[idx].messageArr[msgIdx].content,
+                                        ) {
+                                            heldImage = matches[idx].messageArr[msgIdx].content
+                                        }
+
+                                    } else {
+                                        Box(
+                                            modifier = Modifier
+                                                .widthIn(max = 250.dp)
+                                                .clip(RoundedCornerShape(16.dp))
+                                                .background(
+                                                    if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Color(
+                                                        0xFFFDF1F3
+                                                    ) else Color.LightGray
+                                                )
+                                                .padding(16.dp)
+                                        ) {
+                                            if (matches[idx].messageArr[msgIdx].msgType == "Text") {
+                                                Text(
+                                                    text = matches[idx].messageArr[msgIdx].content,
+                                                    style = Typography.bodyMedium
+                                                )
+                                            } else if (matches[idx].messageArr[msgIdx].msgType == "Audio") {
+                                                VoiceMessage(
+                                                    audioUrl = matches[idx].messageArr[msgIdx].content,
+                                                    isSender = matches[idx].messageArr[msgIdx].sender != usernameInChat
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 
 
                         }
@@ -404,13 +474,13 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                             LaunchedEffect(Unit) {
                                 matchListVM.loadMessage()
                             }
-
                         }
                     }
 
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth().align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
                     ) {
                         if (messageTexting == "" && isRecording) {
                             Row {
@@ -432,13 +502,38 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
 
                 }
             }
-
-
         }
+    }
 
+    if (heldImage != "") {
+        Box(
+            modifier = Modifier.fillMaxSize().clickable {
+                heldImage = ""
+            },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f))
+            )
+            AsyncImage(
+                model = heldImage,
+                contentDescription = null,
+                modifier = Modifier
+                    .sizeIn(maxWidth = 300.dp, maxHeight = 700.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
+    }
 
-
+    if (matchListVM.uiState == MatchListVM.MessageStatus.LOADING) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 
 
 }
+
