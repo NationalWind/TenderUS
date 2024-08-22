@@ -1,6 +1,7 @@
 package com.hcmus.tenderus.model
 
 data class Profile(
+    var username: String? = null,
     var displayName: String? = null,
     var avatarIcon: String? = null,
     val pictures: List<String>? = null,

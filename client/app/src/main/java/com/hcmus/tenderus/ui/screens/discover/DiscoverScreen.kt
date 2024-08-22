@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Dialog
@@ -63,8 +64,12 @@ import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import coil.compose.rememberAsyncImagePainter
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
+import com.hcmus.tenderus.network.LikeRequest
+import com.hcmus.tenderus.network.PassRequest
 import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
+import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
+import com.hcmus.tenderus.ui.viewmodels.ProfileVM
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
@@ -87,7 +92,9 @@ fun calculateAgeFromDob(dob: String): Int {
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)) {
+fun DiscoverScreen(navController: NavController,
+                   profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory),
+                   viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)) {
     var location by remember { mutableStateOf("Ho Chi Minh city, VietNam") }
     var expanded by remember { mutableStateOf(false) }
     var selectedGender by remember { mutableStateOf("Female") }
@@ -98,10 +105,22 @@ fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewMod
 
     // Observe the state from the ViewModel
     val discoverUiState by remember { derivedStateOf { viewModel.discoverUiState } }
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+    var profile by remember { mutableStateOf<Profile?>(null) }
+    var profiles by remember { mutableStateOf<List<Profile>?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+//        viewModel.matchLongPoll(TokenManager.getToken() ?:"", profile?.username!!)
     }
+
+    LaunchedEffect(profileUiState) {
+        if (profileUiState is ProfileUiState.Success) {
+            profile = (profileUiState as ProfileUiState.Success).profile
+        }
+    }
+
     TenderUSTheme {
         Column(
             modifier = Modifier
@@ -220,10 +239,9 @@ fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewMod
                     CircularProgressIndicator()
                 }
                 is DiscoverUiState.Success -> {
-                    var profiles = (discoverUiState as DiscoverUiState.Success).profiles
-                    SwipeableProfiles(profiles) { updatedProfiles ->
-                        profiles = updatedProfiles
-                    }
+                    profiles = (discoverUiState as DiscoverUiState.Success).profiles
+                    Log.d("Print Profiles", profiles.toString())
+                    profile?.let { SwipeableProfiles(it, profiles!!, viewModel) }
                 }
                 is DiscoverUiState.Error -> {
                     // Show an error message
@@ -295,8 +313,11 @@ fun DiscoverScreen(navController: NavController, viewModel: DiscoverVM = viewMod
 //    }
 //}
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>) -> Unit) {
+fun SwipeableProfiles(currentProfile: Profile,
+                      profiles: List<Profile>,
+                      viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)) {
     var currentProfileIndex by remember { mutableStateOf(0) }
     var showProfileDetails by remember { mutableStateOf(false) }
     val offsetX = remember { mutableStateOf(0f) }
@@ -306,6 +327,9 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
     // State for button animation
     var isLikeButtonActive by remember { mutableStateOf(false) }
     var isDislikeButtonActive by remember { mutableStateOf(false) }
+    val profile by remember {
+        derivedStateOf { profiles.getOrNull(currentProfileIndex) ?: Profile() }
+    }
 
     // Reset button states when the profile changes
     LaunchedEffect(currentProfileIndex) {
@@ -314,8 +338,6 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
     }
 
     if (profiles.isNotEmpty()) {
-        val profile = profiles[currentProfileIndex]
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -344,28 +366,29 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                             coroutineScope.launch {
                                 if (offsetX.value > 300f) {
                                     // Like
-                                    val newProfiles = profiles.toMutableList().apply {
-                                        removeAt(currentProfileIndex)
-                                    }
-                                    onProfilesUpdated(newProfiles)
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+                                    Log.d("Discover", currentProfileIndex.toString())
+                                    Log.d("Discover", profiles[currentProfileIndex].toString())
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
                                     isLikeButtonActive = false // Deactivate buttons when drag is canceled
                                     isDislikeButtonActive = false
+                                    viewModel.likeProfile(TokenManager.getToken() ?:"",
+                                        LikeRequest(currentProfile.username!!, profile.username!!)
+                                    )
+
                                 } else if (offsetX.value < -300f) {
                                     // Dislike
-                                    val newProfiles = profiles.toMutableList().apply {
-                                        removeAt(currentProfileIndex)
-                                    }
-                                    onProfilesUpdated(newProfiles)
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
+                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
                                     isLikeButtonActive = false // Deactivate buttons when drag is canceled
                                     isDislikeButtonActive = false
+                                    viewModel.passProfile(TokenManager.getToken() ?:"",
+                                        PassRequest(currentProfile.username!!, profile.username!!)
+                                    )
                                 } else {
                                     // Reset offset if swipe is not significant
                                     offsetX.value = 0f
@@ -549,15 +572,13 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                             .clickable {
                                 // Dislike
                                 if (profiles.isNotEmpty()) {
-//                                    val newProfiles = profiles.toMutableList().apply {
-//                                        removeAt(currentProfileIndex)
-//                                    }
-//                                    onProfilesUpdated(newProfiles)
-//                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
                                     currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
+                                    viewModel.passProfile(TokenManager.getToken() ?:"",
+                                        PassRequest(currentProfile.username!!, profile.username!!)
+                                    )
                                 }
                             }
                     ) {
@@ -585,15 +606,13 @@ fun SwipeableProfiles(profiles: List<Profile>, onProfilesUpdated: (List<Profile>
                             .clickable {
                                 // Like
                                 if (profiles.isNotEmpty()) {
-//                                    val newProfiles = profiles.toMutableList().apply {
-//                                        removeAt(currentProfileIndex)
-//                                    }
-//                                    onProfilesUpdated(newProfiles)
-//                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(newProfiles.size - 1)
                                     currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
+                                    viewModel.likeProfile(TokenManager.getToken() ?:"",
+                                        LikeRequest(currentProfile.username!!, profile.username!!)
+                                    )
                                 }
                             }
                     ) {
