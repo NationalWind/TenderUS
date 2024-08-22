@@ -181,6 +181,7 @@ const authController = {
         try {
             const username = req.body.username;
             await db.account.update({ where: { username: username }, data: { FCMRegToken: null } });
+            await db.profile.update({ where: { username: username }, data: { isActive: false } });
             res.status(200).json({ message: "OK" });
         } catch (error) {
             console.log(error);

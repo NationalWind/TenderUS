@@ -1,7 +1,7 @@
 package com.hcmus.tenderus.ui.screens.message
 
-import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,13 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
@@ -47,11 +46,39 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.ui.screens.admin.composable.ErrorScreen
 import com.hcmus.tenderus.ui.theme.Typography
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.MatchState
 import com.hcmus.tenderus.utils.subtractInMinutes
 
+@Composable
+fun AvatarIcon(match: MatchState) {
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current).data(match.avatarIcon).build(),
+            placeholder = painterResource(R.drawable.profile_placeholder),
+            error = painterResource(R.drawable.profile_placeholder),
+            modifier = Modifier
+                .clip(shape = CircleShape)
+                .size(56.dp),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
+        if (match.isActive) {
+            Box(
+                modifier = Modifier
+                    .size(15.dp)
+                    .background(Color(0xFFE94057), shape = CircleShape)
+                    .align(Alignment.BottomEnd)
+                    .padding(7.dp)
+            )
+        }
+    }
+}
 
 @Composable
 fun MatchItem(match: MatchState, onclick: () -> Unit) {
@@ -62,21 +89,12 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ){
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(match.avatarIcon).build(),
-            placeholder = painterResource(R.drawable.profile_placeholder),
-            error = painterResource(R.drawable.profile_placeholder),
-            modifier = Modifier
-                .clip(shape = CircleShape)
-                .size(56.dp),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-            )
+        AvatarIcon(match)
         Column(
             modifier = Modifier.padding(15.dp)
         ) {
             Text(text = match.displayName, style = Typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            val msg = if (match.messageArr.first().msgType == "Text") match.messageArr.first().content else "Audio"
+            val msg = if (match.messageArr.first().msgType == "Text") match.messageArr.first().content else match.messageArr.first().msgType
             if (match.messageArr.first().receiver == match.username) {
                 Text(text = "You: $msg", style = Typography.bodyMedium.copy(color = Color.Gray), maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else {
@@ -118,16 +136,7 @@ fun NewMatchItem(match: MatchState, onClick: () -> Unit) {
             .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(match.avatarIcon).build(),
-            placeholder = painterResource(R.drawable.profile_placeholder),
-            error = painterResource(R.drawable.profile_placeholder),
-            modifier = Modifier
-                .clip(shape = CircleShape)
-                .size(56.dp),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-        )
+        AvatarIcon(match)
         Text(text = match.displayName, modifier = Modifier
             .padding(5.dp)
             .fillMaxWidth(),
@@ -145,86 +154,110 @@ fun MatchList(navController: NavController, matchListVM: MatchListVM = viewModel
     var searchText by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column {
-            Text(
-                "Messages",
-                fontWeight = FontWeight.Bold,
-                style = Typography.headlineLarge,
-                color = Color(0xFFBD0D36)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            OutlinedTextField(
-                shape = RoundedCornerShape(12.dp),
-                leadingIcon = { Image(painterResource(id = R.drawable.search), null, modifier = Modifier.size(20.dp)) },
-                value=searchText,
-                onValueChange = { searchText = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Search") },
-                singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent
-                ),
-                textStyle = TextStyle(color = Color.Black)
 
-            )
-
+    when (matchListVM.uiState) {
+        MatchListVM.MessageStatus.LOADING -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        Column(modifier= Modifier.fillMaxWidth()) {
-            Text(
-                "New Matches",
-                fontWeight = FontWeight.Bold,
-                style = Typography.titleLarge,
-                color = Color(0xFFBD0D36)
-            )
-            LazyRow {
-                items(matches.size) { matchIdx ->
-                    if (matches[matchIdx].displayName.startsWith(searchText) && matches[matchIdx].messageArr.isEmpty()) {
-                        NewMatchItem(matches[matchIdx], onClick = {
-                            matchListVM.curReceiver = matches[matchIdx].username
-                            navController.navigate("inchat")
-                        })
-                    }
+        MatchListVM.MessageStatus.FAILED -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                ErrorScreen {
+                    matchListVM.getMatches()
                 }
             }
         }
-        Spacer(modifier = Modifier.height(5.dp))
-        Column(modifier = Modifier.fillMaxWidth()) {
+        MatchListVM.MessageStatus.SUCCESS -> {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column {
+                    Text(
+                        "Messages",
+                        fontWeight = FontWeight.Bold,
+                        style = Typography.headlineLarge,
+                        color = Color(0xFFBD0D36)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        shape = RoundedCornerShape(12.dp),
+                        leadingIcon = { Image(painterResource(id = R.drawable.search), null, modifier = Modifier.size(20.dp)) },
+                        value=searchText,
+                        onValueChange = { searchText = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Search") },
+                        singleLine = true,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent
+                        ),
+                        textStyle = TextStyle(color = Color.Black)
 
-            Text(
-                "Messages",
-                fontWeight = FontWeight.Bold,
-                style = Typography.titleLarge,
-                color = Color(0xFFBD0D36)
-            )
+                    )
 
-            LazyColumn {
-                items(matches.size) { matchIdx ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (matches[matchIdx].displayName.startsWith(searchText) && !matches[matchIdx].messageArr.isEmpty()) {
-                            MatchItem(matches[matchIdx]) {
-                                matchListVM.curReceiver = matches[matchIdx].username
-                                navController.navigate("inchat")
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Column(modifier= Modifier.fillMaxWidth()) {
+                    Text(
+                        "New Matches",
+                        fontWeight = FontWeight.Bold,
+                        style = Typography.titleLarge,
+                        color = Color(0xFFBD0D36)
+                    )
+                    LazyRow {
+                        items(matches.size) { matchIdx ->
+                            if (matches[matchIdx].displayName.startsWith(searchText) && matches[matchIdx].messageArr.isEmpty()) {
+                                NewMatchItem(matches[matchIdx], onClick = {
+                                    matchListVM.curReceiver = matches[matchIdx].username
+                                    navController.navigate("inchat")
+                                })
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(5.dp))
+                Column(modifier = Modifier.fillMaxWidth()) {
+
+                    Text(
+                        "Messages",
+                        fontWeight = FontWeight.Bold,
+                        style = Typography.titleLarge,
+                        color = Color(0xFFBD0D36)
+                    )
+
+                    LazyColumn {
+                        items(matches.size) { matchIdx ->
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                if (matches[matchIdx].displayName.startsWith(searchText) && !matches[matchIdx].messageArr.isEmpty()) {
+                                    MatchItem(matches[matchIdx]) {
+                                        matchListVM.curReceiver = matches[matchIdx].username
+                                        navController.navigate("inchat")
+
+                                    }
+                                    HorizontalDivider(thickness = 1.dp, modifier = Modifier.width(200.dp))
+                                }
 
                             }
-                            HorizontalDivider(thickness = 1.dp, modifier = Modifier.width(200.dp))
                         }
-
                     }
                 }
+
             }
         }
-
     }
+
 }
 
