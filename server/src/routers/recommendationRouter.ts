@@ -7,7 +7,6 @@ const recommendationRouter = express.Router();
 
 
 recommendationRouter.get("/", authMiddeware.checkUser, recommendationController.getRecs);
-recommendationRouter.get("/groups", authMiddeware.checkUser, recommendationController.getGroups);
 recommendationRouter.post("/join", authMiddeware.checkUser, recommendationController.join);
 
 export default recommendationRouter;
