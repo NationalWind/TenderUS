@@ -13,7 +13,6 @@ import com.hcmus.tenderus.TenderUsApplication
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.model.Preference
-import com.hcmus.tenderus.network.ApiClient.GetProfile
 import com.hcmus.tenderus.network.ApiClient.ProcessProfile
 import com.hcmus.tenderus.network.ProfileService
 import kotlinx.coroutines.launch

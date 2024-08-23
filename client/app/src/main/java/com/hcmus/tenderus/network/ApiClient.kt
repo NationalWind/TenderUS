@@ -53,8 +53,8 @@ object ApiClient {
     val HaveReadMessageApi by lazy {
         create(HaveReadMessage::class.java)
     }
-    val GetProfile by lazy {
-        create(GetProfile::class.java)
+    val DiscoverService by lazy {
+        create(DiscoverService::class.java)
     }
     val ProcessProfile by lazy {
         create(ProfileService::class.java)

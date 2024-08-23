@@ -15,8 +15,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
 import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.network.ApiClient
-import com.hcmus.tenderus.network.GetProfile
-import com.hcmus.tenderus.network.ApiClient.GetProfile
+import com.hcmus.tenderus.network.ApiClient.DiscoverService
+import com.hcmus.tenderus.network.DiscoverService
+import com.hcmus.tenderus.network.LikeRequest
+import com.hcmus.tenderus.network.PassRequest
 import kotlinx.coroutines.launch
 import retrofit2.http.Header
 import retrofit2.http.Query
@@ -32,8 +34,18 @@ sealed interface DiscoverUiState {
     data object Loading : DiscoverUiState
 }
 
-class DiscoverVM(private val getProfile: GetProfile) : ViewModel() {
+sealed interface SwipeUiState {
+    data class LikeSuccess(val match: Boolean) : SwipeUiState
+    data object PassSuccess : SwipeUiState
+    data object Error : SwipeUiState
+    data object Loading : SwipeUiState
+}
+
+class DiscoverVM(private val discoverService: DiscoverService) : ViewModel() {
     var discoverUiState by mutableStateOf<DiscoverUiState>(DiscoverUiState.Loading)
+        private set
+
+    var swipeUiState by mutableStateOf<SwipeUiState>(SwipeUiState.Loading)
         private set
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
@@ -41,7 +53,7 @@ class DiscoverVM(private val getProfile: GetProfile) : ViewModel() {
         viewModelScope.launch {
             discoverUiState = DiscoverUiState.Loading
             try {
-                val profileResponse = getProfile.getProfiles("Bearer $token", limit)
+                val profileResponse = discoverService.getProfiles("Bearer $token", limit)
                 discoverUiState = DiscoverUiState.Success(profileResponse.profiles)
             } catch (e: IOException) {
                 discoverUiState = DiscoverUiState.Error
@@ -51,13 +63,44 @@ class DiscoverVM(private val getProfile: GetProfile) : ViewModel() {
         }
     }
 
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    fun likeProfile(token: String, likeRequest: LikeRequest) {
+        viewModelScope.launch {
+            swipeUiState = SwipeUiState.Loading
+            try {
+                val likeResponse = discoverService.likeProfile("Bearer $token", likeRequest)
+                swipeUiState = SwipeUiState.LikeSuccess(likeResponse.match)
+            } catch (e: IOException) {
+                swipeUiState = SwipeUiState.Error
+            } catch (e: HttpException) {
+                swipeUiState = SwipeUiState.Error
+            }
+        }
+    }
+
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    fun passProfile(token: String, passRequest: PassRequest) {
+        viewModelScope.launch {
+            swipeUiState = SwipeUiState.Loading
+            try {
+                discoverService.passProfile("Bearer $token", passRequest)
+                swipeUiState = SwipeUiState.PassSuccess
+            } catch (e: IOException) {
+                swipeUiState = SwipeUiState.Error
+            } catch (e: HttpException) {
+                swipeUiState = SwipeUiState.Error
+            }
+        }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as TenderUsApplication)
-                val getProfile = GetProfile
-                DiscoverVM(getProfile)
+                val discoverService = DiscoverService
+                DiscoverVM(discoverService)
             }
         }
     }
 }
+
