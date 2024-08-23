@@ -46,6 +46,8 @@ import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.ItsAMatchScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
+import com.hcmus.tenderus.ui.screens.explore.coffe.CoffeeDateScreen
+
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.Add_Photos
@@ -174,6 +176,12 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 showBar = true
                             }
                             ExploreScreen(mainNavController/*navController*/)
+                        }
+                        composable("coffee_date") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            CoffeeDateScreen(mainNavController/*navController*/)
                         }
                         composable(BottomNavItem.Chat.route) {
                             LaunchedEffect(Unit) {

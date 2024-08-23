@@ -74,6 +74,8 @@ import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
+
+import com.hcmus.tenderus.ui.screens.explore.coffe.CoffeeDateScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails2Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails3Screen
@@ -189,6 +191,7 @@ class MainActivity : ComponentActivity() {
                     composable("admin") {AdminScreen()}
 
                     composable("explore") { ExploreScreen(navController) }
+                    composable("coffee_date") { CoffeeDateScreen(navController) }
                     composable("discover?customTitle={customTitle}") { backStackEntry ->
                         val customTitle = backStackEntry.arguments?.getString("customTitle")
                         DiscoverScreen(navController = navController, customTitle = customTitle)
