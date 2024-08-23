@@ -8,6 +8,7 @@ import { firebaseFCM } from "../lib/firebase";
 
 const profileController = {
     //GET api/profile/prof
+    //response: {prof: Profile}
     getProf: async (req: Request, res: Response) => {
         try {
             const prof = await db.profile.findUniqueOrThrow({ where: { username: req.body.username } });
@@ -18,6 +19,7 @@ const profileController = {
         }
     },
     //GET api/profile/pref
+    //response: {pref: Preference}
     getPref: async (req: Request, res: Response) => {
         try {
             const pref = await db.preference.findUniqueOrThrow({ where: { username: req.body.username } });

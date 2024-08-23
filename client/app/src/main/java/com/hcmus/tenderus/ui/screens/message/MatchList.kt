@@ -91,7 +91,7 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
     ){
         AvatarIcon(match)
         Column(
-            modifier = Modifier.padding(15.dp)
+            modifier = Modifier.padding(15.dp).weight(5f)
         ) {
             Text(text = match.displayName, style = Typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             val msg = if (match.messageArr.first().msgType == "Text") match.messageArr.first().content else match.messageArr.first().msgType
@@ -123,7 +123,7 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
         Spacer(modifier = Modifier
             .fillMaxWidth()
             .weight(1f))
-        Text(text = str, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text = str, maxLines = 1)
     }
 
 }

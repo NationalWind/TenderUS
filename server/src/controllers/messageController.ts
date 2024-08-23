@@ -19,6 +19,7 @@ const messagePollers: { [key: string]: { res: Response, timeout: NodeJS.Timeout 
 
 const messageController = {
     // GET /api/message/matches
+    //response: {matches: {username: String, createdAt: String, avatarIcon: String, displayName: String, isActive: Boolean, isRead: Boolean, messageArr: Message[]}[]}
     getMatches: async (req: Request, res: Response) => {
         try {
             const username = req.body.username;
@@ -151,7 +152,7 @@ const messageController = {
                 res, timeout: setTimeout(() => {
                     res.status(408).json({ message: "Timeout" });
                     delete messagePollers[username];
-                }, 30000)
+                }, 3600000)
             };
         } catch (error) {
             res.status(500).json({ message: "Something went wrong" });
@@ -267,6 +268,7 @@ const messageController = {
     },
 
     // GET /api/message?receiver=&&page_size=&msgID=
+    //response: Message[]
     loadMessage: async (req: Request, res: Response) => {
         try {
             const receiver = req.query.receiver;
@@ -324,7 +326,7 @@ const messageController = {
         }
     },
 
-    //api/message/read
+    //POST api/message/read
     haveRead: async (req: Request, res: Response) => {
         try {
             const { conversationID } = req.body;

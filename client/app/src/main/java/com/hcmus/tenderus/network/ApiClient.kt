@@ -68,6 +68,10 @@ object ApiClient {
     val GetActivityStatusApi by lazy {
         create(GetActivityStatus::class.java)
     }
+    val MatchPollingApi by lazy {
+        create(MatchPolling::class.java)
+    }
+
 
 
 
@@ -118,7 +122,7 @@ object ApiClient {
             builder.sslSocketFactory(sslSocketFactory, trustManager)
             builder.hostnameVerifier(HostnameVerifier { _, _ -> true })
             builder.addInterceptor(loggingInterceptor)
-            builder.readTimeout(30000, java.util.concurrent.TimeUnit.SECONDS)
+            builder.readTimeout(3600, java.util.concurrent.TimeUnit.SECONDS)
             builder.build()
         } catch (e: Exception) {
             throw RuntimeException(e)

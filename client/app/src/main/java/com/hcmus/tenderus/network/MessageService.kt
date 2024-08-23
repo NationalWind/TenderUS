@@ -20,9 +20,15 @@ data class MessageSendingRequest(
 data class HaveReadMessageRequest(
     val conversationID: String
 )
+
 interface GetMatch {
     @GET("api/message/matches")
     suspend fun getMatches(@Header("Authorization") authorization: String): List<Match>
+}
+
+interface MatchPolling {
+    @GET("api/swipe/polling")
+    suspend fun getNewMatch(@Header("Authorization") authorization: String): Match
 }
 
 interface MessagePolling {
