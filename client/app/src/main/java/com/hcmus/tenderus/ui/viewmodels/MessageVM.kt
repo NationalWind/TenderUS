@@ -115,7 +115,7 @@ class MatchListVM: ViewModel() {
                 TokenManager.getToken()?.let {
                     for (match in matches) {
                         match.isActive = GetActivityStatusApi.get("Bearer $it", match.username).isActive
-                        delay(180000)
+                        delay(10000)
                     }
 
                 }

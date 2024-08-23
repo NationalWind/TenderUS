@@ -7,10 +7,9 @@ const profileRouter = express.Router();
 
 profileRouter.get("/prof", authMiddeware.checkUser, profileController.getProf);
 profileRouter.get("/pref", authMiddeware.checkUser, profileController.getPref);
-profileRouter.post("/uPref", authMiddeware.checkUser, profileController.updatePref);
-profileRouter.post("/uProf", authMiddeware.checkUser, profileController.updateProf);
-profileRouter.post("/cPref", authMiddeware.checkUser, profileController.createPref);
-profileRouter.post("/cProf", authMiddeware.checkUser, profileController.createProf);
+profileRouter.post("/Pref", authMiddeware.checkUser, profileController.upsertPref);
+profileRouter.post("/Prof", authMiddeware.checkUser, profileController.upsertProf);
+
 
 export default profileRouter;
 

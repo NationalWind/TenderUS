@@ -32,7 +32,7 @@ class ActivityStatusService: Service() {
 
         runBlocking {
             token?.let {
-                ProcessProfile.updateUserProfile("Bearer $it", Profile(isActive = false))
+                ProcessProfile.upsertUserProfile("Bearer $it", Profile(isActive = false))
             }
         }
         stopSelf()

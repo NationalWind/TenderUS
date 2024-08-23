@@ -506,7 +506,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                                         identity = gender,
                                         avatarIcon = downloadUrl // Update with the new URL
                                     )
-                                    profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                    profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                                     successMessage = "Profile updated successfully!"
                                 }
                             }
@@ -522,7 +522,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                                 birthDate = birthdate.text,
                                 identity = gender
                             )
-                            profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                             successMessage = "Profile updated successfully!"
                         }
                     }
@@ -685,7 +685,7 @@ fun Interest(
                         onClick = {
                             profile?.let {
                                 val updatedProfile = it.copy(interests = selectedInterests.toList())
-                                profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xE6B71C1C)),
@@ -910,7 +910,7 @@ fun Add_Photos(
                                         if (uploadCount == newImageUris.size) {
                                             imageUrls.addAll(existingImageUrls)
                                             val updatedProfile = userProfile.copy(pictures = imageUrls)
-                                            profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                                             Log.d("Add Photos", "Profile updated with new images")
                                         }
                                     }
@@ -920,7 +920,7 @@ fun Add_Photos(
                             if (newImageUris.isEmpty()) {
                                 imageUrls.addAll(existingImageUrls)
                                 val updatedProfile = userProfile.copy(pictures = imageUrls)
-                                profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                                 Log.d("Add Photos", "Profile updated with existing images only")
                             }
                         } ?: run {

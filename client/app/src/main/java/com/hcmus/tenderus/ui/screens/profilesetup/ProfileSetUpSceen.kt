@@ -68,6 +68,7 @@ fun ProfileDetails1Screen(
         onResult = { uri: Uri? ->
             if (uri != null) {
                 profileImageUri = uri
+                newImageSelected = true
             }
         }
     )
@@ -116,8 +117,8 @@ fun ProfileDetails1Screen(
 
             Text(
                 text = "Profile Details",
-                fontSize = 48.sp,
-                style = MaterialTheme.typography.titleLarge,
+                fontSize = 44.sp,
+                style = MaterialTheme.typography.titleMedium,
                 color = Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold
             )
@@ -163,7 +164,7 @@ fun ProfileDetails1Screen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(200.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
 
             // Display error message if error state
@@ -197,7 +198,7 @@ fun ProfileDetails1Screen(
                                     groups = listOf(),
                                     isActive = true
                                 )
-                                profileVM.createUserProfile(TokenManager.getToken() ?: "", profile)
+                                profileVM.upsertUserProfile(TokenManager.getToken() ?: "", profile)
                                 Log.d("ProfileDetails1Screen", "profile created")
                                 isButtonClicked = true
                             }
@@ -216,7 +217,7 @@ fun ProfileDetails1Screen(
                             groups = listOf(),
                             isActive = true
                         )
-                        profileVM.createUserProfile(TokenManager.getToken() ?: "", profile)
+                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", profile)
                         Log.d("ProfileDetails1Screen", "profile created")
                         isButtonClicked = true
                     }
@@ -351,7 +352,7 @@ fun ProfileDetails2Screen(
                 onClick = {
                     if (profile != null) {
                         val updatedProfile = profile!!.copy(identity = selectedGender)
-                        profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                         Log.d("ProfileDetails2Screen", "profile updated")
                     }
                 },
@@ -434,7 +435,7 @@ fun ProfileDetails3Screen(
                 onClick = { navController.navigate("filter") },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 16.dp)
+//                    .padding(top = 16.dp)
             ) {
                 Text("Skip", color = Color.Gray, fontSize = 18.sp)
             }
@@ -451,7 +452,7 @@ fun ProfileDetails3Screen(
                     contentDescription = "Heart Icon",
                     modifier = Modifier.size(100.dp)
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = "Your Interests",
                     style = MaterialTheme.typography.titleLarge,
@@ -459,14 +460,14 @@ fun ProfileDetails3Screen(
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.weight(0.5f))
                 Text(
                     text = "Select a few of your interests and let everyone know what you're passionate about.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
                     fontSize = 16.sp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 interests.chunked(2).forEach { rowInterests ->
                     Row(modifier = Modifier.fillMaxWidth()) {
                         rowInterests.forEach { interest ->
@@ -491,12 +492,12 @@ fun ProfileDetails3Screen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 Button(
                     onClick = {
                         profile?.let {
                             val updatedProfile = it.copy(interests = selectedInterests.toList())
-                            profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                             Log.d("ProfileDetails3Screen", "profile updated")
                         }
                     },
@@ -681,7 +682,7 @@ fun ProfileDetails4Screen(
                                 if (imageUrls.size == imageUris.size) {
                                     profile?.let {
                                         val updatedProfile = it.copy(pictures = imageUrls)
-                                        profileVM.updateUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                                         Log.d("ProfileDetails4Screen", "profile updated")
                                     }
                                 }
@@ -797,7 +798,7 @@ fun PhotoBox(imageUri: Uri?, onClick: () -> Unit) {
     }
 }
 @Composable
-fun HouseRulesScreen(navController: NavHostController) {
+fun HouseRulesScreen(navController: NavHostController, onProfileSetupComplete: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -853,7 +854,7 @@ fun HouseRulesScreen(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    navController.navigate("main")
+                    onProfileSetupComplete()
                 },
                 modifier = Modifier
                     .padding(vertical = 10.dp)

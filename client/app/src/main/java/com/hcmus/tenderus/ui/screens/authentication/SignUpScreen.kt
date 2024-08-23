@@ -454,6 +454,17 @@ fun SignUpScreen(
                 }
                 4 -> {
                     // Step 4: Waiting for Email Verification
+                    LaunchedEffect(Unit) {
+                        scope.launch {
+                            try {
+                                firebaseEmailAuth.confirm()
+                                step = 5 // Proceed to the next screen after verification
+
+                            } catch (e: Exception) {
+                                errorMessage = "Failed to check verification status: ${e.message}"
+                            }
+                        }
+                    }
                     Text(
                         "Verify your email address",
                         fontSize = 30.sp,
@@ -475,21 +486,12 @@ fun SignUpScreen(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
-                        onClick = {
-                            scope.launch {
-                                try {
-                                    firebaseEmailAuth.confirm()
-                                    step = 5 // Proceed to the next screen after verification
-
-                                } catch (e: Exception) {
-                                    errorMessage = "Failed to check verification status: ${e.message}"
-                                }
-                            }
-                        },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = false,
+                        onClick = {}
                     ) {
-                        Text("Check Verification Status", color = Color.White)
+                        Text("Checking Verification Status...", color = Color.White)
                     }
                     errorMessage?.let {
                         Spacer(modifier = Modifier.height(8.dp))

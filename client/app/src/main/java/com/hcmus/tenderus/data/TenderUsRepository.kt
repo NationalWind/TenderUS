@@ -28,6 +28,10 @@ object TokenManager {
         sharedPreferences.edit().putBoolean(FIRST_TIME_KEY, res.firstTime).apply()
     }
 
+    fun saveFirstTime(firstTime: Boolean) {
+        sharedPreferences.edit().putBoolean(FIRST_TIME_KEY, firstTime).apply()
+    }
+
     fun getToken(): String? {
         return sharedPreferences.getString(TOKEN_KEY, null)
     }

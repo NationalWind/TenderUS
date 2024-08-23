@@ -174,7 +174,7 @@ class MainActivity : ComponentActivity() {
                     composable("selGoal") { SelectYourGoalsScreen(navController) }
                     composable("add_photos") { ProfileDetails4Screen(navController) }
                     composable("fgpass1") { ForgotPasswordScreen(navController) }
-                    composable("houserules") { HouseRulesScreen(navController) }
+//                    composable("houserules") { HouseRulesScreen(navController) }
 //                    composable("main") { MainScreen(navController) }
                     composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
                     composable("emailconfirm") { ExampleEmailConfirm(firebaseEmailAuth, navController = navController) }

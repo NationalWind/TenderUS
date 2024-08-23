@@ -64,18 +64,15 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top,
         ) {
-
-            Spacer(modifier = Modifier.height(40.dp))
             Text(
                 text = "Filter Your Search Preferences",
                 fontSize = 40.sp,
                 lineHeight = 36.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFB71C1C),
-                modifier = Modifier.padding(top = 24.dp, bottom = 16.dp) // Adjust the top and bottom padding values as needed
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
 
 
@@ -91,7 +88,7 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 selectedGender = it
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(2f))
 
             // Location Selection
             Text(
@@ -105,14 +102,14 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 location = it
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(2f))
 
             // Distance Slider
             DistanceSlider(distance) {
                 distance = it
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(2f))
 
             // Custom Age Range Slider
             AgeRangeSlider(
@@ -122,18 +119,18 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 onEndAgeChanged = { endAge = it }
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
             // Continue Button
             Button(
                 onClick = {
                     val preference = Preference(startAge.toInt(), endAge.toInt(), distance, selectedGender)
-                    profileVM.createUserPreferences(TokenManager.getToken() ?: "", preference)
+                    profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", preference)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Continue", color = Color.White)
+                Text("Continue", color = Color.White, modifier = Modifier.weight(1f))
             }
             // Clear Button
             Button(
@@ -147,7 +144,7 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Clear", color = Color.White)
+                Text("Clear", color = Color.White, modifier = Modifier.weight(1f))
             }
         }
     }
@@ -281,7 +278,7 @@ fun AgeRangeSlider(
             ),
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // End age slider
         Text(text = "Select End Age")
@@ -321,7 +318,7 @@ fun SelectYourGoalsScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.weight(5f))
 
             Image(
                 painter = painterResource(id = R.drawable.tim),
@@ -337,7 +334,7 @@ fun SelectYourGoalsScreen(navController: NavHostController) {
                 color = Color(0xFFB71C1C),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.weight(5f))
             // Goals List
             goals.forEach { goal ->
                 val isSelected = selectedGoals.contains(goal)
@@ -365,7 +362,7 @@ fun SelectYourGoalsScreen(navController: NavHostController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.weight(3f))
 
             // Continue Button
             Button(

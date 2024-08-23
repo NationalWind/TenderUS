@@ -109,7 +109,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
             var showBar by remember { mutableStateOf(true) }
             LaunchedEffect(Unit) {
                 try {
-                    ProcessProfile.updateUserProfile(
+                    ProcessProfile.upsertUserProfile(
                         "Bearer " + TokenManager.getToken()!!,
                         profile = Profile(isActive = true)
                     )
@@ -282,9 +282,11 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         composable("houserules") {
                             LaunchedEffect(Unit) {
                                 showBar = false
+                            }
+                            HouseRulesScreen(mainNavController) {
+                                TokenManager.saveFirstTime(false)
                                 firstTime = false
                             }
-                            HouseRulesScreen(mainNavController)
                         }
                         composable("main") {
                             LaunchedEffect(Unit) {

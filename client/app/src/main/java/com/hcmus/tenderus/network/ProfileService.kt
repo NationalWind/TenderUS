@@ -16,15 +16,10 @@ interface ProfileService {
     @GET("api/profile/prof")
     suspend fun getCurrentUserProfile(@Header("Authorization") token: String): Profile
 
-    @POST("api/profile/uPref")
-    suspend fun updateUserPreferences(@Header("Authorization") token: String, @Body preferences: Preference)
+    @POST("api/profile/Pref")
+    suspend fun upsertUserPreferences(@Header("Authorization") token: String, @Body preferences: Preference)
 
-    @POST("api/profile/uProf")
-    suspend fun updateUserProfile(@Header("Authorization") token: String, @Body profile: Profile)
+    @POST("api/profile/Prof")
+    suspend fun upsertUserProfile(@Header("Authorization") token: String, @Body profile: Profile)
 
-    @POST("api/profile/cPref")
-    suspend fun createUserPreferences(@Header("Authorization") token: String, @Body preferences: Preference)
-
-    @POST("api/profile/cProf")
-    suspend fun createUserProfile(@Header("Authorization") token: String, @Body profile: Profile)
 }

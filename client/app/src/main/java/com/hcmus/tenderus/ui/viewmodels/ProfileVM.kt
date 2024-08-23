@@ -61,13 +61,13 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
         }
     }
 
-    fun updateUserPreferences(token: String, preference: Preference) {
+    fun upsertUserPreferences(token: String, preference: Preference) {
         viewModelScope.launch {
             updateProfileState = ProfileUiState.Loading
             try {
-                profileService.updateUserPreferences("Bearer $token", preference)
+                profileService.upsertUserPreferences("Bearer $token", preference)
                 updateProfileState = ProfileUiState.PreferencesSuccess(preference)
-//                getCurrentUserPreferences(token)
+                getCurrentUserPreferences(token)
             } catch (e: IOException) {
                 updateProfileState = ProfileUiState.Error
             } catch (e: HttpException) {
@@ -76,11 +76,11 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
         }
     }
 
-    fun updateUserProfile(token: String = TokenManager.getToken()!!, profile: Profile) {
+    fun upsertUserProfile(token: String = TokenManager.getToken()!!, profile: Profile) {
         viewModelScope.launch {
             updateProfileState = ProfileUiState.Loading
             try {
-                profileService.updateUserProfile("Bearer $token", profile)
+                profileService.upsertUserProfile("Bearer $token", profile)
                 updateProfileState = ProfileUiState.Success(profile)
                 getCurrentUserProfile(token)
             } catch (e: IOException) {
@@ -91,35 +91,6 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
         }
     }
 
-    fun createUserPreferences(token: String, preference: Preference) {
-        viewModelScope.launch {
-            profileUiState = ProfileUiState.Loading
-            try {
-                profileService.createUserPreferences("Bearer $token", preference)
-                profileUiState = ProfileUiState.PreferencesSuccess(preference)
-//                getCurrentUserPreferences(token)
-            } catch (e: IOException) {
-                profileUiState = ProfileUiState.Error
-            } catch (e: HttpException) {
-                profileUiState = ProfileUiState.Error
-            }
-        }
-    }
-
-    fun createUserProfile(token: String, profile: Profile) {
-        viewModelScope.launch {
-            profileUiState = ProfileUiState.Loading
-            try {
-                profileService.createUserProfile("Bearer $token", profile)
-                profileUiState = ProfileUiState.Success(profile)
-//                getCurrentUserProfile(token)
-            } catch (e: IOException) {
-                profileUiState = ProfileUiState.Error
-            } catch (e: HttpException) {
-                profileUiState = ProfileUiState.Error
-            }
-        }
-    }
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {

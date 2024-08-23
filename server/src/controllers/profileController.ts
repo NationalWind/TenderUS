@@ -30,38 +30,16 @@ const profileController = {
         }
     },
     // POST /api/profile/...
-    createProf: async (req: Request, res: Response) => {
-        try {
-            const data: Profile = req.body;
-            console.log(req.body)
-            delete req.body.role
-            await db.profile.create({ data });
-            res.status(200).json({ message: "OK" });
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({ message: "Something went wrong" });
-        }
-    },
-    createPref: async (req: Request, res: Response) => {
-        try {
-            const data: Preference = req.body;
-            delete req.body.role
-            await db.preference.create({ data });
-            res.status(200).json({ message: "OK" });
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({ message: "Something went wrong" });
-        }
-    },
-    updateProf: async (req: Request, res: Response) => {
+    upsertProf: async (req: Request, res: Response) => {
         try {
             const data: Omit<Profile, "doc_id"> = req.body;
             delete req.body.role
-            await db.profile.update({
+            await db.profile.upsert({
                 where: {
                     username: req.body.username
                 },
-                data
+                create: data,
+                update: data
             });
             res.status(200).json({ message: "OK" });
         } catch (error) {
@@ -69,15 +47,16 @@ const profileController = {
             res.status(500).json({ message: "Something went wrong" });
         }
     },
-    updatePref: async (req: Request, res: Response) => {
+    upsertPref: async (req: Request, res: Response) => {
         try {
             const data: Preference = req.body;
             delete req.body.role
-            await db.preference.update({
+            await db.preference.upsert({
                 where: {
                     username: req.body.username
                 },
-                data
+                create: data,
+                update: data
             });
             res.status(200).json({ message: "OK" });
         } catch (error) {
