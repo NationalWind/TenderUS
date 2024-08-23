@@ -188,17 +188,15 @@ class MainActivity : ComponentActivity() {
                     composable("exlogin") { ExampleLogin(navController) }
                     composable("admin") {AdminScreen()}
 
-
-//                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
-//                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
-                }
-                NavHost(navController, startDestination = "explore") {
                     composable("explore") { ExploreScreen(navController) }
                     composable("discover?customTitle={customTitle}") { backStackEntry ->
                         val customTitle = backStackEntry.arguments?.getString("customTitle")
                         DiscoverScreen(navController = navController, customTitle = customTitle)
                     }
+//                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
+//                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
                 }
+
             }
         }
     }
