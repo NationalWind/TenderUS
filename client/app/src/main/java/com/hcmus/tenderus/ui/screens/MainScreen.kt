@@ -43,6 +43,7 @@ import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
+import com.hcmus.tenderus.ui.screens.discover.ItsAMatchScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
@@ -53,6 +54,8 @@ import com.hcmus.tenderus.ui.screens.profilesetup.EditProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.Interest
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails2Screen
+import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails3Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails4Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
@@ -154,6 +157,12 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             }
                             DiscoverScreen(mainNavController/*navController*/,"Discover")
                         }
+                        composable("itsamatch") {
+                            LaunchedEffect(Unit) {
+                                showBar = true
+                            }
+                            ItsAMatchScreen(mainNavController/*navController*/)
+                        }
                         composable(BottomNavItem.Matches.route) {
                             LaunchedEffect(Unit) {
                                 showBar = true
@@ -197,7 +206,22 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
 
 
                         composable("profilesetup1") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
                             ProfileDetails1Screen(mainNavController)
+                        }
+                        composable("profilesetup2") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            ProfileDetails2Screen(mainNavController)
+                        }
+                        composable("profilesetup3") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            ProfileDetails3Screen(mainNavController)
                         }
 
                         composable("editprofile") {
@@ -259,6 +283,12 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 showBar = false
                             }
                             HouseRulesScreen(mainNavController)
+                        }
+                        composable("main") {
+                            LaunchedEffect(Unit) {
+                                showBar = true
+                            }
+                            MainScreen(firebaseSMSAuth, firebaseEmailAuth, context)
                         }
                     }
 

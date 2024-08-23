@@ -15,7 +15,6 @@ data class LikeResponse(val match: Boolean)
 data class PassRequest(val username: String, val passedUsername: String)
 data class PassResponse(val message: String)
 
-data class PollingResponse(val message: String)
 
 interface DiscoverService {
     @GET("api/recommendation")

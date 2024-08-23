@@ -70,6 +70,8 @@ import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
 import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
+import com.hcmus.tenderus.ui.viewmodels.SwipeUiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
@@ -239,8 +241,7 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                 }
                 is DiscoverUiState.Success -> {
                     profiles = (discoverUiState as DiscoverUiState.Success).profiles
-                    Log.d("Print Profiles", profiles.toString())
-                    profile?.let { SwipeableProfiles(it, profiles!!, viewModel) }
+                    profile?.let { SwipeableProfiles(navController, it, profiles!!, viewModel) }
                 }
                 is DiscoverUiState.Error -> {
                     // Show an error message
@@ -314,7 +315,8 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun SwipeableProfiles(currentProfile: Profile,
+fun SwipeableProfiles(navController: NavController,
+                      currentProfile: Profile,
                       profiles: List<Profile>,
                       viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)) {
     var currentProfileIndex by remember { mutableStateOf(0) }
@@ -329,6 +331,8 @@ fun SwipeableProfiles(currentProfile: Profile,
     val profile by remember {
         derivedStateOf { profiles.getOrNull(currentProfileIndex) ?: Profile() }
     }
+
+    val swipeUiState by remember { derivedStateOf { viewModel.swipeUiState } }
 
     // Reset button states when the profile changes
     LaunchedEffect(currentProfileIndex) {
@@ -365,29 +369,31 @@ fun SwipeableProfiles(currentProfile: Profile,
                             coroutineScope.launch {
                                 if (offsetX.value > 300f) {
                                     // Like
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
-                                    Log.d("like", currentProfileIndex.toString())
-                                    Log.d("like", profiles[currentProfileIndex].toString())
+                                    currentProfileIndex =
+                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
-                                    isLikeButtonActive = false // Deactivate buttons when drag is canceled
+                                    isLikeButtonActive =
+                                        false // Deactivate buttons when drag is canceled
                                     isDislikeButtonActive = false
-                                    viewModel.likeProfile(TokenManager.getToken() ?:"",
+                                    viewModel.likeProfile(
+                                        TokenManager.getToken() ?: "",
                                         LikeRequest(currentProfile.username!!, profile.username!!)
                                     )
 
                                 } else if (offsetX.value < -300f) {
                                     // Dislike
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
-                                    Log.d("dislike", currentProfileIndex.toString())
-                                    Log.d("dislike", profiles[currentProfileIndex].toString())
+                                    currentProfileIndex =
+                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
-                                    isLikeButtonActive = false // Deactivate buttons when drag is canceled
+                                    isLikeButtonActive =
+                                        false // Deactivate buttons when drag is canceled
                                     isDislikeButtonActive = false
-                                    viewModel.passProfile(TokenManager.getToken() ?:"",
+                                    viewModel.passProfile(
+                                        TokenManager.getToken() ?: "",
                                         PassRequest(currentProfile.username!!, profile.username!!)
                                     )
                                 } else {
@@ -573,11 +579,13 @@ fun SwipeableProfiles(currentProfile: Profile,
                             .clickable {
                                 // Dislike
                                 if (profiles.isNotEmpty()) {
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+                                    currentProfileIndex =
+                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
-                                    viewModel.passProfile(TokenManager.getToken() ?:"",
+                                    viewModel.passProfile(
+                                        TokenManager.getToken() ?: "",
                                         PassRequest(currentProfile.username!!, profile.username!!)
                                     )
                                 }
@@ -607,11 +615,13 @@ fun SwipeableProfiles(currentProfile: Profile,
                             .clickable {
                                 // Like
                                 if (profiles.isNotEmpty()) {
-                                    currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+                                    currentProfileIndex =
+                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
-                                    viewModel.likeProfile(TokenManager.getToken() ?:"",
+                                    viewModel.likeProfile(
+                                        TokenManager.getToken() ?: "",
                                         LikeRequest(currentProfile.username!!, profile.username!!)
                                     )
                                 }
@@ -627,6 +637,103 @@ fun SwipeableProfiles(currentProfile: Profile,
                         )
                     }
                 }
+            }
+        }
+        when (swipeUiState) {
+            is SwipeUiState.Loading -> {
+                // Show a loading spinner or progress indicator
+//                CircularProgressIndicator()
+            }
+            is SwipeUiState.LikeSuccess -> {
+                val match = (swipeUiState as SwipeUiState.LikeSuccess).match
+                if (match) {
+                    MatchOverlay {
+                        // After the overlay fades out, navigate to the "It's a match" screen
+                        navController.navigate("itsamatch")
+                    }
+                    Log.d("Like", "It's a Match")
+                } else {
+                    Log.d("Like", "Liked")
+                }
+            }
+            is SwipeUiState.PassSuccess -> {
+                Log.d("Pass", "Passed")
+            }
+            is SwipeUiState.Error -> {
+                // Show an error message
+                Text("Failed to swipe", color = Color.Red)
+            }
+        }
+    }
+}
+
+@Composable
+fun MatchOverlay(onAnimationEnd: () -> Unit) {
+    var alpha by remember { mutableStateOf(1f) }
+
+    LaunchedEffect(Unit) {
+        // Start fade-out animation
+        alpha = 0f
+        delay(1000) // Adjust delay for fade-out duration
+        onAnimationEnd()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Gray.copy(alpha = alpha)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "MATCH! MATCH! MATCH!",
+            fontSize = 40.sp, // Adjust font size as needed
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun ItsAMatchScreen(navController: NavController) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFBD0D36) // Background color
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "It's a match",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineLarge
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = { navController.navigate("inchat") },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Chat Now",
+                    color = Color(0xFFBD0D36)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = { navController.navigate("main") }) {
+                Text(
+                    text = "Not now",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
