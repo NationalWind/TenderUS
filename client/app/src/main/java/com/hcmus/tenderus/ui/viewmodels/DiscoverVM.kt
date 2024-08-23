@@ -37,7 +37,6 @@ sealed interface DiscoverUiState {
 sealed interface SwipeUiState {
     data class LikeSuccess(val match: Boolean) : SwipeUiState
     data object PassSuccess : SwipeUiState
-    data class PollingResult(val message: String) : SwipeUiState
     data object Error : SwipeUiState
     data object Loading : SwipeUiState
 }
@@ -82,25 +81,10 @@ class DiscoverVM(private val discoverService: DiscoverService) : ViewModel() {
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun passProfile(token: String, passRequest: PassRequest) {
         viewModelScope.launch {
-            discoverUiState = DiscoverUiState.Loading
+            swipeUiState = SwipeUiState.Loading
             try {
                 discoverService.passProfile("Bearer $token", passRequest)
                 swipeUiState = SwipeUiState.PassSuccess
-            } catch (e: IOException) {
-                swipeUiState = SwipeUiState.Error
-            } catch (e: HttpException) {
-                swipeUiState = SwipeUiState.Error
-            }
-        }
-    }
-
-    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    fun matchLongPoll(token: String, username: String) {
-        viewModelScope.launch {
-            discoverUiState = DiscoverUiState.Loading
-            try {
-                val pollingResponse = discoverService.matchLongPoll("Bearer $token", username)
-                swipeUiState = SwipeUiState.PollingResult(pollingResponse.message)
             } catch (e: IOException) {
                 swipeUiState = SwipeUiState.Error
             } catch (e: HttpException) {

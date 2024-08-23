@@ -32,10 +32,4 @@ interface DiscoverService {
         @Header("Authorization") token: String,
         @Body passRequest: PassRequest
     ): PassResponse
-
-    @GET("api/swipe/polling")
-    suspend fun matchLongPoll(
-        @Header("Authorization") token: String,
-        @Query("username") username: String
-    ): PollingResponse
 }

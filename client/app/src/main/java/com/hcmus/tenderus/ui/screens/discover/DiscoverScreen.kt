@@ -112,7 +112,6 @@ fun DiscoverScreen(navController: NavController,
     LaunchedEffect(Unit) {
         viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
         profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-//        viewModel.matchLongPoll(TokenManager.getToken() ?:"", profile?.username!!)
     }
 
     LaunchedEffect(profileUiState) {
@@ -367,8 +366,8 @@ fun SwipeableProfiles(currentProfile: Profile,
                                 if (offsetX.value > 300f) {
                                     // Like
                                     currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
-                                    Log.d("Discover", currentProfileIndex.toString())
-                                    Log.d("Discover", profiles[currentProfileIndex].toString())
+                                    Log.d("like", currentProfileIndex.toString())
+                                    Log.d("like", profiles[currentProfileIndex].toString())
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
@@ -381,6 +380,8 @@ fun SwipeableProfiles(currentProfile: Profile,
                                 } else if (offsetX.value < -300f) {
                                     // Dislike
                                     currentProfileIndex = (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+                                    Log.d("dislike", currentProfileIndex.toString())
+                                    Log.d("dislike", profiles[currentProfileIndex].toString())
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
