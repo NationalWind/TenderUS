@@ -9,16 +9,6 @@ import { parse } from "dotenv";
 const validGroups = ["Looking for Love", "Free tonight?", "Coffee Date", "Let's be friend", "Like to go drinking", "Movie Lovers", "Creative Lovers", "Love Sports"]
 
 const recommendationController = {
-    // GET /api/recommendation/groups
-    getGroups: async (req: Request, res: Response) => {
-        try {
-            res.status(200).json({ groups: validGroups });
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({ message: "Something went wrong" });
-        }
-    },
-
     // POST /api/recommendation/join { id(username): String, group: String }
     join: async (req: Request, res: Response) => {
         try {
@@ -46,6 +36,7 @@ const recommendationController = {
         }
     },
     // GET /api/recommendation?limit=&group=
+    //response: {profiles: Profile[]}
     getRecs: async (req: Request, res: Response) => {
         try {
             if (!req.query.limit || typeof req.query.limit !== "string") {
@@ -149,6 +140,14 @@ const recommendationController = {
             res.status(500).json({ message: "Something went wrong" });
         }
     },
+    // getGroups: async (req: Request, res: Response) => {
+    //     try {
+    //         res.status(200).json({ groups: validGroups });
+    //     } catch (error) {
+    //         console.log(error);
+    //         res.status(500).json({ message: "Something went wrong" });
+    //     }
+    // },
 };
 
 export default recommendationController;

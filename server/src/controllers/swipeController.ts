@@ -52,16 +52,16 @@ const swipeController = {
                 await db.match.upsert({
                     where: {
                         user1_user2: {
-                            user1: data.likedUsername,
-                            user2: data.username
+                            user1: user1,
+                            user2: user2
                         }
                     },
                     update: {
                         createdAt: new Date()
                     },
                     create: {
-                        user1: data.likedUsername,
-                        user2: data.username,
+                        user1: user1,
+                        user2: user2,
                         createdAt: new Date()
                     },
                 });
