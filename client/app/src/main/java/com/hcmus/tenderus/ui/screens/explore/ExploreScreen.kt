@@ -112,7 +112,7 @@ fun CategorySection(navController: NavController) {
             CategoryItem(
                 imageRes = R.drawable.coffe_date,
                 text = "Coffee\nDate",
-                onClick = { /* Hành động hoặc điều hướng khác */ }
+                onClick = { navController.navigate("coffee_date") }
             )
             Spacer(modifier = Modifier.width(16.dp))
             CategoryItem(
