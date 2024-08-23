@@ -77,13 +77,10 @@ const authController = {
                 }
 
                 await db.account.create({ data });
+                res.status(200).json({ message: "OK" });
             } else {
                 res.status(403).json({ message: "Invalid token" });
-                return;
             }
-
-
-
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Something went wrong" });
@@ -91,6 +88,7 @@ const authController = {
     },
 
     // POST /api/auth/login
+    // response: {token: string, firebaseToken: string, firstTime: boolean, role: Role}
     login: async (req: Request, res: Response) => {
         try {
             interface LoginRequest {

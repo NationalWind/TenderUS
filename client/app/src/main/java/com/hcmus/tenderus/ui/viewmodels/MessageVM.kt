@@ -19,12 +19,14 @@ import com.hcmus.tenderus.model.Message
 import com.hcmus.tenderus.network.ApiClient.GetActivityStatusApi
 import com.hcmus.tenderus.network.ApiClient.GetMatchesApi
 import com.hcmus.tenderus.network.ApiClient.HaveReadMessageApi
+import com.hcmus.tenderus.network.ApiClient.MatchPollingApi
 import com.hcmus.tenderus.network.ApiClient.MessageLoadingApi
 import com.hcmus.tenderus.network.ApiClient.MessagePollingApi
 import com.hcmus.tenderus.network.ApiClient.MessageSendingApi
 import com.hcmus.tenderus.network.HaveReadMessageRequest
 import com.hcmus.tenderus.network.MessageSendingRequest
 import com.hcmus.tenderus.utils.firebase.StorageUtil.Companion.uploadToStorage
+import com.hcmus.tenderus.utils.getCurrentDateTimeIso
 import com.hcmus.tenderus.utils.subtractInMinutes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -34,7 +36,7 @@ data class MatchState(
     val username: String = "",
     val avatarIcon: String = "",
     val displayName: String = "",
-    val createdAt: String = "",
+    val createdAt: String = getCurrentDateTimeIso(),
     var isActive: Boolean = false,
     var isRead: Boolean = false,
     val messageArr: SnapshotStateList<Message> = mutableStateListOf<Message>()
@@ -67,6 +69,7 @@ class MatchListVM: ViewModel() {
                     val newMsg =
                         MessagePollingApi.getNewMessage("Bearer $token")
                     val idx = matches.indexOfFirst { it.username == newMsg.sender }
+                    if (idx == -1) continue//
                     if (idx == 0) {
                         matches[idx].messageArr.add(0, newMsg)
                     } else {
@@ -80,6 +83,29 @@ class MatchListVM: ViewModel() {
 
                 } catch (e: Exception) {
                     Log.d("MsgPolling", e.toString())
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            while (true) {
+                try {
+                    val token = TokenManager.getToken() ?: break
+                    val newMatch = MatchPollingApi.getNewMatch("Bearer $token")
+                    val idx = matches.indexOfFirst { (it.username == newMatch.username) }
+                    if (idx == -1) {
+                        matches.add(
+                            0,
+                            MatchState(
+                                username = newMatch.username,
+                                avatarIcon = newMatch.avatarIcon,
+                                displayName = newMatch.displayName,
+                                isActive = newMatch.isActive
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.d("MatchPolling", e.toString())
                 }
             }
         }
@@ -128,6 +154,7 @@ class MatchListVM: ViewModel() {
                         }
 
                     }
+
                     for (m in matchesList) {
                         matches.add(
                             MatchState(
@@ -155,7 +182,6 @@ class MatchListVM: ViewModel() {
     fun sendMessage(req: MessageSendingRequest) {
         viewModelScope.launch {
             try {
-                uiState = MessageStatus.LOADING
                 val msg = MessageSendingApi.sendMessage("Bearer " + TokenManager.getToken()!!, req)
                 val idx = matches.indexOfFirst { it.username == msg.receiver }
                 if (idx == 0) {
