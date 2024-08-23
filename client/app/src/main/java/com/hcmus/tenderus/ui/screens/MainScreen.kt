@@ -152,7 +152,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             LaunchedEffect(Unit) {
                                 showBar = true
                             }
-                            DiscoverScreen(mainNavController/*navController*/)
+                            DiscoverScreen(mainNavController/*navController*/,"Discover")
                         }
                         composable(BottomNavItem.Matches.route) {
                             LaunchedEffect(Unit) {

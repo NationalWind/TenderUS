@@ -2,6 +2,7 @@ package com.hcmus.tenderus.ui.screens.explore
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,7 +49,7 @@ fun ExploreScreen(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 WelcomeSection()
-                CategorySection()
+                CategorySection(navController)
                 WelcomeJointopic()
                 TopicSection()
             }
@@ -81,7 +82,7 @@ fun WelcomeSection() {
 }
 
 @Composable
-fun CategorySection() {
+fun CategorySection(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -89,31 +90,64 @@ fun CategorySection() {
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center // Center the images horizontally
+            horizontalArrangement = Arrangement.Center
         ) {
             CategoryItem(
                 imageRes = R.drawable.looking_for_love,
-                text = "Looking for\nLove"
+                text = "Looking for\nLove",
+                onClick = { navController.navigate("discover?customTitle=Looking for Love") }
             )
-            Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
+            Spacer(modifier = Modifier.width(16.dp))
             CategoryItem(
                 imageRes = R.drawable.free_tonight,
-                text = "Free \ntonight?"
+                text = "Free \ntonight?",
+                onClick = { navController.navigate("discover?customTitle=Free tonight?") }
             )
         }
-        Spacer(modifier = Modifier.height(16.dp)) // Increase space between rows
+        Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center // Center the images horizontally
+            horizontalArrangement = Arrangement.Center
         ) {
             CategoryItem(
                 imageRes = R.drawable.coffe_date,
-                text = "Coffee\nDate"
+                text = "Coffee\nDate",
+                onClick = { /* Hành động hoặc điều hướng khác */ }
             )
-            Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
+            Spacer(modifier = Modifier.width(16.dp))
             CategoryItem(
                 imageRes = R.drawable.let_friend,
-                text = "Let's be \nfriend"
+                text = "Let's be\nfriend",
+                onClick = { /* Hành động hoặc điều hướng khác */ }
+            )
+        }
+    }
+}
+
+@Composable
+fun CategoryItem(imageRes: Int, text: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(180.dp) // Increase the width of the item
+            .aspectRatio(0.75f) // Adjust the aspect ratio for larger images
+            .clickable(onClick = onClick)  // Thêm hành động click vào đây
+    ) {
+        Image(
+            painter = painterResource(id = imageRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        if (text.isNotEmpty()) {
+            Text(
+                text = text,
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(8.dp)
             )
         }
     }
@@ -125,8 +159,8 @@ fun WelcomeJointopic() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 5.dp),
-        
-    ) {
+
+        ) {
         Text(
             text = "For you",
             color = Color(0xFFBD0D36),
@@ -156,12 +190,14 @@ fun TopicSection() {
         ) {
             CategoryItem(
                 imageRes = R.drawable.drink,
-                text = "Like to go \ndrinking"
+                text = "Like to go \ndrinking",
+                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
             )
             Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.movie,
-                text = "Movie \nLovers"
+                text = "Movie \nLovers",
+                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
             )
         }
         Spacer(modifier = Modifier.height(16.dp)) // Increase space between rows
@@ -171,40 +207,14 @@ fun TopicSection() {
         ) {
             CategoryItem(
                 imageRes = R.drawable.creative,
-                text = "Creative \nLovers"
+                text = "Creative \nLovers",
+                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
             )
             Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.sport,
-                text = "Love \nSports"
-            )
-        }
-    }
-}
-
-@Composable
-fun CategoryItem(imageRes: Int, text: String) {
-    Box(
-        modifier = Modifier
-            .width(180.dp) // Increase the width of the item
-            .aspectRatio(0.75f) // Adjust the aspect ratio for larger images
-    ) {
-        Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        if (text.isNotEmpty()) {
-            Text(
-                text = text,
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.ExtraBold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(8.dp)
+                text = "Love \nSports",
+                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
             )
         }
     }

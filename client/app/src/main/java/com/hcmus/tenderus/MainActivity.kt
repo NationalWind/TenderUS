@@ -72,6 +72,8 @@ import com.hcmus.tenderus.ui.screens.authentication.ForgotPasswordScreen
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
 import com.hcmus.tenderus.ui.screens.authentication.LoginScreen
 import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen
+import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
+import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails2Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails3Screen
@@ -180,12 +182,22 @@ class MainActivity : ComponentActivity() {
 //                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
 //                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
                     composable("main") { MainScreen(firebaseSMSAuth, firebaseEmailAuth, applicationContext) }
+
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
                     composable("exlogin") { ExampleLogin(navController) }
                     composable("admin") {AdminScreen()}
+
+
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
 //                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
+                }
+                NavHost(navController, startDestination = "explore") {
+                    composable("explore") { ExploreScreen(navController) }
+                    composable("discover?customTitle={customTitle}") { backStackEntry ->
+                        val customTitle = backStackEntry.arguments?.getString("customTitle")
+                        DiscoverScreen(navController = navController, customTitle = customTitle)
+                    }
                 }
             }
         }

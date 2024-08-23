@@ -92,7 +92,7 @@ fun calculateAgeFromDob(dob: String): Int {
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun DiscoverScreen(navController: NavController,
+fun DiscoverScreen(navController: NavController,customTitle: String?,
                    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory),
                    viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)) {
     var location by remember { mutableStateOf("Ho Chi Minh city, VietNam") }
@@ -136,7 +136,7 @@ fun DiscoverScreen(navController: NavController,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Discover",
+                    text = customTitle ?: "Discover",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFB62424)
@@ -780,6 +780,8 @@ fun AgeRangeSlider(
         )
     }
 }
+
+
 
 @Composable
 fun MatchesScreen(navController: NavController) {
