@@ -216,6 +216,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         composable("profilesetup1") {
                             LaunchedEffect(Unit) {
                                 showBar = false
+                                Log.d("firstTime", firstTime.toString())
                             }
                             ProfileDetails1Screen(mainNavController)
                         }
@@ -289,6 +290,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         composable("houserules") {
                             LaunchedEffect(Unit) {
                                 showBar = false
+                                firstTime = false
                             }
                             HouseRulesScreen(mainNavController)
                         }
