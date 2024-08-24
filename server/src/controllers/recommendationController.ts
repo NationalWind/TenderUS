@@ -9,15 +9,15 @@ import { parse } from "dotenv";
 const validGroups = ["Looking for Love", "Free tonight?", "Coffee Date", "Let's be friend", "Like to go drinking", "Movie Lovers", "Creative Lovers", "Love Sports"]
 
 const recommendationController = {
-    // POST /api/recommendation/join { id(username): String, group: String }
+    // POST /api/recommendation/join?group=
     join: async (req: Request, res: Response) => {
         try {
             const username: string = req.body.username;
-            if (!req.body.group || typeof req.body.group !== "string" || !validGroups.includes(req.body.group)) {
+            if (!req.query.group || typeof req.query.group !== "string" || !validGroups.includes(req.query.group)) {
                 res.status(400).json({ message: "Bad request" });
                 return;
             }
-            const group: string = req.body.group;
+            const group: string = req.query.group;
 
 
             await db.profile.update({
@@ -140,14 +140,23 @@ const recommendationController = {
             res.status(500).json({ message: "Something went wrong" });
         }
     },
-    // getGroups: async (req: Request, res: Response) => {
-    //     try {
-    //         res.status(200).json({ groups: validGroups });
-    //     } catch (error) {
-    //         console.log(error);
-    //         res.status(500).json({ message: "Something went wrong" });
-    //     }
-    // },
+
+    // GET /api/recommendation/join?group=
+    // response: {joined: Boolean}
+    joinedYet: async (req: Request, res: Response) => {
+        try {
+            if (!req.query.group || typeof req.query.group !== "string") {
+                res.status(400).json({ message: "Bad request" });
+                return;
+            }
+            const prof = await db.profile.findUniqueOrThrow({ where: { username: req.body.username } });
+            const groups = prof.groups;
+            res.status(200).json({ joined: groups.includes(req.query.group) });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Something went wrong" });
+        }
+    },
 };
 
 export default recommendationController;

@@ -146,36 +146,39 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                     text = customTitle ?: "Discover",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFB62424)
+                    color = Color(0xFFB62424),
+                    modifier = Modifier.padding(8.dp)
                 )
                 Spacer(modifier = Modifier.width(105.dp))
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clickable { showNotifications = !showNotifications }
-                        .background(Color.Transparent)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_noti), // Replace with your notification icon
-                        contentDescription = "Notifications",
-                        tint = Color(0xFFB71C1C),
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(55.dp)
-                        .clickable { expanded = !expanded }
-                        .background(Color.Transparent)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_filter),
-                        contentDescription = "Filter",
-                        tint = Color(0xFFB71C1C),
-                        modifier = Modifier.fillMaxSize()
-                    )
+                if (customTitle == "Discover") {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clickable { showNotifications = !showNotifications }
+                            .background(Color.Transparent)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_noti), // Replace with your notification icon
+                            contentDescription = "Notifications",
+                            tint = Color(0xFFB71C1C),
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(55.dp)
+                            .clickable { expanded = !expanded }
+                            .background(Color.Transparent)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.icon_filter),
+                            contentDescription = "Filter",
+                            tint = Color(0xFFB71C1C),
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
             Text(
@@ -743,14 +746,7 @@ fun ItsAMatchScreen(navController: NavController) {
 
             TextButton(onClick = {
                 navController.popBackStack()
-                navController.navigate(BottomNavItem.Discover.route) {
-                    popUpTo(navController.graph.startDestinationId) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                } }
-            ) {
+            }) {
                 Text(
                     text = "Not now",
                     color = Color.White,

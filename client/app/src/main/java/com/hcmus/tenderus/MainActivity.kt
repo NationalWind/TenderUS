@@ -191,7 +191,7 @@ class MainActivity : ComponentActivity() {
                     composable("admin") {AdminScreen()}
 
                     composable("explore") { ExploreScreen(navController) }
-                    composable("coffee_date") { CoffeeDateScreen(navController) }
+//                    composable("coffee_date") { CoffeeDateScreen(navController) }
                     composable("discover?customTitle={customTitle}") { backStackEntry ->
                         val customTitle = backStackEntry.arguments?.getString("customTitle")
                         DiscoverScreen(navController = navController, customTitle = customTitle)

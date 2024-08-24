@@ -71,6 +71,10 @@ object ApiClient {
     val MatchPollingApi by lazy {
         create(MatchPolling::class.java)
     }
+    val ExploreService by lazy {
+        create(ExploreService::class.java)
+    }
+
 
 
 

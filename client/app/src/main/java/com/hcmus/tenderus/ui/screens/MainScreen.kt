@@ -62,6 +62,7 @@ import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails4Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.SearchPreferencesScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.SelectYourGoalsScreen
+import com.hcmus.tenderus.ui.viewmodels.ExploreVM
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
 import com.hcmus.tenderus.utils.ActivityStatusService
@@ -165,12 +166,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             }
                             ItsAMatchScreen(mainNavController/*navController*/)
                         }
-                        composable(BottomNavItem.Matches.route) {
-                            LaunchedEffect(Unit) {
-                                showBar = true
-                            }
-                            MatchesScreen(mainNavController/*navController*/)
-                        }
+
                         composable(BottomNavItem.Explore.route) {
                             LaunchedEffect(Unit) {
                                 showBar = true
@@ -181,7 +177,9 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             LaunchedEffect(Unit) {
                                 showBar = false
                             }
-                            CoffeeDateScreen(mainNavController/*navController*/)
+                            val backStackEntry =
+                                remember { mainNavController.getBackStackEntry(BottomNavItem.Explore.route) }
+                            CoffeeDateScreen(mainNavController, viewModel(viewModelStoreOwner = backStackEntry, factory = ExploreVM.Factory))
                         }
                         composable(BottomNavItem.Chat.route) {
                             LaunchedEffect(Unit) {
