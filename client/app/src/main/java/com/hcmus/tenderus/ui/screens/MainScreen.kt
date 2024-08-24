@@ -7,11 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,13 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
@@ -51,7 +42,6 @@ import com.hcmus.tenderus.ui.screens.explore.coffe.CoffeeDateScreen
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
 import com.hcmus.tenderus.ui.screens.profilesetup.Add_Photos
-//import com.hcmus.tenderus.ui.screens.profilesetup.Add_Photoss
 import com.hcmus.tenderus.ui.screens.profilesetup.EditProfileScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.HouseRulesScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.Interest
@@ -217,6 +207,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 Log.d("firstTime", firstTime.toString())
                             }
                             ProfileDetails1Screen(mainNavController)
+
                         }
                         composable("profilesetup2") {
                             LaunchedEffect(Unit) {
@@ -242,6 +233,13 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 showBar = false
                             }
                             Interest(mainNavController)
+                        }
+
+                        composable("about_us") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            AboutUsScreen(mainNavController)
                         }
 
                         composable("addphoto") {

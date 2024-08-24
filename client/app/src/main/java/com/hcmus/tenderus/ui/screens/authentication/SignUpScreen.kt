@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +22,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -118,6 +121,7 @@ fun SignUpScreen(
         }
     }
 
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -169,14 +173,15 @@ fun SignUpScreen(
                                 .clickable { expanded = !expanded }
                                 .padding(16.dp)
                         ) {
-                            Text(text = selectedCountryCode, fontSize = 18.sp)
+                            Text(text = selectedCountryCode, fontSize = 18.sp, color = Color(0xFFB71C1C))
                             Spacer(modifier = Modifier.width(57.dp))
                             Icon(
                                 painter = painterResource(id = R.drawable.drdown),
                                 contentDescription = "Dropdown",
                                 modifier = Modifier
                                     .align(Alignment.CenterEnd)
-                                    .size(20.dp)
+                                    .size(20.dp),
+                                tint = Color(0xFFB71C1C)
                             )
                             DropdownMenu(
                                 expanded = expanded,
@@ -200,7 +205,13 @@ fun SignUpScreen(
                             onValueChange = { phoneNumber = it },
                             placeholder = { Text("Phone Number") },
                             modifier = Modifier
-                                .weight(1f) // Take up the remaining space
+                                .weight(1f), // Take up the remaining space
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = { focusManager.clearFocus() },
+                            )
                         )
                     }
 
@@ -312,7 +323,13 @@ fun SignUpScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(vertical = 16.dp, horizontal = 8.dp)
+                            .padding(vertical = 16.dp, horizontal = 8.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -396,7 +413,13 @@ fun SignUpScreen(
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     if (!isEmailValid) {
                         Text(
@@ -510,19 +533,26 @@ fun SignUpScreen(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    BasicTextField(
+//                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
                         value = username,
                         onValueChange = {
                             username = it
                             isUsernameValid = validateUsername(username)
                         },
+                        label = { Text("Username") },
                         textStyle = TextStyle(fontSize = 18.sp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                            .padding(vertical = 2.dp),
+//                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+//                            .padding(16.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     if (!isUsernameValid) {
                         Text(
@@ -531,7 +561,7 @@ fun SignUpScreen(
                             fontSize = 12.sp
                         )
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         "Create a password",
                         fontSize = 30.sp,
@@ -541,20 +571,27 @@ fun SignUpScreen(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    BasicTextField(
+//                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
                         value = password,
                         onValueChange = {
                             password = it
                             isPasswordValid = validatePassword(password.text)
                         },
+                        label = { Text("Password") },
                         visualTransformation = PasswordVisualTransformation(),
                         textStyle = TextStyle(fontSize = 18.sp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                            .padding(vertical = 2.dp),
+//                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+//                            .padding(16.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     if (!isPasswordValid) {
                         Text(
@@ -563,20 +600,27 @@ fun SignUpScreen(
                             fontSize = 12.sp
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    BasicTextField(
+//                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = {
                             confirmPassword = it
                             doPasswordsMatch = password.text == confirmPassword.text
                         },
+                        label = { Text("Confirm Password") },
                         visualTransformation = PasswordVisualTransformation(),
                         textStyle = TextStyle(fontSize = 18.sp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                            .padding(vertical = 2.dp),
+//                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+//                            .padding(16.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     if (!doPasswordsMatch) {
                         Text(

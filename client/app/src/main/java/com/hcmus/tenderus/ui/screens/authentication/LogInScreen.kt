@@ -6,18 +6,27 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -31,13 +40,14 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.HttpException
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
     TenderUSTheme {
@@ -47,6 +57,7 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 .background(Color.White)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
+                        focusManager.clearFocus()
                         keyboardController?.hide()
                     })
                 }
@@ -77,18 +88,23 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 value = username,
                 onValueChange = { username = it },
                 label = { Text("Username") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                    },
+                )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
+            PasswordInput(
+                password = password,
+                onPasswordChange = { password = it }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -97,13 +113,15 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 onClick = {
                     scope.launch {
                         try {
-                            onLoggedIn(GenAuth.login(
+                            onLoggedIn(
+                                GenAuth.login(
                                     UserLogin(
                                         username,
                                         password,
                                         FCMRegToken = TenderUSPushNotificationService.token!!
                                     )
-                            ))
+                                )
+                            )
                         } catch (e: HttpException) {
                             val errorBody = e.response()?.errorBody()?.string()
                             val errorJson = errorBody?.let { JSONObject(it) }
@@ -124,7 +142,6 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 Text(text = "LOGIN")
             }
 
-
             Button(
                 onClick = { /* Handle login as guest logic here */ },
                 colors = ButtonDefaults.buttonColors(
@@ -139,7 +156,7 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
             Spacer(modifier = Modifier.height(16.dp))
 
             if (errorMessage.isNotEmpty()) {
-                Text(text = errorMessage, color = Color.Red,  fontWeight = FontWeight.Bold)
+                Text(text = errorMessage, color = Color.Red, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -181,3 +198,40 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
         }
     }
 }
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun PasswordInput(
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    focusManager: FocusManager = LocalFocusManager.current
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    OutlinedTextField(
+        value = password,
+        onValueChange = onPasswordChange,
+        label = { Text("Password") },
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                focusManager.clearFocus()
+                keyboardController?.hide()
+            }
+        ),
+        modifier = Modifier.fillMaxWidth(),
+        trailingIcon = {
+            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+            }
+        }
+    )
+}
+
+
