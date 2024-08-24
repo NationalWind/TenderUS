@@ -296,12 +296,12 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 firstTime = false
                             }
                         }
-                        composable("main") {
-                            LaunchedEffect(Unit) {
-                                showBar = true
-                            }
-                            MainScreen(firebaseSMSAuth, firebaseEmailAuth, context)
-                        }
+//                        composable("main") {
+//                            LaunchedEffect(Unit) {
+//                                showBar = true
+//                            }
+//                            MainScreen(firebaseSMSAuth, firebaseEmailAuth, context)
+//                        }
                     }
 
                 }
