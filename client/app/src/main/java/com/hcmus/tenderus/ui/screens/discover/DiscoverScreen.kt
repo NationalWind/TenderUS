@@ -3,6 +3,10 @@ package com.hcmus.tenderus.ui.screens.discover
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -66,6 +70,7 @@ import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.network.LikeRequest
 import com.hcmus.tenderus.network.PassRequest
+import com.hcmus.tenderus.ui.screens.BottomNavItem
 import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
 import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
@@ -468,8 +473,8 @@ fun SwipeableProfiles(navController: NavController,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(16.dp)
-                            .size(60.dp)
-                            .offset(x = (-10).dp, y = (-60).dp)
+                            .size(52.dp)
+                            .offset(x = (-10).dp, y = (-100).dp)
                             .clickable { showProfileDetails = true }
                     ) {
                         Image(
@@ -481,7 +486,11 @@ fun SwipeableProfiles(navController: NavController,
                     }
                 }
 
-                if (showProfileDetails) {
+                AnimatedVisibility (
+                    visible = showProfileDetails,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
                     // Full Profile Information Section
                     Box(
                         modifier = Modifier
@@ -489,11 +498,11 @@ fun SwipeableProfiles(navController: NavController,
                             .background(Color.White)
                             .padding(16.dp)
                             .verticalScroll(rememberScrollState())
+
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 200.dp) // Ensure content doesn't overlap with the image
                         ) {
                             // Profile Image as part of the detailed profile
                             Image(
@@ -503,6 +512,7 @@ fun SwipeableProfiles(navController: NavController,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp) // Adjust height as needed
+                                    .clip(RoundedCornerShape(12.dp))
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -517,6 +527,7 @@ fun SwipeableProfiles(navController: NavController,
                                         .fillMaxWidth()
                                         .height(200.dp) // Adjust height as needed
                                         .padding(vertical = 8.dp) // Add spacing between images
+                                        .clip(RoundedCornerShape(12.dp))
                                 )
                             }
 
@@ -536,8 +547,8 @@ fun SwipeableProfiles(navController: NavController,
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.End)
-                                    .size(64.dp)
-                                    .offset(x = (-10).dp, y = (-60).dp)
+                                    .size(52.dp)
+                                    .offset(x = (-10).dp, y = (-100).dp)
                                     .clickable { showProfileDetails = false }
                                     .background(Color.Transparent)
                             ) {
@@ -579,8 +590,7 @@ fun SwipeableProfiles(navController: NavController,
                             .clickable {
                                 // Dislike
                                 if (profiles.isNotEmpty()) {
-                                    currentProfileIndex =
-                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
@@ -588,6 +598,8 @@ fun SwipeableProfiles(navController: NavController,
                                         TokenManager.getToken() ?: "",
                                         PassRequest(currentProfile.username!!, profile.username!!)
                                     )
+                                    currentProfileIndex =
+                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                 }
                             }
                     ) {
@@ -615,8 +627,7 @@ fun SwipeableProfiles(navController: NavController,
                             .clickable {
                                 // Like
                                 if (profiles.isNotEmpty()) {
-                                    currentProfileIndex =
-                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
@@ -624,6 +635,8 @@ fun SwipeableProfiles(navController: NavController,
                                         TokenManager.getToken() ?: "",
                                         LikeRequest(currentProfile.username!!, profile.username!!)
                                     )
+                                    currentProfileIndex =
+                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                 }
                             }
                     ) {
@@ -645,15 +658,10 @@ fun SwipeableProfiles(navController: NavController,
 //                CircularProgressIndicator()
             }
             is SwipeUiState.LikeSuccess -> {
-                val match = (swipeUiState as SwipeUiState.LikeSuccess).match
-                if (match) {
-                    MatchOverlay {
-                        // After the overlay fades out, navigate to the "It's a match" screen
-                        navController.navigate("itsamatch")
-                    }
-                    Log.d("Like", "It's a Match")
-                } else {
-                    Log.d("Like", "Liked")
+                if ((swipeUiState as SwipeUiState.LikeSuccess).match) {
+                    (swipeUiState as SwipeUiState.LikeSuccess).match = false
+                    navController.navigate("itsamatch")
+
                 }
             }
             is SwipeUiState.PassSuccess -> {
@@ -664,16 +672,13 @@ fun SwipeableProfiles(navController: NavController,
                 Text("Failed to swipe", color = Color.Red)
             }
         }
+
     }
 }
 
 @Composable
 fun MatchOverlay(onAnimationEnd: () -> Unit) {
-    var alpha by remember { mutableStateOf(1f) }
-
     LaunchedEffect(Unit) {
-        // Start fade-out animation
-        alpha = 0f
         delay(1000) // Adjust delay for fade-out duration
         onAnimationEnd()
     }
@@ -681,7 +686,7 @@ fun MatchOverlay(onAnimationEnd: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Gray.copy(alpha = alpha)),
+            .background(Color.Gray.copy(alpha = 0.75f)),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -715,7 +720,15 @@ fun ItsAMatchScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { navController.navigate("inchat") },
+                onClick = {
+                    navController.popBackStack()
+                    navController.navigate(BottomNavItem.Chat.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    } },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White
                 )
@@ -728,7 +741,16 @@ fun ItsAMatchScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = { navController.navigate("main") }) {
+            TextButton(onClick = {
+                navController.popBackStack()
+                navController.navigate(BottomNavItem.Discover.route) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                } }
+            ) {
                 Text(
                     text = "Not now",
                     color = Color.White,

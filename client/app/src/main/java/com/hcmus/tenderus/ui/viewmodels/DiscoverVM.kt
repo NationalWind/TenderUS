@@ -35,7 +35,7 @@ sealed interface DiscoverUiState {
 }
 
 sealed interface SwipeUiState {
-    data class LikeSuccess(val match: Boolean) : SwipeUiState
+    data class LikeSuccess(var match: Boolean) : SwipeUiState
     data object PassSuccess : SwipeUiState
     data object Error : SwipeUiState
     data object Loading : SwipeUiState
