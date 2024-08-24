@@ -1,6 +1,6 @@
 package com.hcmus.tenderus.ui.screens.profilesetup
 
-import android.icu.util.Calendar
+
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -117,7 +119,7 @@ fun ProfileDetails1Screen(
 
             Text(
                 text = "Profile Details",
-                fontSize = 44.sp,
+                fontSize = 43.sp,
                 style = MaterialTheme.typography.titleMedium,
                 color = Color(0xFFB71C1C),
                 fontWeight = FontWeight.Bold
@@ -154,6 +156,12 @@ fun ProfileDetails1Screen(
                 value = fullName,
                 onValueChange = { fullName = it },
                 label = { Text("Full name") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() }
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -164,7 +172,7 @@ fun ProfileDetails1Screen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(200.dp))
 
 
             // Display error message if error state
@@ -206,7 +214,7 @@ fun ProfileDetails1Screen(
                     } else {
                         val profile = Profile(
                             displayName = fullName,
-                            avatarIcon = "https://cdn.vectorstock.com/i/1000v/77/30/default-avatar-profile-icon-grey-photo-placeholder-vector-17317730.avif", // No new image URL
+                            avatarIcon = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541", // No new image URL
                             pictures = listOf(),
                             description = "",
                             longitude = 0f,
@@ -435,7 +443,7 @@ fun ProfileDetails3Screen(
                 onClick = { navController.navigate("filter") },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-//                    .padding(top = 16.dp)
+                    .padding(top = 16.dp)
             ) {
                 Text("Skip", color = Color.Gray, fontSize = 18.sp)
             }
@@ -452,7 +460,7 @@ fun ProfileDetails3Screen(
                     contentDescription = "Heart Icon",
                     modifier = Modifier.size(100.dp)
                 )
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Your Interests",
                     style = MaterialTheme.typography.titleLarge,
@@ -460,14 +468,14 @@ fun ProfileDetails3Screen(
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp
                 )
-                Spacer(modifier = Modifier.weight(0.5f))
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Select a few of your interests and let everyone know what you're passionate about.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
                     fontSize = 16.sp
                 )
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(16.dp))
                 interests.chunked(2).forEach { rowInterests ->
                     Row(modifier = Modifier.fillMaxWidth()) {
                         rowInterests.forEach { interest ->
@@ -492,7 +500,7 @@ fun ProfileDetails3Screen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
                         profile?.let {

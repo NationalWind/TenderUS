@@ -6,7 +6,6 @@ import android.os.Looper
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.hcmus.tenderus.ui.screens.report.ReportIssueDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,7 +68,7 @@ fun ProfileHeader(imageUri: Uri?, name: String, age: Int) {
     ) {
         Box(
             modifier = Modifier
-                .size(140.dp)
+                .size(160.dp)
                 .clip(CircleShape)
                 .border(2.dp, Color.Gray, CircleShape)
         ) {
@@ -117,13 +116,7 @@ fun ProfileButtons(navController: NavController, onSignedOut: () -> Unit) {
                 }
             )
         }
-        ProfileButton(
-            text = "Report App Issue",
-            icon = Icons.Default.AddCircle,
-            isPrimary = false,
-            onClick = { showDialog = true }
-        )
-        Spacer(modifier = Modifier.height(180.dp))
+        Spacer(modifier = Modifier.height(200.dp))
         ProfileButton(
             text = "Log Out",
             icon = Icons.Default.ExitToApp,
@@ -145,13 +138,10 @@ fun ProfileButtons(navController: NavController, onSignedOut: () -> Unit) {
             text = "About Us",
             icon = Icons.Default.Info,
             isPrimary = false,
-            onClick = { /* Handle About Us */ }
+            onClick = { navController.navigate("about_us") }
         )
     }
 
-    if (showDialog) {
-        ReportIssueDialog(onDismiss = { showDialog = false })
-    }
 }
 
 @Composable
@@ -210,7 +200,7 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
 
     Scaffold(
         contentWindowInsets = WindowInsets(
-            top =  0.dp,
+            top =  60.dp,
             bottom = 0.dp
         ),
         containerColor = Color.White
@@ -340,7 +330,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
         ) {
             Box(
                 modifier = Modifier
-                    .size(115.dp)
+                    .size(150.dp)
                     .clip(CircleShape)
                     .background(Color.Gray)
                     .clickable { imagePickerLauncher.launch("image/*") },
@@ -482,7 +472,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
             }
 
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(50.dp))
 
             Button(
                 onClick = {
