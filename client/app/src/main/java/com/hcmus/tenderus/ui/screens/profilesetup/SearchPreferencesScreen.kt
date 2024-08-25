@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.screens.profilesetup
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.navigation.NavHostController
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Preference
+import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
@@ -34,8 +36,19 @@ fun SearchPreferencesScreen(navController: NavHostController,
     var endAge by remember { mutableStateOf(28f) }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
+    var profile by remember { mutableStateOf<Profile?>(null) }
 
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+    }
+
+    LaunchedEffect(profileUiState) {
+        if (profileUiState is ProfileUiState.Success) {
+            profile = (profileUiState as ProfileUiState.Success).profile
+        }
+    }
 
     when (profileUiState) {
         is ProfileUiState.Loading -> {
@@ -127,6 +140,10 @@ fun SearchPreferencesScreen(navController: NavHostController,
             Button(
                 onClick = {
                     val preference = Preference(startAge.toInt(), endAge.toInt(), distance, selectedGender)
+                    profile?.let {
+                        val updatedProfile = it.copy(location = location)
+                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                    }
                     profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", preference)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),

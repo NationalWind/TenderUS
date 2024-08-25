@@ -200,7 +200,7 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
 
     Scaffold(
         contentWindowInsets = WindowInsets(
-            top =  60.dp,
+            top =  15.dp,
             bottom = 0.dp
         ),
         containerColor = Color.White

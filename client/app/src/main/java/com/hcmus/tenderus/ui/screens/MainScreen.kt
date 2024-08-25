@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
@@ -63,7 +64,7 @@ import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
 @SuppressLint("UnrememberedGetBackStackEntry")
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, context: Context) {
+fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, context: Context, fusedLocationClient: FusedLocationProviderClient) {
     var isLoggedIn by remember {
         mutableStateOf(TokenManager.getToken() != null)
     }
@@ -206,7 +207,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 showBar = false
                                 Log.d("firstTime", firstTime.toString())
                             }
-                            ProfileDetails1Screen(mainNavController)
+                            ProfileDetails1Screen(mainNavController, fusedLocationClient)
 
                         }
                         composable("profilesetup2") {
