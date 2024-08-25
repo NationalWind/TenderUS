@@ -41,15 +41,15 @@ sealed interface SwipeUiState {
     data object Loading : SwipeUiState
 }
 
-class DiscoverVM(private val discoverService: DiscoverService) : ViewModel() {
+open class DiscoverVM(protected val discoverService: DiscoverService) : ViewModel() {
     var discoverUiState by mutableStateOf<DiscoverUiState>(DiscoverUiState.Loading)
-        private set
+        protected set
 
     var swipeUiState by mutableStateOf<SwipeUiState>(SwipeUiState.Loading)
         private set
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    fun getProfiles(token: String, limit: String) {
+    open fun getProfiles(token: String, limit: String) {
         viewModelScope.launch {
             discoverUiState = DiscoverUiState.Loading
             try {

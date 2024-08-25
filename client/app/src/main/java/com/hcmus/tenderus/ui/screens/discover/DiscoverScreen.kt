@@ -67,6 +67,7 @@ import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import coil.compose.rememberAsyncImagePainter
 import com.hcmus.tenderus.data.TokenManager
+import com.hcmus.tenderus.model.Preference
 import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.network.LikeRequest
 import com.hcmus.tenderus.network.PassRequest
@@ -115,15 +116,25 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
     var profile by remember { mutableStateOf<Profile?>(null) }
     var profiles by remember { mutableStateOf<List<Profile>?>(null) }
+    var preference by remember { mutableStateOf<Preference?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
         profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+        profileVM.getCurrentUserPreferences(TokenManager.getToken() ?:"")
     }
 
     LaunchedEffect(profileUiState) {
         if (profileUiState is ProfileUiState.Success) {
             profile = (profileUiState as ProfileUiState.Success).profile
+            location = profile!!.location!!
+        }
+        if (profileUiState is ProfileUiState.PreferencesSuccess) {
+            preference = (profileUiState as ProfileUiState.PreferencesSuccess).preferences
+            selectedGender = preference!!.showMe
+            distance = preference!!.maxDist
+            startAge = preference!!.ageMin.toFloat()
+            endAge = preference!!.ageMax.toFloat()
         }
     }
 
@@ -146,36 +157,39 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                     text = customTitle ?: "Discover",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFB62424)
+                    color = Color(0xFFB62424),
+                    modifier = Modifier.padding(8.dp)
                 )
                 Spacer(modifier = Modifier.width(105.dp))
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clickable { showNotifications = !showNotifications }
-                        .background(Color.Transparent)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_noti), // Replace with your notification icon
-                        contentDescription = "Notifications",
-                        tint = Color(0xFFB71C1C),
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(55.dp)
-                        .clickable { expanded = !expanded }
-                        .background(Color.Transparent)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.icon_filter),
-                        contentDescription = "Filter",
-                        tint = Color(0xFFB71C1C),
-                        modifier = Modifier.fillMaxSize()
-                    )
+                if (customTitle == "Discover") {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clickable { showNotifications = !showNotifications }
+                            .background(Color.Transparent)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_noti), // Replace with your notification icon
+                            contentDescription = "Notifications",
+                            tint = Color(0xFFB71C1C),
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(55.dp)
+                            .clickable { expanded = !expanded }
+                            .background(Color.Transparent)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.icon_filter),
+                            contentDescription = "Filter",
+                            tint = Color(0xFFB71C1C),
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
             Text(
@@ -202,6 +216,11 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
 
                     GenderSelection(selectedGender) {
                         selectedGender = it
+                        preference?.let { preference1 ->
+                            val updatedPreference = preference1.copy(showMe = selectedGender)
+                            profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
+                            viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -216,6 +235,11 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
 
                     LocationSelection(location) {
                         location = it
+                        profile?.let { profile1 ->
+                            val updatedProfile = profile1.copy(location = location)
+                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                            viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -223,6 +247,11 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                     // Distance Slider
                     DistanceSlider(distance) {
                         distance = it
+                        preference?.let { preference1 ->
+                            val updatedPreference = preference1.copy(maxDist = distance)
+                            profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
+                            viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -231,8 +260,22 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                     AgeRangeSlider(
                         startAge = startAge,
                         endAge = endAge,
-                        onStartAgeChanged = { startAge = it },
-                        onEndAgeChanged = { endAge = it }
+                        onStartAgeChanged = {
+                            startAge = it
+                            preference?.let { preference1 ->
+                                val updatedPreference = preference1.copy(ageMin = startAge.toInt())
+                                profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
+                                viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+                            }
+                        },
+                        onEndAgeChanged = {
+                            endAge = it
+                            preference?.let { preference1 ->
+                                val updatedPreference = preference1.copy(ageMax = endAge.toInt())
+                                profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
+                                viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+                            }
+                        }
                     )
                 }
             }
@@ -374,8 +417,6 @@ fun SwipeableProfiles(navController: NavController,
                             coroutineScope.launch {
                                 if (offsetX.value > 300f) {
                                     // Like
-                                    currentProfileIndex =
-                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
@@ -386,11 +427,10 @@ fun SwipeableProfiles(navController: NavController,
                                         TokenManager.getToken() ?: "",
                                         LikeRequest(currentProfile.username!!, profile.username!!)
                                     )
-
-                                } else if (offsetX.value < -300f) {
-                                    // Dislike
                                     currentProfileIndex =
                                         (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
+                                } else if (offsetX.value < -300f) {
+                                    // Dislike
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
@@ -401,6 +441,8 @@ fun SwipeableProfiles(navController: NavController,
                                         TokenManager.getToken() ?: "",
                                         PassRequest(currentProfile.username!!, profile.username!!)
                                     )
+                                    currentProfileIndex =
+                                        (currentProfileIndex + 1).coerceAtMost(profiles.size - 1)
                                 } else {
                                     // Reset offset if swipe is not significant
                                     offsetX.value = 0f
@@ -435,6 +477,27 @@ fun SwipeableProfiles(navController: NavController,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
+
+                    // Rewind button at the top left
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(16.dp)
+                            .size(52.dp)
+                            .offset(x = (-10).dp, y = (-10).dp)
+                            .clickable {
+                                if (currentProfileIndex > 0) {
+                                    currentProfileIndex -= 1 // Rewind to the previous profile
+                                }
+                            }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.rewind),
+                            contentDescription = "Rewind",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
 
                 // Overlay profile information
@@ -590,7 +653,6 @@ fun SwipeableProfiles(navController: NavController,
                             .clickable {
                                 // Dislike
                                 if (profiles.isNotEmpty()) {
-
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
@@ -627,7 +689,6 @@ fun SwipeableProfiles(navController: NavController,
                             .clickable {
                                 // Like
                                 if (profiles.isNotEmpty()) {
-
                                     offsetX.value = 0f
                                     offsetY.value = 0f
                                     showProfileDetails = false // Collapse profile details on swipe
@@ -743,14 +804,7 @@ fun ItsAMatchScreen(navController: NavController) {
 
             TextButton(onClick = {
                 navController.popBackStack()
-                navController.navigate(BottomNavItem.Discover.route) {
-                    popUpTo(navController.graph.startDestinationId) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                } }
-            ) {
+            }) {
                 Text(
                     text = "Not now",
                     color = Color.White,

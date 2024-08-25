@@ -1,6 +1,8 @@
 package com.hcmus.tenderus.ui.screens.profilesetup
 
 
+import android.annotation.SuppressLint
+import android.location.Location
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -37,6 +39,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.auth.FirebaseAuth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
@@ -51,9 +54,11 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
+@SuppressLint("MissingPermission")
 @Composable
 fun ProfileDetails1Screen(
     navController: NavHostController,
+    fusedLocationClient: FusedLocationProviderClient,
     profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
 ) {
     val context = LocalContext.current
@@ -194,41 +199,52 @@ fun ProfileDetails1Screen(
                                 context = context,
                                 type = "Image"
                             ) { downloadUrl ->
-                                val profile = Profile(
-                                    displayName = fullName,
-                                    avatarIcon = downloadUrl, // Update with the new URL
-                                    pictures = listOf(),
-                                    description = "",
-                                    longitude = 0f,
-                                    latitude = 0f,
-                                    identity = "",
-                                    birthDate = dateOfBirth,
-                                    interests = listOf(),
-                                    groups = listOf(),
-                                    isActive = true
-                                )
-                                profileVM.upsertUserProfile(TokenManager.getToken() ?: "", profile)
-                                Log.d("ProfileDetails1Screen", "profile created")
-                                isButtonClicked = true
+                                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                                    val latitude = location?.latitude ?: 0.0
+                                    val longitude = location?.longitude ?: 0.0
+
+                                    val profile = Profile(
+                                        displayName = fullName,
+                                        avatarIcon = downloadUrl,
+                                        pictures = listOf(),
+                                        description = "",
+                                        location = "",
+                                        longitude = longitude.toFloat(),
+                                        latitude = latitude.toFloat(),
+                                        identity = "",
+                                        birthDate = dateOfBirth,
+                                        interests = listOf(),
+                                        groups = listOf(),
+                                        isActive = true
+                                    )
+                                    profileVM.upsertUserProfile(TokenManager.getToken() ?: "", profile)
+                                    Log.d("ProfileDetails1Screen", "profile created")
+                                    isButtonClicked = true
+                                }
                             }
                         }
                     } else {
-                        val profile = Profile(
-                            displayName = fullName,
-                            avatarIcon = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541", // No new image URL
-                            pictures = listOf(),
-                            description = "",
-                            longitude = 0f,
-                            latitude = 0f,
-                            identity = "",
-                            birthDate = dateOfBirth,
-                            interests = listOf(),
-                            groups = listOf(),
-                            isActive = true
-                        )
-                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", profile)
-                        Log.d("ProfileDetails1Screen", "profile created")
-                        isButtonClicked = true
+                        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                            val latitude = location?.latitude ?: 0.0
+                            val longitude = location?.longitude ?: 0.0
+
+                            val profile = Profile(
+                                displayName = fullName,
+                                avatarIcon = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541",
+                                pictures = listOf(),
+                                description = "",
+                                longitude = longitude.toFloat(),
+                                latitude = latitude.toFloat(),
+                                identity = "",
+                                birthDate = dateOfBirth,
+                                interests = listOf(),
+                                groups = listOf(),
+                                isActive = true
+                            )
+                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", profile)
+                            Log.d("ProfileDetails1Screen", "profile created")
+                            isButtonClicked = true
+                        }
                     }
                 },
                 colors = ButtonDefaults.buttonColors(

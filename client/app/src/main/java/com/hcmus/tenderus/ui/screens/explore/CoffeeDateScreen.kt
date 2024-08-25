@@ -1,5 +1,7 @@
 package com.hcmus.tenderus.ui.screens.explore.coffe
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -22,9 +24,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hcmus.tenderus.ui.viewmodels.ExploreVM
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun CoffeeDateScreen(navController: NavController) {
+fun CoffeeDateScreen(navController: NavController, exploreVM: ExploreVM) {
     Scaffold(
         containerColor = Color.White
     ) { paddingValues ->
@@ -49,21 +54,25 @@ fun CoffeeDateScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Subtitle()
                 Spacer(modifier = Modifier.height(54.dp))
-                JoinAndBackButtons(navController)
+                JoinAndBackButtons(navController, exploreVM)
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-private fun JoinAndBackButtons(navController: NavController) {
+private fun JoinAndBackButtons(navController: NavController, exploreVM: ExploreVM) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Button(
-            onClick = { navController.navigate("discover?customTitle=Coffe Date") },
+            onClick = {
+                exploreVM.join("Coffee Date")
+                navController.popBackStack()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
