@@ -52,46 +52,54 @@ import kotlin.math.exp
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun ExploreScreen(navController: NavController, exploreVM: ExploreVM = viewModel(factory = ExploreVM.Factory)) {
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-
-    ) {
-        Column(
+    if (TokenManager.getRole() != "USER") {
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "You have to log in as user to explore", textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
+        }
+    } else {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(Color.White)
+
         ) {
-            WelcomeSection()
-            CategorySection(navController)
-            WelcomeJointopic()
-            TopicSection()
-        }
-    }
-
-    if (exploreVM.group != null) {
-
-        DiscoverScreen(navController, "Explore", viewModel = exploreVM)
-
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.circlecancle),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            Column(
                 modifier = Modifier
-                    .size(38.dp)
-                    .clickable {
-                        exploreVM.group = null
-                    }
-                    .align(Alignment.TopEnd)
-            )
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                WelcomeSection()
+                CategorySection(navController)
+                WelcomeJointopic()
+                TopicSection()
+            }
         }
 
+        if (exploreVM.group != null) {
+
+            DiscoverScreen(navController, "Explore", viewModel = exploreVM)
+
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.circlecancle),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clickable {
+                            exploreVM.group = null
+                        }
+                        .align(Alignment.TopEnd)
+                )
+            }
+
+        }
     }
 
 }

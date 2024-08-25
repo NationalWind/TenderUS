@@ -103,13 +103,16 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
             var showBar by remember { mutableStateOf(true) }
             LaunchedEffect(Unit) {
                 try {
-                    ProcessProfile.upsertUserProfile(
-                        "Bearer " + TokenManager.getToken()!!,
-                        profile = Profile(isActive = true)
-                    )
-                    val intent = Intent(context, ActivityStatusService::class.java)
-                    context.startService(intent)
-
+                    TokenManager.getToken()?.let {token ->
+                        if (token != "") {
+                            ProcessProfile.upsertUserProfile(
+                                "Bearer $token",
+                                profile = Profile(isActive = true)
+                            )
+                            val intent = Intent(context, ActivityStatusService::class.java)
+                            context.startService(intent)
+                        }
+                    }
                 } catch (e: Exception) {
                     Log.d("Profile", "Activity Status Update Failed")
                 }

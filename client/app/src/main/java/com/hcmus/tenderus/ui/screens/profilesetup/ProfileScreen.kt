@@ -79,10 +79,13 @@ fun ProfileHeader(imageUri: Uri?, name: String, age: Int) {
         ) {
             imageUri?.let {
                 Image(
-                    painter = rememberAsyncImagePainter(it),
+                    painter = rememberAsyncImagePainter(
+                        it,
+                        placeholder = painterResource(id = R.drawable.profile_placeholder)
+                    ),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
             } ?: Image(
                 painter = painterResource(id = R.drawable.profile_placeholder),
@@ -92,7 +95,12 @@ fun ProfileHeader(imageUri: Uri?, name: String, age: Int) {
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "$name, $age", style = MaterialTheme.typography.headlineMedium)
+        if (TokenManager.getRole() == "USER") {
+            Text(text = "$name, $age", style = MaterialTheme.typography.headlineMedium)
+        } else {
+            Text(text = name, style = MaterialTheme.typography.headlineMedium)
+        }
+
     }
 }
 
@@ -108,18 +116,20 @@ fun ProfileButtons(navController: NavController, onSignedOut: () -> Unit) {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ProfileButton(
-                text = "Edit Profile",
-                icon = Icons.Default.Edit,
-                isPrimary = false,
-                onClick = {
-                    navController.navigate("editprofile")
-                }
-            )
+        if (TokenManager.getRole() == "USER") {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                ProfileButton(
+                    text = "Edit Profile",
+                    icon = Icons.Default.Edit,
+                    isPrimary = false,
+                    onClick = {
+                        navController.navigate("editprofile")
+                    }
+                )
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
         ProfileButton(

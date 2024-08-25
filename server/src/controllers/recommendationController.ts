@@ -85,12 +85,9 @@ const recommendationController = {
             });
             const recs: Profile[] = [];
 
-            console.log(cur_likes)
-
             for (const user of users) {
                 const age = getAge(user.birthDate);
                 if (age > cur_pref.ageMax || age < cur_pref.ageMin || user.username === cur_prof.username || cur_likes.some(obj => obj.likedUsername === user.username)) continue;
-                console.log({ likedUsername: user.username })
                 if (cur_pref.showMe != user.identity && cur_pref.showMe != "Both") continue;
                 if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.maxDist * cur_pref.maxDist) {
                     if (req.query.group) {
@@ -162,6 +159,20 @@ const recommendationController = {
             res.status(500).json({ message: "Something went wrong" });
         }
     },
+
+    // GET /api/recommendation/guest
+    //response: {profiles: Profile[]}
+    getGuestRecs: async (req: Request, res: Response) => {
+        try {
+            const count = await db.profile.count({ where: { account: { role: Role.USER } } });
+            const where = count < 10 ? 0 : Math.floor(Math.random() * (count - 9));
+            res.status(200).json({ profiles: await db.profile.findMany({ where: { account: { role: Role.USER } }, skip: where, take: 10 }) });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Something went wrong" });
+        }
+    },
+
 };
 
 export default recommendationController;

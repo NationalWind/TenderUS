@@ -26,8 +26,10 @@ class GenAuth {
             return res
         }
         suspend fun signOut() {
-            SignOutApi.signOut("Bearer " + TokenManager.getToken()!!)
-            Firebase.auth.signOut()
+            if (TokenManager.getToken() != null && TokenManager.getRole() != "GUEST") {
+                SignOutApi.signOut("Bearer " + TokenManager.getToken())
+                Firebase.auth.signOut()
+            }
             TokenManager.clearToken()
         }
 

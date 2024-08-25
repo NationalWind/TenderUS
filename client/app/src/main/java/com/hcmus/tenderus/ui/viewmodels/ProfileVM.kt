@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +38,7 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
         viewModelScope.launch {
             profileUiState = ProfileUiState.Loading
             try {
-                val preference = profileService.getCurrentUserPreferences("Bearer $token")
+                val preference = if (TokenManager.getRole() == "GUEST") Preference() else profileService.getCurrentUserPreferences("Bearer $token")
                 profileUiState = ProfileUiState.PreferencesSuccess(preference)
             } catch (e: IOException) {
                 profileUiState = ProfileUiState.Error
@@ -51,7 +52,7 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
         viewModelScope.launch {
             profileUiState = ProfileUiState.Loading
             try {
-                val profile = profileService.getCurrentUserProfile("Bearer $token")
+                val profile = if (TokenManager.getRole() == "GUEST") Profile("", "GUEST", "", emptyList(), "", "", 0f, 0f, "", "", emptyList(), emptyList(), false) else profileService.getCurrentUserProfile("Bearer $token")
                 profileUiState = ProfileUiState.Success(profile)
             } catch (e: IOException) {
                 profileUiState = ProfileUiState.Error

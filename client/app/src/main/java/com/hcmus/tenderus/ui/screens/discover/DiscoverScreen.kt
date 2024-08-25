@@ -121,7 +121,9 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
     LaunchedEffect(Unit) {
         viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
         profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-        profileVM.getCurrentUserPreferences(TokenManager.getToken() ?:"")
+        if (TokenManager.getRole() == "USER") {
+            profileVM.getCurrentUserPreferences(TokenManager.getToken() ?: "")
+        }
     }
 
     LaunchedEffect(profileUiState) {
@@ -161,7 +163,7 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                     modifier = Modifier.padding(8.dp)
                 )
                 Spacer(modifier = Modifier.width(105.dp))
-                if (customTitle == "Discover") {
+                if (customTitle == "Discover" && TokenManager.getRole()== "USER") {
                     Box(
                         modifier = Modifier
                             .size(48.dp)
@@ -289,6 +291,7 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                 }
                 is DiscoverUiState.Success -> {
                     profiles = (discoverUiState as DiscoverUiState.Success).profiles
+                    Log.d("{f", profile.toString())
                     profile?.let { SwipeableProfiles(navController, it, profiles!!, viewModel) }
                 }
                 is DiscoverUiState.Error -> {
@@ -381,7 +384,7 @@ fun SwipeableProfiles(navController: NavController,
     }
 
     val swipeUiState by remember { derivedStateOf { viewModel.swipeUiState } }
-
+    Log.d("H", "HOWIEGHWEG")
     // Reset button states when the profile changes
     LaunchedEffect(currentProfileIndex) {
         isLikeButtonActive = false
@@ -733,7 +736,13 @@ fun SwipeableProfiles(navController: NavController,
                 Text("Failed to swipe", color = Color.Red)
             }
         }
-
+    } else {
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "There is no user matching your preferences", textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
+        }
     }
 }
 

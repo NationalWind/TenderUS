@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,6 +47,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.ui.screens.admin.composable.ErrorScreen
 import com.hcmus.tenderus.ui.theme.Typography
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
@@ -150,111 +152,131 @@ fun NewMatchItem(match: MatchState, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchList(navController: NavController, matchListVM: MatchListVM = viewModel()) {
-    val matches = matchListVM.matches
-    var searchText by remember { mutableStateOf("") }
-
-    val scope = rememberCoroutineScope()
-
-    when (matchListVM.uiState) {
-        MatchListVM.MessageStatus.LOADING -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+    if (TokenManager.getRole() != "USER") {
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "You have to log in as user to chat", textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
         }
-        MatchListVM.MessageStatus.FAILED -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                ErrorScreen {
-                    matchListVM.getMatches()
+    } else {
+        val matches = matchListVM.matches
+        var searchText by remember { mutableStateOf("") }
+
+        val scope = rememberCoroutineScope()
+
+        when (matchListVM.uiState) {
+            MatchListVM.MessageStatus.LOADING -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
-        }
-        MatchListVM.MessageStatus.SUCCESS -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Column {
-                    Text(
-                        "Messages",
-                        fontWeight = FontWeight.Bold,
-                        style = Typography.headlineLarge,
-                        color = Color(0xFFBD0D36)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedTextField(
-                        shape = RoundedCornerShape(12.dp),
-                        leadingIcon = { Image(painterResource(id = R.drawable.search), null, modifier = Modifier.size(20.dp)) },
-                        value=searchText,
-                        onValueChange = { searchText = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Search") },
-                        singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent
-                        ),
-                        textStyle = TextStyle(color = Color.Black)
 
-                    )
-
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Column(modifier= Modifier.fillMaxWidth()) {
-                    Text(
-                        "New Matches",
-                        fontWeight = FontWeight.Bold,
-                        style = Typography.titleLarge,
-                        color = Color(0xFFBD0D36)
-                    )
-                    LazyRow {
-                        items(matches.size) { matchIdx ->
-                            if (matches[matchIdx].displayName.startsWith(searchText) && matches[matchIdx].messageArr.isEmpty()) {
-                                NewMatchItem(matches[matchIdx], onClick = {
-                                    matchListVM.curReceiver = matches[matchIdx].username
-                                    navController.navigate("inchat")
-                                })
-                            }
-                        }
+            MatchListVM.MessageStatus.FAILED -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ErrorScreen {
+                        matchListVM.getMatches()
                     }
                 }
-                Spacer(modifier = Modifier.height(5.dp))
-                Column(modifier = Modifier.fillMaxWidth()) {
+            }
 
-                    Text(
-                        "Messages",
-                        fontWeight = FontWeight.Bold,
-                        style = Typography.titleLarge,
-                        color = Color(0xFFBD0D36)
-                    )
+            MatchListVM.MessageStatus.SUCCESS -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Column {
+                        Text(
+                            "Messages",
+                            fontWeight = FontWeight.Bold,
+                            style = Typography.headlineLarge,
+                            color = Color(0xFFBD0D36)
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        OutlinedTextField(
+                            shape = RoundedCornerShape(12.dp),
+                            leadingIcon = {
+                                Image(
+                                    painterResource(id = R.drawable.search),
+                                    null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            value = searchText,
+                            onValueChange = { searchText = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Search") },
+                            singleLine = true,
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent
+                            ),
+                            textStyle = TextStyle(color = Color.Black)
 
-                    LazyColumn {
-                        items(matches.size) { matchIdx ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                if (matches[matchIdx].displayName.startsWith(searchText) && !matches[matchIdx].messageArr.isEmpty()) {
-                                    MatchItem(matches[matchIdx]) {
+                        )
+
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            "New Matches",
+                            fontWeight = FontWeight.Bold,
+                            style = Typography.titleLarge,
+                            color = Color(0xFFBD0D36)
+                        )
+                        LazyRow {
+                            items(matches.size) { matchIdx ->
+                                if (matches[matchIdx].displayName.startsWith(searchText) && matches[matchIdx].messageArr.isEmpty()) {
+                                    NewMatchItem(matches[matchIdx], onClick = {
                                         matchListVM.curReceiver = matches[matchIdx].username
                                         navController.navigate("inchat")
-
-                                    }
-                                    HorizontalDivider(thickness = 1.dp, modifier = Modifier.width(200.dp))
+                                    })
                                 }
-
                             }
                         }
                     }
-                }
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Column(modifier = Modifier.fillMaxWidth()) {
 
+                        Text(
+                            "Messages",
+                            fontWeight = FontWeight.Bold,
+                            style = Typography.titleLarge,
+                            color = Color(0xFFBD0D36)
+                        )
+
+                        LazyColumn {
+                            items(matches.size) { matchIdx ->
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    if (matches[matchIdx].displayName.startsWith(searchText) && !matches[matchIdx].messageArr.isEmpty()) {
+                                        MatchItem(matches[matchIdx]) {
+                                            matchListVM.curReceiver = matches[matchIdx].username
+                                            navController.navigate("inchat")
+
+                                        }
+                                        HorizontalDivider(
+                                            thickness = 1.dp,
+                                            modifier = Modifier.width(200.dp)
+                                        )
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                }
             }
         }
     }

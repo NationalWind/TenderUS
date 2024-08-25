@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
+import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.network.ApiClient
 import com.hcmus.tenderus.network.ApiClient.DiscoverService
@@ -53,7 +54,7 @@ open class DiscoverVM(protected val discoverService: DiscoverService) : ViewMode
         viewModelScope.launch {
             discoverUiState = DiscoverUiState.Loading
             try {
-                val profileResponse = discoverService.getProfiles("Bearer $token", limit)
+                val profileResponse = if (TokenManager.getRole() == "GUEST") discoverService.getProfiles() else discoverService.getProfiles("Bearer $token", limit)
                 discoverUiState = DiscoverUiState.Success(profileResponse.profiles)
             } catch (e: IOException) {
                 discoverUiState = DiscoverUiState.Error
@@ -68,8 +69,12 @@ open class DiscoverVM(protected val discoverService: DiscoverService) : ViewMode
         viewModelScope.launch {
             swipeUiState = SwipeUiState.Loading
             try {
-                val likeResponse = discoverService.likeProfile("Bearer $token", likeRequest)
-                swipeUiState = SwipeUiState.LikeSuccess(likeResponse.match)
+                if (TokenManager.getRole() == "GUEST") {
+                    swipeUiState = SwipeUiState.LikeSuccess(false)
+                } else {
+                    val likeResponse = discoverService.likeProfile("Bearer $token", likeRequest)
+                    swipeUiState = SwipeUiState.LikeSuccess(likeResponse.match)
+                }
             } catch (e: IOException) {
                 swipeUiState = SwipeUiState.Error
             } catch (e: HttpException) {
@@ -83,7 +88,9 @@ open class DiscoverVM(protected val discoverService: DiscoverService) : ViewMode
         viewModelScope.launch {
             swipeUiState = SwipeUiState.Loading
             try {
-                discoverService.passProfile("Bearer $token", passRequest)
+                if (TokenManager.getRole() != "GUEST") {
+                    discoverService.passProfile("Bearer $token", passRequest)
+                }
                 swipeUiState = SwipeUiState.PassSuccess
             } catch (e: IOException) {
                 swipeUiState = SwipeUiState.Error

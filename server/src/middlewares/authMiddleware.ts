@@ -16,11 +16,6 @@ const authMiddeware = {
             req.body.username = decoded.username;
             req.body.role = decoded.role;
 
-            if (req.body.role === "GUEST") {
-                res.status(403).json({ message: "Forbidden" });
-                return;
-            }
-
             delete req.body.token;
             next();
         } catch (error) {

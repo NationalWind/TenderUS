@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.network.LoginOKResponse
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
@@ -168,7 +169,11 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
             }
 
             Button(
-                onClick = { /* Handle login as guest logic here */ },
+                onClick = {
+                    val res = LoginOKResponse("", "", false, "GUEST")
+                    TokenManager.saveToken(res)
+                    onLoggedIn(res)
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Gray,
                     contentColor = Color.White
