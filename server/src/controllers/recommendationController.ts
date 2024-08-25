@@ -58,6 +58,10 @@ const recommendationController = {
 
             const cur_pref = await db.preference.findUnique({ where: { username: req.body.username } });
             const cur_prof = await db.profile.findUnique({ where: { username: req.body.username } });
+            const cur_likes = await db.like.findMany({
+                where: { username: req.body.username },
+                select: { likedUsername: true }
+            });
 
             if (!cur_prof || !cur_pref) {
                 res.status(404).json({ message: "User requesting not found" });
@@ -69,23 +73,24 @@ const recommendationController = {
                 return
             }
 
-            // Preferences enforcement (haven't excluded matched users yet)
+
+
+            // Preferences enforcement
             const users = await db.profile.findMany({
                 where: {
-                    username: {
-                        not: cur_prof.username
-                    },
                     account: {
                         role: Role.USER
-                    }
+                    },
                 }
             });
-
             const recs: Profile[] = [];
+
+            console.log(cur_likes)
 
             for (const user of users) {
                 const age = getAge(user.birthDate);
-                if (age > cur_pref.ageMax || age < cur_pref.ageMin) continue;
+                if (age > cur_pref.ageMax || age < cur_pref.ageMin || user.username === cur_prof.username || cur_likes.some(obj => obj.likedUsername === user.username)) continue;
+                console.log({ likedUsername: user.username })
                 if (cur_pref.showMe != user.identity && cur_pref.showMe != "Both") continue;
                 if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.maxDist * cur_pref.maxDist) {
                     if (req.query.group) {
@@ -107,8 +112,8 @@ const recommendationController = {
             recs.sort((a: Profile, b: Profile) => {
                 const a_cur = a.interests.filter(value => cur_prof.interests.includes(value));
                 const b_cur = b.interests.filter(value => cur_prof.interests.includes(value));
-                return b_cur.length - a_cur.length;
-            })
+                return b_cur.length + (b.location === cur_prof.location ? 3 : 0) - (a_cur.length + (a.location === cur_prof.location ? 3 : 0));
+            });
 
             if (!cur_pref.recPage) {
                 cur_pref.recPage = 0;

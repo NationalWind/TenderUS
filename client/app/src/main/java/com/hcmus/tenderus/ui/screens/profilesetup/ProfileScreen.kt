@@ -116,7 +116,7 @@ fun ProfileButtons(navController: NavController, onSignedOut: () -> Unit) {
                 }
             )
         }
-        Spacer(modifier = Modifier.height(200.dp))
+        Spacer(modifier = Modifier.weight(1f))
         ProfileButton(
             text = "Log Out",
             icon = Icons.Default.ExitToApp,
@@ -200,7 +200,7 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
 
     Scaffold(
         contentWindowInsets = WindowInsets(
-            top =  60.dp,
+            top =  15.dp,
             bottom = 0.dp
         ),
         containerColor = Color.White
@@ -213,8 +213,7 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 profile?.let {
@@ -370,7 +369,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(16f))
 
 
             Box(
@@ -411,7 +410,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(16f))
 
             OutlinedTextField(
                 value = birthdate,
@@ -445,7 +444,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(16f))
 
             Button(
                 onClick = { navController.navigate("addphoto") },
@@ -472,7 +471,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
             }
 
 
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.weight(50f))
 
             Button(
                 onClick = {

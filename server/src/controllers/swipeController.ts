@@ -38,7 +38,16 @@ const swipeController = {
             }
 
 
-            await db.like.create({ data });
+            await db.like.upsert({
+                where: {
+                    username_likedUsername: {
+                        username: data.username,
+                        likedUsername: data.likedUsername
+                    }
+                },
+                create: data,
+                update: {}
+            });
             const checked = await db.like.findFirst({ where: { username: data.likedUsername, likedUsername: data.username } });
             var match = false;
             if (checked) {
