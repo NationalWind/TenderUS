@@ -107,6 +107,7 @@ fun ProfileDetails1Screen(
                 .background(Color.White)
                 .fillMaxSize()
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
                 .clickable { focusManager.clearFocus() }, // Dismiss keyboard when clicking outside
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -301,6 +302,7 @@ fun ProfileDetails2Screen(
             modifier = Modifier
                 .background(Color.White)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -451,6 +453,7 @@ fun ProfileDetails3Screen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(top = 64.dp),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -604,6 +607,7 @@ fun ProfileDetails4Screen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(top = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top

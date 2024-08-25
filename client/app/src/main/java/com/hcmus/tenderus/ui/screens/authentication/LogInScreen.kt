@@ -36,16 +36,20 @@ import com.hcmus.tenderus.network.LoginOKResponse
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.utils.firebase.GenAuth
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.HttpException
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var isSuccess by remember { mutableStateOf(false) }
+    var progress by remember { mutableFloatStateOf(0.0f) }
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -57,7 +61,6 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 .background(Color.White)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
-                        focusManager.clearFocus()
                         keyboardController?.hide()
                     })
                 }
@@ -93,10 +96,7 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = {
-                        focusManager.clearFocus()
-                        keyboardController?.hide()
-                    },
+                    onDone = { focusManager.clearFocus() },
                 )
             )
 
@@ -111,17 +111,24 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
 
             Button(
                 onClick = {
+                    isLoading = true
+                    isSuccess = false
+                    errorMessage = ""
+                    progress = 0.0f
                     scope.launch {
+                        while (progress < 1.0f) {
+                            progress += 0.1f
+                            delay(10) // Simulate loading
+                        }
                         try {
-                            onLoggedIn(
-                                GenAuth.login(
-                                    UserLogin(
-                                        username,
-                                        password,
-                                        FCMRegToken = TenderUSPushNotificationService.token!!
-                                    )
+                            onLoggedIn(GenAuth.login(
+                                UserLogin(
+                                    username,
+                                    password,
+                                    FCMRegToken = TenderUSPushNotificationService.token!!
                                 )
-                            )
+                            ))
+                            isSuccess = true
                         } catch (e: HttpException) {
                             val errorBody = e.response()?.errorBody()?.string()
                             val errorJson = errorBody?.let { JSONObject(it) }
@@ -130,6 +137,8 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                         } catch (e: Exception) {
                             errorMessage = "An unexpected error occurred"
                             Log.d("Login", e.toString())
+                        } finally {
+                            isLoading = false
                         }
                     }
                 },
@@ -139,7 +148,23 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "LOGIN")
+                if (isLoading) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(
+                            progress = progress,
+                            color = Color.White,
+                            modifier = Modifier.size(48.dp),
+                            strokeWidth = 4.dp
+                        )
+                        Text(
+                            text = "${(progress * 100).toInt()}%",
+                            color = Color.White,
+//                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                } else {
+                    Text(text = "LOGIN")
+                }
             }
 
             Button(
@@ -156,7 +181,7 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
             Spacer(modifier = Modifier.height(16.dp))
 
             if (errorMessage.isNotEmpty()) {
-                Text(text = errorMessage, color = Color.Red, fontWeight = FontWeight.Bold)
+                Text(text = errorMessage, color = Color.Red,  fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -207,7 +232,6 @@ fun PasswordInput(
     focusManager: FocusManager = LocalFocusManager.current
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     OutlinedTextField(
         value = password,
@@ -219,10 +243,7 @@ fun PasswordInput(
             imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
-            onDone = {
-                focusManager.clearFocus()
-                keyboardController?.hide()
-            }
+            onDone = { focusManager.clearFocus() }
         ),
         modifier = Modifier.fillMaxWidth(),
         trailingIcon = {
@@ -233,5 +254,4 @@ fun PasswordInput(
         }
     )
 }
-
 
