@@ -70,6 +70,9 @@ fun SignUpScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf("") }
     var isResendAllowed by remember { mutableStateOf(true) }
+    var progress by remember { mutableStateOf(0f) } // Progress value
+    var isLoading by remember { mutableStateOf(false) }
+    var isSuccess by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -633,43 +636,63 @@ fun SignUpScreen(
                     Button(
                         onClick = {
                             if (isPasswordValid && doPasswordsMatch) {
-                                // Perform signup and navigation
-                                isSignUpSuccessful = true
+                                isLoading = true
+                                isSuccess = false
+                                errorMessage = ""
+                                progress = 0.0f
                                 scope.launch {
+                                    while (progress < 1.0f) {
+                                        progress += 0.1f
+                                        delay(30) // Simulate loading
+                                    }
                                     try {
-                                        // call sync
-                                        errorMessage = GenAuth.syncForSignUp(username, password.text).message
-                                        if (isSignUpSuccessful){
-                                            successMessage = "Account created successfully.\n Please log in to set up your profile."
-                                            delay(3000)
-                                            navController.navigate("signin")
-                                        }
+                                        // Simulate API call
+                                        GenAuth.syncForSignUp(username, password.text)
+                                        isSuccess = true
+//                                        successMessage = "Account created successfully.\n Please log in to set up your profile."
+                                        delay(20)
+                                        navController.navigate("signin")
                                     } catch (e: retrofit2.HttpException) {
                                         Log.d("Signup", e.toString())
                                         errorMessage = "Internal server error. This could be due to a duplicate username or other server issues. Please try again later."
+                                    } catch (e: Exception) {
+                                        errorMessage = "An unexpected error occurred"
+                                        Log.d("Signup", e.toString())
+                                    } finally {
+                                        isLoading = false
                                     }
                                 }
-
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Create an account", color = Color.White)
+                        if (isLoading) {
+                            Box(contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(
+                                    progress = progress.toFloat(),
+                                    color = Color.White,
+                                    modifier = Modifier.size(48.dp),
+                                    strokeWidth = 4.dp
+                                )
+                                Text(
+                                    text = "${(progress * 100).toInt()}%",
+                                    color = Color.White,
+//                                    style = MaterialTheme.typography.body1
+                                )
+                            }
+                        } else {
+                            Text("Create an account", color = Color.White)
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     errorMessage?.let {
-                        Spacer(modifier = Modifier.height(8.dp))
                         Text(text = it, color = Color.Red, fontSize = 14.sp)
                     }
-                    // Display success message
-                    if (successMessage.isNotEmpty()) {
-                        Text(
-                            text = successMessage,
-                            color = Color.Blue,
-                            modifier = Modifier.padding(top = 12.dp)
-                        )
 
-                    }
+
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -705,4 +728,29 @@ fun validatePassword(password: String): Boolean {
 
 fun validateUsername(username: String): Boolean {
     return username.isNotEmpty() && username.length >= 3
+}
+
+@Composable
+fun CircularProgressWithPercent(
+    progress: Float,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        CircularProgressIndicator(
+            progress = progress,
+            modifier = Modifier.size(100.dp), // Adjust size as needed
+            color = Color(0xFFB71C1C),
+            strokeWidth = 8.dp // Adjust stroke width as needed
+        )
+        Text(
+            text = "${(progress * 100).toInt()}%",
+            color = Color.Black,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
 }

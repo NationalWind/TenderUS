@@ -68,6 +68,7 @@ dependencies {
 //    implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.coil.compose)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.play.services.location)
 
 
 

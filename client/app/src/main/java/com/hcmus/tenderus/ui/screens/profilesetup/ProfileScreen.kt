@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -26,10 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,6 +54,7 @@ import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
 import com.hcmus.tenderus.utils.firebase.StorageUtil
+import kotlinx.coroutines.delay
 import java.io.File
 import java.time.LocalDate
 import java.time.Period
@@ -200,7 +205,7 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
 
     Scaffold(
         contentWindowInsets = WindowInsets(
-            top =  15.dp,
+            top =  0.dp,
             bottom = 0.dp
         ),
         containerColor = Color.White
@@ -216,6 +221,7 @@ fun ProfileScreen(navController: NavController, profileVM: ProfileVM = viewModel
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(35.dp))
                 profile?.let {
                     ProfileHeader(
                         imageUri = it.avatarIcon!!.takeIf { uri -> uri.isNotEmpty() }?.let { Uri.parse(it) },
@@ -242,8 +248,12 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
     var gender by remember { mutableStateOf("") }
     var profile by remember { mutableStateOf<Profile?>(null) }
     var successMessage by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
     var newImageSelected by remember { mutableStateOf(false) }
-
+    var progress by remember { mutableStateOf(0.0f) }
+    var isLoading by remember { mutableStateOf(false) }
+    var isSuccess by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -366,7 +376,13 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Full Name") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() },
+                )
             )
 
             Spacer(modifier = Modifier.weight(16f))
@@ -416,7 +432,13 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 value = birthdate,
                 onValueChange = { birthdate = it },
                 label = { Text("Birthdate") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() },
+                )
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -470,70 +492,117 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 )
             }
 
-
+            val coroutineScope = rememberCoroutineScope()
             Spacer(modifier = Modifier.weight(50f))
 
             Button(
                 onClick = {
-                    // Check if the profileImageUri is valid
-                    if (newImageSelected) {
-                        try {
-                            // Log the URI for debugging
-                            Log.d("EditProfileScreen", "Uploading image with URI: ${profileImageUri.toString()}")
+                    isLoading = true
+                    errorMessage = ""
+                    successMessage = ""
 
-                            // Proceed with uploading the image
-                            StorageUtil.uploadToStorage(
-                                auth = FirebaseAuth.getInstance(),
-                                uri = profileImageUri!!,
-                                context = context,
-                                type = "Image"
-                            ) { downloadUrl ->
+                    coroutineScope.launch {
+                        try {
+                            // Simulate a task that updates progress over time
+                            while (progress < 1.0f) {
+                                progress += 0.1f
+                                delay(20) // Adjust the delay for a smooth progress increment
+                            }
+
+                            // Check if the profileImageUri is valid
+                            if (newImageSelected) {
+                                try {
+                                    Log.d("EditProfileScreen", "Uploading image with URI: ${profileImageUri.toString()}")
+
+                                    StorageUtil.uploadToStorage(
+                                        auth = FirebaseAuth.getInstance(),
+                                        uri = profileImageUri!!,
+                                        context = context,
+                                        type = "Image"
+                                    ) { downloadUrl ->
+                                        profile?.let { profileData ->
+                                            val updatedProfile = profileData.copy(
+                                                displayName = name.text,
+                                                birthDate = birthdate.text,
+                                                identity = gender,
+                                                avatarIcon = downloadUrl // Update with the new URL
+                                            )
+                                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                            successMessage = "Profile updated successfully!"
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("EditProfileScreen", "Error uploading image", e)
+                                    errorMessage = "Failed to upload image. Please try again."
+                                }
+                            } else {
+                                // No image to upload, just update the profile info
                                 profile?.let { profileData ->
                                     val updatedProfile = profileData.copy(
                                         displayName = name.text,
                                         birthDate = birthdate.text,
-                                        identity = gender,
-                                        avatarIcon = downloadUrl // Update with the new URL
+                                        identity = gender
                                     )
                                     profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
                                     successMessage = "Profile updated successfully!"
                                 }
                             }
                         } catch (e: Exception) {
-                            Log.e("EditProfileScreen", "Error uploading image", e)
-                            // Handle or show an error message if needed
-                        }
-                    } else {
-                        // No image to upload, just update the profile info
-                        profile?.let { profileData ->
-                            val updatedProfile = profileData.copy(
-                                displayName = name.text,
-                                birthDate = birthdate.text,
-                                identity = gender
-                            )
-                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                            successMessage = "Profile updated successfully!"
+                            Log.e("EditProfileScreen", "Error during operation", e)
+                            errorMessage = "Failed to update profile. Please try again."
+                        } finally {
+                            isLoading = false // Ensure isLoading is set to false after completion
                         }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C))
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFB71C1C),
+                    contentColor = Color.White
+                ),
+                enabled = !isLoading // Disable button when loading
             ) {
-                Text("Save")
-            }
-
-            // Display success message
-            if (successMessage.isNotEmpty()) {
-                Text(
-                    text = successMessage,
-                    color = Color.Blue,
-                    modifier = Modifier.padding(top = 12.dp)
-                )
-
+                if (isLoading) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator(
+                            progress = progress,
+                            color = Color.White,
+                            modifier = Modifier.size(48.dp),
+                            strokeWidth = 4.dp
+                        )
+                        Text(
+                            text = "${(progress * 100).toInt()}%",
+                            color = Color.White,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                } else {
+                    Text(text = "Save")
+                }
             }
         }
-    }
+
+//            if (successMessage.isNotEmpty()) {
+//                Text(
+//                    text = successMessage,
+//                    color = Color.Blue,
+//                    modifier = Modifier.padding(top = 8.dp)
+//                )
+//            }
+
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                )
+            }
+        }
 }
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -548,6 +617,9 @@ fun Interest(
     )
 
     var successMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var progress by remember { mutableStateOf(0.0f) }
+    var errorMessage by remember { mutableStateOf("") }
     val selectedInterests = remember { mutableStateListOf<String>() }
     var profile by remember { mutableStateOf<Profile?>(null) }
     var loading by remember { mutableStateOf(false) }
@@ -669,34 +741,78 @@ fun Interest(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp)) // Reduced height for less spacing
+                    val coroutineScope = rememberCoroutineScope()
+                    Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
-                            profile?.let {
-                                val updatedProfile = it.copy(interests = selectedInterests.toList())
-                                profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                            isLoading = true
+                            errorMessage = ""
+                            successMessage = ""
+
+                            coroutineScope.launch {
+                                try {
+                                    while (progress < 1.0f) {
+                                        progress += 0.1f
+                                        delay(50)
+                                    }
+
+                                    profile?.let {
+                                        val updatedProfile = it.copy(interests = selectedInterests.toList())
+                                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                        successMessage = "Profile updated successfully!"
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("SaveButton", "Error updating profile", e)
+                                    errorMessage = "Failed to update profile. Please try again."
+                                } finally {
+                                    isLoading = false
+                                }
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xE6B71C1C)),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading
                     ) {
-                        Text("Save", color = Color.White, fontSize = 18.sp)
+                        if (isLoading) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator(
+                                    progress = progress,
+                                    color = Color.White,
+                                    modifier = Modifier.size(48.dp),
+                                    strokeWidth = 4.dp
+                                )
+                                Text(
+                                    text = "${(progress * 100).toInt()}%",
+                                    color = Color.White,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        } else {
+                            Text("Save", color = Color.White, fontSize = 18.sp)
+                        }
                     }
-                }
-                // Display success message
-                if (successMessage.isNotEmpty()) {
-                    Text(
-                        text = successMessage,
-                        color = Color.Blue,
-                        modifier = Modifier.align(Alignment.BottomCenter)
-                    )
-                }
-                if (error) {
-                    Text("An error occurred. Please try again.", color = Color.Red, modifier = Modifier.align(Alignment.Center))
-                }
+                    if (errorMessage.isNotEmpty()) {
+                        Text(
+                            text = errorMessage,
+                            color = Color.Red,
+                        )
+                    }
+
+                    // Display success message
+//                if (successMessage.isNotEmpty()) {
+//                    Text(
+//                        text = successMessage,
+//                        color = Color.Blue,
+//                        modifier = Modifier.align(Alignment.BottomCenter)
+//                    )
+//                }
+
             }
         }
     }
+}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -711,6 +827,10 @@ fun Add_Photos(
     var showDialog by remember { mutableStateOf(false) }
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
     var successMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var progress by remember { mutableStateOf(0f) }
+    var errorMessage by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
     val imageUriLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -877,61 +997,96 @@ fun Add_Photos(
 
                 Button(
                     onClick = {
-                        val imageUrls = mutableListOf<String>()
-                        val newImageUris = imageUris.filter { it?.scheme == "content" }
-                        val existingImageUrls = imageUris.filter { it?.scheme != "content" }.map { it.toString() }
+                        isLoading = true
+                        errorMessage = ""
+                        successMessage = ""
+                        progress = 0f
 
-                        val totalImages = newImageUris.size + existingImageUrls.size
-                        var uploadCount = 0
+                        coroutineScope.launch {
+                            while (progress < 1.0f) {
+                                progress += 0.1f
+                                delay(20) // Simulate loading
+                            }
+                            try {
+                                val imageUrls = mutableListOf<String>()
+                                val newImageUris = imageUris.filter { it?.scheme == "content" }
+                                val existingImageUrls = imageUris.filter { it?.scheme != "content" }.map { it.toString() }
 
-                        profile?.let { userProfile ->
-                            newImageUris.forEach { uri ->
-                                uri?.let { imageUri ->
-                                    StorageUtil.uploadToStorage(
-                                        auth = FirebaseAuth.getInstance(),
-                                        uri = imageUri,
-                                        context = context,
-                                        type = "Image"
-                                    ) { downloadUrl ->
-                                        imageUrls.add(downloadUrl)
-                                        uploadCount++
+                                val totalImages = newImageUris.size + existingImageUrls.size
+                                var uploadCount = 0
 
-                                        if (uploadCount == newImageUris.size) {
-                                            imageUrls.addAll(existingImageUrls)
-                                            val updatedProfile = userProfile.copy(pictures = imageUrls)
-                                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                            Log.d("Add Photos", "Profile updated with new images")
+                                profile?.let { userProfile ->
+                                    newImageUris.forEach { uri ->
+                                        uri?.let { imageUri ->
+                                            StorageUtil.uploadToStorage(
+                                                auth = FirebaseAuth.getInstance(),
+                                                uri = imageUri,
+                                                context = context,
+                                                type = "Image"
+                                            ) { downloadUrl ->
+                                                imageUrls.add(downloadUrl)
+                                                uploadCount++
+
+                                                progress = uploadCount.toFloat() / newImageUris.size.toFloat()
+
+                                                if (uploadCount == newImageUris.size) {
+                                                    imageUrls.addAll(existingImageUrls)
+                                                    val updatedProfile = userProfile.copy(pictures = imageUrls)
+                                                    profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                                    Log.d("Add Photos", "Profile updated with new images")
+                                                }
+                                            }
                                         }
                                     }
-                                }
-                            }
 
-                            if (newImageUris.isEmpty()) {
-                                imageUrls.addAll(existingImageUrls)
-                                val updatedProfile = userProfile.copy(pictures = imageUrls)
-                                profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                Log.d("Add Photos", "Profile updated with existing images only")
+                                    if (newImageUris.isEmpty()) {
+                                        imageUrls.addAll(existingImageUrls)
+                                        val updatedProfile = userProfile.copy(pictures = imageUrls)
+                                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                        Log.d("Add Photos", "Profile updated with existing images only")
+                                    }
+                                } ?: run {
+                                    Log.e("Add Photos", "Profile is null, cannot update.")
+                                }
+                            } catch (e: Exception) {
+                                Log.e("Add Photos", "Error updating profile", e)
+                                errorMessage = "Failed to update profile. Please try again."
+                            } finally {
+                                isLoading = false
                             }
-                        } ?: run {
-                            Log.e("Add Photos", "Profile is null, cannot update.")
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-                    enabled = imageUris.size >= 2,
+                    enabled = imageUris.size >= 2 && !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
                 ) {
-                    Text("Save", color = Color.White)
+                    if (isLoading) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator(
+                                progress = progress,
+                                color = Color.White,
+                                modifier = Modifier.size(48.dp),
+                                strokeWidth = 4.dp
+                            )
+                            Text(
+                                text = "${(progress * 100).toInt()}%",
+                                color = Color.White,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    } else {
+                        Text("Save", color = Color.White)
+                    }
                 }
-
-            }
 
             if (error) {
                 Text(
                     text = "An error occurred. Please try again.",
                     color = Color.Red,
-                    modifier = Modifier.align(Alignment.Center)
                 )
             }
 
@@ -939,7 +1094,6 @@ fun Add_Photos(
                 Text(
                     text = "An error occurred while uploading images.",
                     color = Color.Red,
-                    modifier = Modifier.align(Alignment.Center)
                 )
             }
 
@@ -947,7 +1101,6 @@ fun Add_Photos(
                 Text(
                     text = successMessage,
                     color = Color.Blue,
-                    modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
         }
@@ -969,6 +1122,7 @@ fun Add_Photos(
             )
         }
     }
+}
 }
 
 //@Composable
