@@ -2,6 +2,7 @@ package com.hcmus.tenderus.ui.viewmodels
 
 import android.net.http.HttpException
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresExtension
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,8 +58,13 @@ open class DiscoverVM(protected val discoverService: DiscoverService) : ViewMode
                 val profileResponse = if (TokenManager.getRole() == "GUEST") discoverService.getProfiles() else discoverService.getProfiles("Bearer $token", limit)
                 discoverUiState = DiscoverUiState.Success(profileResponse.profiles)
             } catch (e: IOException) {
+                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             } catch (e: HttpException) {
+                Log.d("GetProfiles", e.message.toString())
+                discoverUiState = DiscoverUiState.Error
+            } catch (e: Exception) {
+                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             }
         }
@@ -76,8 +82,13 @@ open class DiscoverVM(protected val discoverService: DiscoverService) : ViewMode
                     swipeUiState = SwipeUiState.LikeSuccess(likeResponse.match)
                 }
             } catch (e: IOException) {
+                Log.d("LikeProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             } catch (e: HttpException) {
+                Log.d("LikeProfiles", e.message.toString())
+                swipeUiState = SwipeUiState.Error
+            } catch (e: Exception) {
+                Log.d("LikeProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             }
         }
@@ -93,8 +104,13 @@ open class DiscoverVM(protected val discoverService: DiscoverService) : ViewMode
                 }
                 swipeUiState = SwipeUiState.PassSuccess
             } catch (e: IOException) {
+                Log.d("PassProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             } catch (e: HttpException) {
+                Log.d("PassProfiles", e.message.toString())
+                swipeUiState = SwipeUiState.Error
+            } catch (e: Exception) {
+                Log.d("PassProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             }
         }

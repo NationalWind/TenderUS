@@ -68,8 +68,13 @@ class ExploreVM(private val exploreService: ExploreService, discoverService: Dis
                     discoverUiState = DiscoverUiState.Success(profileResponse.profiles)
                 }
             } catch (e: IOException) {
+                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             } catch (e: HttpException) {
+                Log.d("GetProfiles", e.message.toString())
+                discoverUiState = DiscoverUiState.Error
+            } catch (e: Exception) {
+                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             }
         }

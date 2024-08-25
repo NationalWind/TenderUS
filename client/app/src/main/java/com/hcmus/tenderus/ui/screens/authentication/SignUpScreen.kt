@@ -667,23 +667,7 @@ fun SignUpScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        if (isLoading) {
-                            Box(contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator(
-                                    progress = progress.toFloat(),
-                                    color = Color.White,
-                                    modifier = Modifier.size(48.dp),
-                                    strokeWidth = 4.dp
-                                )
-                                Text(
-                                    text = "${(progress * 100).toInt()}%",
-                                    color = Color.White,
-//                                    style = MaterialTheme.typography.body1
-                                )
-                            }
-                        } else {
                             Text("Create an account", color = Color.White)
-                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -716,6 +700,16 @@ fun SignUpScreen(
                     }
                 }
             }
+        }
+    }
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+            contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
+        ) {
+            CircularProgressIndicator(color = Color.White)  // White progress indicator
         }
     }
 }
