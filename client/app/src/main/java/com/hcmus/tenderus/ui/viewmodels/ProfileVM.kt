@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,8 +41,13 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
                 val preference = profileService.getCurrentUserPreferences("Bearer $token")
                 profileUiState = ProfileUiState.PreferencesSuccess(preference)
             } catch (e: IOException) {
+                Log.d("GetCurrentPreferences", e.message.toString())
                 profileUiState = ProfileUiState.Error
             } catch (e: HttpException) {
+                Log.d("GetCurrentPreferences", e.message.toString())
+                profileUiState = ProfileUiState.Error
+            } catch (e: Exception) {
+                Log.d("GetCurrentPreferences", e.message.toString())
                 profileUiState = ProfileUiState.Error
             }
         }
@@ -54,8 +60,13 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
                 val profile = profileService.getCurrentUserProfile("Bearer $token")
                 profileUiState = ProfileUiState.Success(profile)
             } catch (e: IOException) {
+                Log.d("GetCurrentProfile", e.message.toString())
                 profileUiState = ProfileUiState.Error
             } catch (e: HttpException) {
+                Log.d("GetCurrentProfile", e.message.toString())
+                profileUiState = ProfileUiState.Error
+            } catch (e: Exception) {
+                Log.d("GetCurrentProfile", e.message.toString())
                 profileUiState = ProfileUiState.Error
             }
         }
@@ -69,8 +80,13 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
                 updateProfileState = ProfileUiState.PreferencesSuccess(preference)
                 getCurrentUserPreferences(token)
             } catch (e: IOException) {
+                Log.d("UpsertPreferences", e.message.toString())
                 updateProfileState = ProfileUiState.Error
             } catch (e: HttpException) {
+                Log.d("UpsertPreferences", e.message.toString())
+                updateProfileState = ProfileUiState.Error
+            } catch (e: Exception) {
+                Log.d("UpsertPreferences", e.message.toString())
                 updateProfileState = ProfileUiState.Error
             }
         }
@@ -84,8 +100,13 @@ class ProfileVM(private val profileService: ProfileService) : ViewModel() {
                 updateProfileState = ProfileUiState.Success(profile)
                 getCurrentUserProfile(token)
             } catch (e: IOException) {
+                Log.d("UpsertProfile", e.message.toString())
                 updateProfileState = ProfileUiState.Error
             } catch (e: HttpException) {
+                Log.d("UpsertProfile", e.message.toString())
+                updateProfileState = ProfileUiState.Error
+            } catch (e: Exception) {
+                Log.d("UpsertProfile", e.message.toString())
                 updateProfileState = ProfileUiState.Error
             }
         }
