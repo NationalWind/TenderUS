@@ -17,7 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -49,6 +51,7 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
     var errorMessage by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var isSuccess by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(0.0f) }
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -111,24 +114,22 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
 
             Button(
                 onClick = {
-                    isLoading = true
+                    showLoading = true
                     isSuccess = false
                     errorMessage = ""
-                    progress = 0.0f
                     scope.launch {
-                        while (progress < 1.0f) {
-                            progress += 0.1f
-                            delay(10) // Simulate loading
-                        }
                         try {
-                            onLoggedIn(GenAuth.login(
-                                UserLogin(
-                                    username,
-                                    password,
-                                    FCMRegToken = TenderUSPushNotificationService.token!!
+                            onLoggedIn(
+                                GenAuth.login(
+                                    UserLogin(
+                                        username,
+                                        password,
+                                        FCMRegToken = TenderUSPushNotificationService.token!!
+                                    )
                                 )
-                            ))
+                            )
                             isSuccess = true
+                            // Navigate to the next screen here
                         } catch (e: HttpException) {
                             val errorBody = e.response()?.errorBody()?.string()
                             val errorJson = errorBody?.let { JSONObject(it) }
@@ -138,7 +139,7 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                             errorMessage = "An unexpected error occurred"
                             Log.d("Login", e.toString())
                         } finally {
-                            isLoading = false
+                            showLoading = false
                         }
                     }
                 },
@@ -148,24 +149,13 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (isLoading) {
-                    Box(contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            progress = progress,
-                            color = Color.White,
-                            modifier = Modifier.size(48.dp),
-                            strokeWidth = 4.dp
-                        )
-                        Text(
-                            text = "${(progress * 100).toInt()}%",
-                            color = Color.White,
-//                            style = MaterialTheme.typography.body1
-                        )
-                    }
-                } else {
-                    Text(text = "LOGIN")
-                }
+                Text(text = "LOGIN")
             }
+//        if (showLoading) {
+//            CircularProgressIndicator()
+//        }
+
+
 
             Button(
                 onClick = { /* Handle login as guest logic here */ },
@@ -220,6 +210,16 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 color = Color.Gray,
                 fontSize = 12.sp
             )
+        }
+    }
+    if (showLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+            contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
+        ) {
+            CircularProgressIndicator(color = Color.White)  // White progress indicator
         }
     }
 }

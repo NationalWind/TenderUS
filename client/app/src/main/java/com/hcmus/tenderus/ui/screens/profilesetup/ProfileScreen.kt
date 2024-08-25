@@ -272,16 +272,18 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
         Log.d("Profile", "Profile fetched")
     }
 
-
     // Handle profile data and errors
     LaunchedEffect(profileUiState) {
         when (profileUiState) {
             is ProfileUiState.Loading -> {
                 // Display loading indicator
+
             }
+
             is ProfileUiState.Error -> {
                 // Display error message
             }
+
             is ProfileUiState.Success -> {
                 // Load profile data into the UI
                 val profileData = (profileUiState as ProfileUiState.Success).profile
@@ -289,9 +291,11 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 name = TextFieldValue(profileData.displayName!!)
                 birthdate = TextFieldValue(profileData.birthDate!!)
                 gender = profileData.identity!!
-                profileImageUri = profileData.avatarIcon!!.takeIf { it.isNotEmpty() }?.let { Uri.parse(it) }
+                profileImageUri =
+                    profileData.avatarIcon!!.takeIf { it.isNotEmpty() }?.let { Uri.parse(it) }
                 newImageSelected = false
             }
+
             is ProfileUiState.PreferencesSuccess -> {
                 // Handle PreferencesSuccess state
             }
@@ -299,13 +303,13 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
     }
     Scaffold(
         contentWindowInsets = WindowInsets(
-            top =  0.dp,
+            top = 0.dp,
             bottom = 0.dp
         ),
         topBar = {
             TopAppBar(
                 windowInsets = WindowInsets(
-                    top =  0.dp,
+                    top = 0.dp,
                     bottom = 0.dp
                 ),
                 title = {
@@ -313,7 +317,11 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFB71C1C))
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color(0xFFB71C1C)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -366,7 +374,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 painter = painterResource(id = R.drawable.icon_camera), // Replace with your camera icon resource
                 contentDescription = "Change Avatar",
                 modifier = Modifier
-                    .offset(x = 40.dp,y = (-22).dp)
+                    .offset(x = 40.dp, y = (-22).dp)
                     .size(36.dp)
                     .clickable { imagePickerLauncher.launch("image/*") },
                 tint = Color(0xFFB71C1C)
@@ -512,7 +520,10 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                             // Check if the profileImageUri is valid
                             if (newImageSelected) {
                                 try {
-                                    Log.d("EditProfileScreen", "Uploading image with URI: ${profileImageUri.toString()}")
+                                    Log.d(
+                                        "EditProfileScreen",
+                                        "Uploading image with URI: ${profileImageUri.toString()}"
+                                    )
 
                                     StorageUtil.uploadToStorage(
                                         auth = FirebaseAuth.getInstance(),
@@ -527,7 +538,9 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                                                 identity = gender,
                                                 avatarIcon = downloadUrl // Update with the new URL
                                             )
-                                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                            profileVM.upsertUserProfile(
+                                                TokenManager.getToken() ?: "", updatedProfile
+                                            )
                                             successMessage = "Profile updated successfully!"
                                         }
                                     }
@@ -543,7 +556,10 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                                         birthDate = birthdate.text,
                                         identity = gender
                                     )
-                                    profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                    profileVM.upsertUserProfile(
+                                        TokenManager.getToken() ?: "",
+                                        updatedProfile
+                                    )
                                     successMessage = "Profile updated successfully!"
                                 }
                             }
@@ -562,35 +578,8 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 ),
                 enabled = !isLoading // Disable button when loading
             ) {
-                if (isLoading) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator(
-                            progress = progress,
-                            color = Color.White,
-                            modifier = Modifier.size(48.dp),
-                            strokeWidth = 4.dp
-                        )
-                        Text(
-                            text = "${(progress * 100).toInt()}%",
-                            color = Color.White,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                } else {
-                    Text(text = "Save")
-                }
+                Text(text = "Save")
             }
-        }
-
-//            if (successMessage.isNotEmpty()) {
-//                Text(
-//                    text = successMessage,
-//                    color = Color.Blue,
-//                    modifier = Modifier.padding(top = 8.dp)
-//                )
-//            }
 
             if (errorMessage.isNotEmpty()) {
                 Text(
@@ -599,86 +588,338 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                 )
             }
         }
+    }
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+            contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
+        ) {
+            CircularProgressIndicator(color = Color.White)  // White progress indicator
+        }
+    }
 }
 
 
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun Interest(
+        navController: NavController,
+        profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
+    ) {
+        val interests = listOf(
+            "Photography", "Karaoke", "Cooking", "Run", "Art",
+            "Extreme", "Drink", "Shopping", "Yoga", "Tennis",
+            "Swimming", "Traveling", "Music", "Video games"
+        )
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Interest(
-    navController: NavController,
-    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
-) {
-    val interests = listOf(
-        "Photography", "Karaoke", "Cooking", "Run", "Art",
-        "Extreme", "Drink", "Shopping", "Yoga", "Tennis",
-        "Swimming", "Traveling", "Music", "Video games"
-    )
+        var successMessage by remember { mutableStateOf("") }
+        var isLoading by remember { mutableStateOf(false) }
+        var progress by remember { mutableStateOf(0.0f) }
+        var errorMessage by remember { mutableStateOf("") }
+        val selectedInterests = remember { mutableStateListOf<String>() }
+        var profile by remember { mutableStateOf<Profile?>(null) }
+        var loading by remember { mutableStateOf(false) }
+        var error by remember { mutableStateOf(false) }
 
-    var successMessage by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var progress by remember { mutableStateOf(0.0f) }
-    var errorMessage by remember { mutableStateOf("") }
-    val selectedInterests = remember { mutableStateListOf<String>() }
-    var profile by remember { mutableStateOf<Profile?>(null) }
-    var loading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-    }
-
-    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
-    val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
-
-    // Handle profile data and errors
-    when (profileUiState) {
-        is ProfileUiState.Success -> {
-            profile = (profileUiState as ProfileUiState.Success).profile
-            selectedInterests.clear()
-            selectedInterests.addAll(profile?.interests ?: emptyList())
+        LaunchedEffect(Unit) {
+            profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
         }
-        is ProfileUiState.Error -> {
-            error = true
-        }
-        is ProfileUiState.Loading -> {
-            loading = true
-        }
-        else -> Unit
-    }
 
-    // Observe update status
-    LaunchedEffect(updateProfileState) {
-        when (updateProfileState) {
+        val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+        val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
+
+        // Handle profile data and errors
+        when (profileUiState) {
             is ProfileUiState.Success -> {
-                successMessage = "Profile updated successfully!"
+                profile = (profileUiState as ProfileUiState.Success).profile
+                selectedInterests.clear()
+                selectedInterests.addAll(profile?.interests ?: emptyList())
             }
+
             is ProfileUiState.Error -> {
                 error = true
             }
+
+            is ProfileUiState.Loading -> {
+                loading = true
+            }
+
             else -> Unit
+        }
+
+        // Observe update status
+        LaunchedEffect(updateProfileState) {
+            when (updateProfileState) {
+                is ProfileUiState.Success -> {
+                    successMessage = "Profile updated successfully!"
+                }
+
+                is ProfileUiState.Error -> {
+                    error = true
+                }
+
+                else -> Unit
+            }
+        }
+
+        TenderUSTheme {
+            Scaffold(
+                contentWindowInsets = WindowInsets(
+                    top = 0.dp,
+                    bottom = 0.dp
+                ),
+                topBar = {
+                    TopAppBar(
+                        windowInsets = WindowInsets(
+                            top = 0.dp,
+                            bottom = 0.dp
+                        ),
+                        title = {
+                            Text("Interests", color = Color(0xFFB71C1C))
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    Icons.Default.ArrowBack,
+                                    contentDescription = "Back",
+                                    tint = Color(0xFFB71C1C)
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.mediumTopAppBarColors(
+                            containerColor = Color.White
+                        )
+                    )
+                }
+            ) { paddingValues ->
+                Box(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp), // Reduced space between items
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        Text(
+                            text = "Your Interests",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color(0xFFB71C1C),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
+                        )
+                        Text(
+                            text = "Select a few of your interests and let everyone know what you're passionate about.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp)) // Reduced height for less spacing
+                        interests.chunked(2).forEach { rowInterests ->
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                rowInterests.forEach { interest ->
+                                    OutlinedButton(
+                                        onClick = {
+                                            if (selectedInterests.contains(interest)) {
+                                                selectedInterests.remove(interest)
+                                            } else {
+                                                selectedInterests.add(interest)
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(4.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = if (selectedInterests.contains(interest)) Color(
+                                                0xFFB71C1C
+                                            ) else Color.White,
+                                            contentColor = if (selectedInterests.contains(interest)) Color.White else Color.Black
+                                        )
+                                    ) {
+                                        Text(interest)
+                                    }
+                                }
+                            }
+                        }
+                        val coroutineScope = rememberCoroutineScope()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                isLoading = true
+                                errorMessage = ""
+                                successMessage = ""
+
+                                coroutineScope.launch {
+                                    try {
+                                        while (progress < 1.0f) {
+                                            progress += 0.1f
+                                            delay(50)
+                                        }
+
+                                        profile?.let {
+                                            val updatedProfile =
+                                                it.copy(interests = selectedInterests.toList())
+                                            profileVM.upsertUserProfile(
+                                                TokenManager.getToken() ?: "", updatedProfile
+                                            )
+                                            successMessage = "Profile updated successfully!"
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("SaveButton", "Error updating profile", e)
+                                        errorMessage = "Failed to update profile. Please try again."
+                                    } finally {
+                                        isLoading = false
+                                    }
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xE6B71C1C)),
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !isLoading
+                        ) {
+                            Text("Save", color = Color.White, fontSize = 18.sp)
+                        }
+                        if (errorMessage.isNotEmpty()) {
+                            Text(
+                                text = errorMessage,
+                                color = Color.Red,
+                            )
+                        }
+
+                    }
+                }
+            }
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+                    contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
+                ) {
+                    CircularProgressIndicator(color = Color.White)  // White progress indicator
+                }
+            }
         }
     }
 
-    TenderUSTheme {
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun Add_Photos(
+        navController: NavController,
+        profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
+    ) {
+        var imageUris by remember { mutableStateOf(listOf<Uri?>()) }
+        val context = LocalContext.current
+
+        var showDialog by remember { mutableStateOf(false) }
+        var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+        var successMessage by remember { mutableStateOf("") }
+        var isLoading by remember { mutableStateOf(false) }
+        var progress by remember { mutableStateOf(0f) }
+        var errorMessage by remember { mutableStateOf("") }
+        val coroutineScope = rememberCoroutineScope()
+
+        val imageUriLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent(),
+            onResult = { uri ->
+                uri?.let {
+                    imageUris = imageUris.toMutableList().apply { add(uri) }
+                }
+            }
+        )
+
+        val cameraLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.TakePicture(),
+            onResult = { success ->
+                if (success) {
+                    cameraImageUri?.let { uri ->
+                        imageUris = imageUris.toMutableList().apply { add(uri) }
+                    }
+                }
+            }
+        )
+
+        var profile by remember { mutableStateOf<Profile?>(null) }
+        var loading by remember { mutableStateOf(false) }
+        var error by remember { mutableStateOf(false) }
+        var uploadError by remember { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+            Log.d("Photos", "Profile fetched")
+        }
+
+        val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+        val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
+
+        // Handle profile data and errors
+        when (profileUiState) {
+            is ProfileUiState.Success -> {
+                profile = (profileUiState as ProfileUiState.Success).profile
+                profile?.pictures?.let { urls ->
+                    val uris = urls.map { url -> Uri.parse(url) }
+                    imageUris = uris
+                }
+            }
+
+            is ProfileUiState.Error -> {
+                error = true
+            }
+
+            is ProfileUiState.Loading -> {
+                loading = true
+            }
+
+            else -> Unit
+        }
+
+        // Observe update status
+        LaunchedEffect(updateProfileState) {
+            when (updateProfileState) {
+                is ProfileUiState.Success -> {
+                    successMessage = "Profile updated successfully!"
+                    loading = false
+                }
+
+                is ProfileUiState.Error -> {
+                    uploadError = true
+                    loading = false
+                }
+
+                else -> Unit
+            }
+        }
+
         Scaffold(
             contentWindowInsets = WindowInsets(
-                top =  0.dp,
+                top = 0.dp,
                 bottom = 0.dp
             ),
             topBar = {
                 TopAppBar(
                     windowInsets = WindowInsets(
-                        top =  0.dp,
+                        top = 0.dp,
                         bottom = 0.dp
                     ),
                     title = {
-                        Text("Interests", color = Color(0xFFB71C1C))
+                        Text("Add Photos", color = Color(0xFFB71C1C))
                     },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFB71C1C))
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                contentDescription = "Back",
+                                tint = Color(0xFFB71C1C)
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -689,441 +930,217 @@ fun Interest(
         ) { paddingValues ->
             Box(
                 modifier = Modifier
-                    .background(Color.White)
                     .fillMaxSize()
+                    .background(Color.White)
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp), // Reduced space between items
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(top = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
                 ) {
-
                     Text(
-                        text = "Your Interests",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color(0xFFB71C1C),
+                        text = "Add Photos",
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
+                        color = Color(0xFFB71C1C)
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Select a few of your interests and let everyone know what you're passionate about.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
+                        text = "Add at least 2 photos to continue",
                         fontSize = 16.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 24.dp)
                     )
-                    Spacer(modifier = Modifier.height(8.dp)) // Reduced height for less spacing
-                    interests.chunked(2).forEach { rowInterests ->
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            rowInterests.forEach { interest ->
-                                OutlinedButton(
-                                    onClick = {
-                                        if (selectedInterests.contains(interest)) {
-                                            selectedInterests.remove(interest)
-                                        } else {
-                                            selectedInterests.add(interest)
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(4.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (selectedInterests.contains(interest)) Color(0xFFB71C1C) else Color.White,
-                                        contentColor = if (selectedInterests.contains(interest)) Color.White else Color.Black
-                                    )
-                                ) {
-                                    Text(interest)
-                                }
+
+                    val gridModifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp)
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Column(
+                        modifier = gridModifier,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            for (i in 0 until 3) {
+                                PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
+                                    if (imageUris.getOrNull(i) != null) {
+                                        imageUris = imageUris.toMutableList().apply { removeAt(i) }
+                                    } else {
+                                        showDialog = true
+                                    }
+                                })
+                            }
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            for (i in 3 until 6) {
+                                PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
+                                    if (imageUris.getOrNull(i) != null) {
+                                        imageUris = imageUris.toMutableList().apply { removeAt(i) }
+                                    } else {
+                                        showDialog = true
+                                    }
+                                })
                             }
                         }
                     }
-                    val coroutineScope = rememberCoroutineScope()
-                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
                     Button(
                         onClick = {
                             isLoading = true
                             errorMessage = ""
                             successMessage = ""
+                            progress = 0f
 
                             coroutineScope.launch {
+                                while (progress < 1.0f) {
+                                    progress += 0.1f
+                                    delay(20) // Simulate loading
+                                }
                                 try {
-                                    while (progress < 1.0f) {
-                                        progress += 0.1f
-                                        delay(50)
-                                    }
+                                    val imageUrls = mutableListOf<String>()
+                                    val newImageUris = imageUris.filter { it?.scheme == "content" }
+                                    val existingImageUrls =
+                                        imageUris.filter { it?.scheme != "content" }
+                                            .map { it.toString() }
 
-                                    profile?.let {
-                                        val updatedProfile = it.copy(interests = selectedInterests.toList())
-                                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                        successMessage = "Profile updated successfully!"
+                                    val totalImages = newImageUris.size + existingImageUrls.size
+                                    var uploadCount = 0
+
+                                    profile?.let { userProfile ->
+                                        newImageUris.forEach { uri ->
+                                            uri?.let { imageUri ->
+                                                StorageUtil.uploadToStorage(
+                                                    auth = FirebaseAuth.getInstance(),
+                                                    uri = imageUri,
+                                                    context = context,
+                                                    type = "Image"
+                                                ) { downloadUrl ->
+                                                    imageUrls.add(downloadUrl)
+                                                    uploadCount++
+
+                                                    progress =
+                                                        uploadCount.toFloat() / newImageUris.size.toFloat()
+
+                                                    if (uploadCount == newImageUris.size) {
+                                                        imageUrls.addAll(existingImageUrls)
+                                                        val updatedProfile =
+                                                            userProfile.copy(pictures = imageUrls)
+                                                        profileVM.upsertUserProfile(
+                                                            TokenManager.getToken() ?: "",
+                                                            updatedProfile
+                                                        )
+                                                        Log.d(
+                                                            "Add Photos",
+                                                            "Profile updated with new images"
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (newImageUris.isEmpty()) {
+                                            imageUrls.addAll(existingImageUrls)
+                                            val updatedProfile =
+                                                userProfile.copy(pictures = imageUrls)
+                                            profileVM.upsertUserProfile(
+                                                TokenManager.getToken() ?: "", updatedProfile
+                                            )
+                                            Log.d(
+                                                "Add Photos",
+                                                "Profile updated with existing images only"
+                                            )
+                                        }
+                                    } ?: run {
+                                        Log.e("Add Photos", "Profile is null, cannot update.")
                                     }
                                 } catch (e: Exception) {
-                                    Log.e("SaveButton", "Error updating profile", e)
+                                    Log.e("Add Photos", "Error updating profile", e)
                                     errorMessage = "Failed to update profile. Please try again."
                                 } finally {
                                     isLoading = false
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xE6B71C1C)),
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !isLoading
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
+                        enabled = imageUris.size >= 2 && !isLoading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
                     ) {
-                        if (isLoading) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator(
-                                    progress = progress,
-                                    color = Color.White,
-                                    modifier = Modifier.size(48.dp),
-                                    strokeWidth = 4.dp
-                                )
-                                Text(
-                                    text = "${(progress * 100).toInt()}%",
-                                    color = Color.White,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                            }
-                        } else {
-                            Text("Save", color = Color.White, fontSize = 18.sp)
-                        }
+                        Text("Save", color = Color.White)
                     }
-                    if (errorMessage.isNotEmpty()) {
+
+                    if (error) {
                         Text(
-                            text = errorMessage,
+                            text = "An error occurred. Please try again.",
                             color = Color.Red,
                         )
                     }
 
-                    // Display success message
-//                if (successMessage.isNotEmpty()) {
-//                    Text(
-//                        text = successMessage,
-//                        color = Color.Blue,
-//                        modifier = Modifier.align(Alignment.BottomCenter)
-//                    )
-//                }
+                    if (uploadError) {
+                        Text(
+                            text = "An error occurred while uploading images.",
+                            color = Color.Red,
+                        )
+                    }
 
-            }
-        }
-    }
-}
-}
+//            if (successMessage.isNotEmpty()) {
+//                Text(
+//                    text = successMessage,
+//                    color = Color.Blue,
+//                )
+//            }
+                }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Add_Photos(
-    navController: NavController,
-    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
-) {
-    var imageUris by remember { mutableStateOf(listOf<Uri?>()) }
-    val context = LocalContext.current
-
-    var showDialog by remember { mutableStateOf(false) }
-    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
-    var successMessage by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var progress by remember { mutableStateOf(0f) }
-    var errorMessage by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope()
-
-    val imageUriLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri ->
-            uri?.let {
-                imageUris = imageUris.toMutableList().apply { add(uri) }
-            }
-        }
-    )
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                cameraImageUri?.let { uri ->
-                    imageUris = imageUris.toMutableList().apply { add(uri) }
+                if (showDialog) {
+                    ChooseImageSourceDialog(
+                        onDismiss = { showDialog = false },
+                        onGalleryClick = {
+                            showDialog = false
+                            imageUriLauncher.launch("image/*")
+                        },
+                        onCameraClick = {
+                            showDialog = false
+                            val photoFile = File(context.cacheDir, "camera_image.jpg")
+                            val photoUri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.provider",
+                                photoFile
+                            )
+                            cameraImageUri = photoUri
+                            cameraLauncher.launch(photoUri)
+                        }
+                    )
                 }
             }
         }
-    )
-
-    var profile by remember { mutableStateOf<Profile?>(null) }
-    var loading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf(false) }
-    var uploadError by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-        Log.d("Photos", "Profile fetched")
-    }
-
-    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
-    val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
-
-    // Handle profile data and errors
-    when (profileUiState) {
-        is ProfileUiState.Success -> {
-            profile = (profileUiState as ProfileUiState.Success).profile
-            profile?.pictures?.let { urls ->
-                val uris = urls.map { url -> Uri.parse(url) }
-                imageUris = uris
-            }
-        }
-        is ProfileUiState.Error -> {
-            error = true
-        }
-        is ProfileUiState.Loading -> {
-            loading = true
-        }
-        else -> Unit
-    }
-
-    // Observe update status
-    LaunchedEffect(updateProfileState) {
-        when (updateProfileState) {
-            is ProfileUiState.Success -> {
-                successMessage = "Profile updated successfully!"
-                loading = false
-            }
-            is ProfileUiState.Error -> {
-                uploadError = true
-                loading = false
-            }
-            else -> Unit
-        }
-    }
-
-    Scaffold(
-        contentWindowInsets = WindowInsets(
-            top =  0.dp,
-            bottom = 0.dp
-        ),
-        topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets(
-                    top =  0.dp,
-                    bottom = 0.dp
-                ),
-                title = {
-                    Text("Add Photos", color = Color(0xFFB71C1C))
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFB71C1C))
-                    }
-                },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = Color.White
-                )
-            )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(paddingValues)
-        ) {
-            Column(
+        if (isLoading) {
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
+                    .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+                contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
             ) {
-                Text(
-                    text = "Add Photos",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFB71C1C)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Add at least 2 photos to continue",
-                    fontSize = 16.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-
-                val gridModifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp)
-                Spacer(modifier = Modifier.height(24.dp))
-                Column(
-                    modifier = gridModifier,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        for (i in 0 until 3) {
-                            PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
-                                if (imageUris.getOrNull(i) != null) {
-                                    imageUris = imageUris.toMutableList().apply { removeAt(i) }
-                                } else {
-                                    showDialog = true
-                                }
-                            })
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        for (i in 3 until 6) {
-                            PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
-                                if (imageUris.getOrNull(i) != null) {
-                                    imageUris = imageUris.toMutableList().apply { removeAt(i) }
-                                } else {
-                                    showDialog = true
-                                }
-                            })
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = {
-                        isLoading = true
-                        errorMessage = ""
-                        successMessage = ""
-                        progress = 0f
-
-                        coroutineScope.launch {
-                            while (progress < 1.0f) {
-                                progress += 0.1f
-                                delay(20) // Simulate loading
-                            }
-                            try {
-                                val imageUrls = mutableListOf<String>()
-                                val newImageUris = imageUris.filter { it?.scheme == "content" }
-                                val existingImageUrls = imageUris.filter { it?.scheme != "content" }.map { it.toString() }
-
-                                val totalImages = newImageUris.size + existingImageUrls.size
-                                var uploadCount = 0
-
-                                profile?.let { userProfile ->
-                                    newImageUris.forEach { uri ->
-                                        uri?.let { imageUri ->
-                                            StorageUtil.uploadToStorage(
-                                                auth = FirebaseAuth.getInstance(),
-                                                uri = imageUri,
-                                                context = context,
-                                                type = "Image"
-                                            ) { downloadUrl ->
-                                                imageUrls.add(downloadUrl)
-                                                uploadCount++
-
-                                                progress = uploadCount.toFloat() / newImageUris.size.toFloat()
-
-                                                if (uploadCount == newImageUris.size) {
-                                                    imageUrls.addAll(existingImageUrls)
-                                                    val updatedProfile = userProfile.copy(pictures = imageUrls)
-                                                    profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                                    Log.d("Add Photos", "Profile updated with new images")
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    if (newImageUris.isEmpty()) {
-                                        imageUrls.addAll(existingImageUrls)
-                                        val updatedProfile = userProfile.copy(pictures = imageUrls)
-                                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                        Log.d("Add Photos", "Profile updated with existing images only")
-                                    }
-                                } ?: run {
-                                    Log.e("Add Photos", "Profile is null, cannot update.")
-                                }
-                            } catch (e: Exception) {
-                                Log.e("Add Photos", "Error updating profile", e)
-                                errorMessage = "Failed to update profile. Please try again."
-                            } finally {
-                                isLoading = false
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-                    enabled = imageUris.size >= 2 && !isLoading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                ) {
-                    if (isLoading) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator(
-                                progress = progress,
-                                color = Color.White,
-                                modifier = Modifier.size(48.dp),
-                                strokeWidth = 4.dp
-                            )
-                            Text(
-                                text = "${(progress * 100).toInt()}%",
-                                color = Color.White,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
-                    } else {
-                        Text("Save", color = Color.White)
-                    }
-                }
-
-            if (error) {
-                Text(
-                    text = "An error occurred. Please try again.",
-                    color = Color.Red,
-                )
+                CircularProgressIndicator(color = Color.White)  // White progress indicator
             }
-
-            if (uploadError) {
-                Text(
-                    text = "An error occurred while uploading images.",
-                    color = Color.Red,
-                )
-            }
-
-            if (successMessage.isNotEmpty()) {
-                Text(
-                    text = successMessage,
-                    color = Color.Blue,
-                )
-            }
-        }
-
-        if (showDialog) {
-            ChooseImageSourceDialog(
-                onDismiss = { showDialog = false },
-                onGalleryClick = {
-                    showDialog = false
-                    imageUriLauncher.launch("image/*")
-                },
-                onCameraClick = {
-                    showDialog = false
-                    val photoFile = File(context.cacheDir, "camera_image.jpg")
-                    val photoUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", photoFile)
-                    cameraImageUri = photoUri
-                    cameraLauncher.launch(photoUri)
-                }
-            )
         }
     }
-}
-}
 
 //@Composable
 //@Preview(showBackground = true)
