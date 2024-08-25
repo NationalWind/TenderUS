@@ -477,6 +477,27 @@ fun SwipeableProfiles(navController: NavController,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
+
+                    // Rewind button at the top left
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(16.dp)
+                            .size(52.dp)
+                            .offset(x = (-10).dp, y = (-10).dp)
+                            .clickable {
+                                if (currentProfileIndex > 0) {
+                                    currentProfileIndex -= 1 // Rewind to the previous profile
+                                }
+                            }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.rewind),
+                            contentDescription = "Rewind",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
 
                 // Overlay profile information
