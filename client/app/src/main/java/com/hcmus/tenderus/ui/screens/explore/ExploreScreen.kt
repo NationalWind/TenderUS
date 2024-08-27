@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,7 @@ import com.hcmus.tenderus.network.ApiClient
 import com.hcmus.tenderus.network.ExploreService
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.SwipeableProfiles
+import com.hcmus.tenderus.ui.theme.PinkPrimary
 import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.ExploreVM
 import kotlinx.coroutines.launch
@@ -81,13 +83,13 @@ fun ExploreScreen(navController: NavController, exploreVM: ExploreVM = viewModel
 
         if (exploreVM.group != null) {
 
-            DiscoverScreen(navController, "Explore", viewModel = exploreVM)
+            DiscoverScreen(navController, exploreVM.group, viewModel = exploreVM)
 
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize().padding(vertical = 3.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.circlecancle),
+                    painter = painterResource(id = R.drawable.circlecanci),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

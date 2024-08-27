@@ -16,6 +16,7 @@ import com.hcmus.tenderus.data.TokenManager
 
 import com.hcmus.tenderus.model.Match
 import com.hcmus.tenderus.model.Message
+import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.network.ApiClient.GetActivityStatusApi
 import com.hcmus.tenderus.network.ApiClient.GetMatchesApi
 import com.hcmus.tenderus.network.ApiClient.HaveReadMessageApi
@@ -52,6 +53,8 @@ class MatchListVM: ViewModel() {
 
     val matches = mutableStateListOf<MatchState>()
     var curReceiver by mutableStateOf("")
+    var curProfile by mutableStateOf<Profile?>(null)
+
     var uiState by mutableStateOf(MessageStatus.LOADING)
 
     init {
@@ -228,6 +231,18 @@ class MatchListVM: ViewModel() {
                 HaveReadMessageApi.update("Bearer " + TokenManager.getToken()!!, HaveReadMessageRequest(conversationID))
             } catch (e: Exception) {
                 Log.d("MsgBeRead", e.toString())
+            }
+        }
+    }
+
+    fun getMatchProfile() {
+        viewModelScope.launch {
+            try {
+                uiState = MessageStatus.LOADING
+                curProfile = GetMatchesApi.getMatchProfile("Bearer " + TokenManager.getToken()!!, curReceiver)
+                uiState = MessageStatus.SUCCESS
+            } catch (e: Exception) {
+                Log.d("GetProfile", e.toString())
             }
         }
     }

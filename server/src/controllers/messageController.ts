@@ -381,7 +381,38 @@ const messageController = {
             console.log(error);
             res.status(500).json({ message: "Something went wrong" });
         }
-    }
+    },
+
+    // GET api/message/match-profile/:username
+    // response {Profile}
+    getMatchProfile: async (req: Request, res: Response) => {
+        try {
+            const { username } = req.params;
+            var user1 = username
+            var user2 = req.body.username
+            if (user1 > user2) {
+                user1 = req.body.username
+                user2 = username
+            }
+            const match = await db.match.findUnique({
+                where: {
+                    user1_user2: {
+                        user1: user1,
+                        user2: user2
+                    }
+                }
+            });
+            if (!match) {
+                res.status(403).json({ message: "You haven't got a match with this user" });
+                return;
+            }
+            const prof = await db.profile.findUniqueOrThrow({ where: { username } });
+            res.status(200).json(prof);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Something went wrong" });
+        }
+    },
 }
 
 
