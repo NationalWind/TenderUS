@@ -1024,10 +1024,14 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                                 }
                                 try {
                                     val imageUrls = mutableListOf<String>()
-                                    val newImageUris = imageUris.filter { it?.scheme == "content" }
-                                    val existingImageUrls =
-                                        imageUris.filter { it?.scheme != "content" }
-                                            .map { it.toString() }
+                                    val newImageUris = imageUris.filter { uri ->
+                                        // Explicitly track newly selected images
+                                        uri?.let { uri.scheme == "content" && !uri.toString().startsWith("http") } == true
+                                    }
+                                    Log.d("Add Photos", newImageUris.size.toString())
+                                    val existingImageUrls = imageUris.filter { uri ->
+                                        uri?.let { it.scheme == "content" && uri.toString().startsWith("http") } == false
+                                    }.map { it.toString() }
 
                                     val totalImages = newImageUris.size + existingImageUrls.size
                                     var uploadCount = 0
@@ -1044,8 +1048,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                                                     imageUrls.add(downloadUrl)
                                                     uploadCount++
 
-                                                    progress =
-                                                        uploadCount.toFloat() / newImageUris.size.toFloat()
+                                                    progress = uploadCount.toFloat() / newImageUris.size.toFloat()
 
                                                     if (uploadCount == newImageUris.size) {
                                                         imageUrls.addAll(existingImageUrls)
@@ -1066,8 +1069,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
 
                                         if (newImageUris.isEmpty()) {
                                             imageUrls.addAll(existingImageUrls)
-                                            val updatedProfile =
-                                                userProfile.copy(pictures = imageUrls)
+                                            val updatedProfile = userProfile.copy(pictures = imageUrls)
                                             profileVM.upsertUserProfile(
                                                 TokenManager.getToken() ?: "", updatedProfile
                                             )
@@ -1109,13 +1111,6 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                             color = Color.Red,
                         )
                     }
-
-//            if (successMessage.isNotEmpty()) {
-//                Text(
-//                    text = successMessage,
-//                    color = Color.Blue,
-//                )
-//            }
                 }
 
                 if (showDialog) {
@@ -1138,16 +1133,17 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                         }
                     )
                 }
-            }
-        }
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
-                contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
-            ) {
-                CircularProgressIndicator(color = Color.White)  // White progress indicator
+
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+                        contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
+                    ) {
+                        CircularProgressIndicator(color = Color.White)  // White progress indicator
+                    }
+                }
             }
         }
     }
