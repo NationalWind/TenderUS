@@ -2,6 +2,7 @@ package com.hcmus.tenderus.network
 
 import com.hcmus.tenderus.model.Match
 import com.hcmus.tenderus.model.Message
+import com.hcmus.tenderus.model.Profile
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -24,6 +25,10 @@ data class HaveReadMessageRequest(
 interface GetMatch {
     @GET("api/message/matches")
     suspend fun getMatches(@Header("Authorization") authorization: String): List<Match>
+
+    @GET("api/message/match-profile/{username}")
+    suspend fun getMatchProfile(@Header("Authorization") authorization: String, @Path("username") username: String): Profile
+
 }
 
 interface MatchPolling {

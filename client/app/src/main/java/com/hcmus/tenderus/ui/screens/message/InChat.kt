@@ -10,6 +10,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -73,6 +76,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.network.MessageSendingRequest
+import com.hcmus.tenderus.ui.screens.discover.FullProfile
 import com.hcmus.tenderus.ui.theme.Typography
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.MatchState
@@ -197,7 +201,7 @@ fun VoiceMessage(audioUrl: String, isSender: Boolean) {
 }
 
 @Composable
-fun InChatTopBar(match: MatchState, onclick: () -> Unit = {}) {
+fun InChatTopBar(match: MatchState, onclick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -232,9 +236,10 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
     val matches = matchListVM.matches
     val usernameInChat = matchListVM.curReceiver
     var heldImage by remember { mutableStateOf("") }
+    var showProfileDetails by remember { mutableStateOf(false) }
 
     val audioRecorder = remember { AudioRecorder(context) }
-    val file = remember {File(context.cacheDir.toString(), "audio.mp3")}
+    val file = remember { File(context.cacheDir.toString(), "audio.mp3") }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -285,7 +290,10 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                         modifier = Modifier.size(50.dp)
                     )
                 }
-                InChatTopBar(matches[idx])
+                InChatTopBar(matches[idx]) {
+                    matchListVM.getMatchProfile()
+                    showProfileDetails = true
+                }
             }
         },
         bottomBar = {
@@ -388,7 +396,7 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
             }
         }
 
-        ) {
+    ) {
         Column(
             Modifier
                 .fillMaxSize()
@@ -413,15 +421,28 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                                 horizontalAlignment = Alignment.CenterHorizontally
 
                             ) {
-                                val isToday = convertIsoToHumanReadableDate(matches[idx].messageArr[msgIdx].createdAt) == convertIsoToHumanReadableDate(getCurrentDateTimeIso())
-                                val text = if (isToday) convertIsoToHanoiTime(matches[idx].messageArr[msgIdx].createdAt) else convertIsoToHumanReadableDateTime(matches[idx].messageArr[msgIdx].createdAt)
+                                val isToday =
+                                    convertIsoToHumanReadableDate(matches[idx].messageArr[msgIdx].createdAt) == convertIsoToHumanReadableDate(
+                                        getCurrentDateTimeIso()
+                                    )
+                                val text =
+                                    if (isToday) convertIsoToHanoiTime(matches[idx].messageArr[msgIdx].createdAt) else convertIsoToHumanReadableDateTime(
+                                        matches[idx].messageArr[msgIdx].createdAt
+                                    )
                                 if (msgIdx == matches[idx].messageArr.size - 1) {
                                     Text(text)
                                 } else {
-                                    if (convertIsoToHumanReadableDate(matches[idx].messageArr[msgIdx].createdAt) != convertIsoToHumanReadableDate(matches[idx].messageArr[msgIdx + 1].createdAt)) {
+                                    if (convertIsoToHumanReadableDate(matches[idx].messageArr[msgIdx].createdAt) != convertIsoToHumanReadableDate(
+                                            matches[idx].messageArr[msgIdx + 1].createdAt
+                                        )
+                                    ) {
                                         Text(text)
                                     } else {
-                                        if (isToday && subtractInMinutes(matches[idx].messageArr[msgIdx + 1].createdAt, matches[idx].messageArr[msgIdx].createdAt) >= 15) {
+                                        if (isToday && subtractInMinutes(
+                                                matches[idx].messageArr[msgIdx + 1].createdAt,
+                                                matches[idx].messageArr[msgIdx].createdAt
+                                            ) >= 15
+                                        ) {
                                             Text(text)
                                         }
                                     }
@@ -505,6 +526,18 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
         }
     }
 
+    AnimatedVisibility(
+        visible = showProfileDetails,
+        enter = slideInVertically(initialOffsetY = { it }),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+    ) {
+        matchListVM.curProfile?.let {
+            FullProfile(it) {
+                showProfileDetails = false
+            }
+        }
+    }
+
     if (heldImage != "") {
         Box(
             modifier = Modifier.fillMaxSize().clickable {
@@ -534,6 +567,14 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
         }
     }
 
+    if (matchListVM.uiState == MatchListVM.MessageStatus.LOADING) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
 
 }
 

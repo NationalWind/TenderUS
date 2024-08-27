@@ -10,6 +10,7 @@ messageRouter.get("/polling", authMiddeware.checkUser, messageController.message
 
 messageRouter.get("/", authMiddeware.checkUser, messageController.loadMessage);
 messageRouter.get("/matches", authMiddeware.checkUser, messageController.getMatches);
+messageRouter.get("/match-profile/:username", authMiddeware.checkUser, messageController.getMatchProfile);
 
 messageRouter.post("/read", authMiddeware.checkUser, messageController.haveRead);
 

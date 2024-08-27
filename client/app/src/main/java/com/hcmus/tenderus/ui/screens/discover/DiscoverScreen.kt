@@ -557,75 +557,8 @@ fun SwipeableProfiles(navController: NavController,
                     enter = slideInVertically(initialOffsetY = { it }),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
-                    // Full Profile Information Section
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                            .padding(16.dp)
-                            .verticalScroll(rememberScrollState())
-
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            // Profile Image as part of the detailed profile
-                            Image(
-                                painter = rememberAsyncImagePainter(profile.avatarIcon!!),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp) // Adjust height as needed
-                                    .clip(RoundedCornerShape(12.dp))
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Display additional images
-                            profile.pictures!!.drop(1).forEach { imageUrl ->
-                                Image(
-                                    painter = rememberAsyncImagePainter(imageUrl),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(200.dp) // Adjust height as needed
-                                        .padding(vertical = 8.dp) // Add spacing between images
-                                        .clip(RoundedCornerShape(12.dp))
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            Text(profile.displayName!!, style = MaterialTheme.typography.headlineSmall)
-                            Text("Age: ${calculateAgeFromDob(profile.birthDate!!)}", style = MaterialTheme.typography.bodyLarge)
-                            Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                profile.description!!,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Use collapse button image for collapsing profile details
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.End)
-                                    .size(52.dp)
-                                    .offset(x = (-10).dp, y = (-100).dp)
-                                    .clickable { showProfileDetails = false }
-                                    .background(Color.Transparent)
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.collapse_button),
-                                    contentDescription = "Collapse Profile",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            }
-                        }
+                    FullProfile(profile) {
+                        showProfileDetails = false
                     }
                 }
             }
@@ -738,10 +671,86 @@ fun SwipeableProfiles(navController: NavController,
         }
     } else {
         Box(
-            modifier = Modifier.fillMaxSize().background(Color.White),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
             Text(text = "There is no user matching your preferences", textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
+        }
+    }
+}
+
+@Composable
+fun FullProfile(profile: Profile, onDismiss: () -> Unit) {
+    // Full Profile Information Section
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            // Profile Image as part of the detailed profile
+            Image(
+                painter = rememberAsyncImagePainter(profile.avatarIcon!!),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp) // Adjust height as needed
+                    .clip(RoundedCornerShape(12.dp))
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display additional images
+            profile.pictures!!.drop(1).forEach { imageUrl ->
+                Image(
+                    painter = rememberAsyncImagePainter(imageUrl),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp) // Adjust height as needed
+                        .padding(vertical = 8.dp) // Add spacing between images
+                        .clip(RoundedCornerShape(12.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(profile.displayName!!, style = MaterialTheme.typography.headlineSmall)
+            Text("Age: ${calculateAgeFromDob(profile.birthDate!!)}", style = MaterialTheme.typography.bodyLarge)
+            Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                profile.description!!,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Use collapse button image for collapsing profile details
+            Box(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .size(52.dp)
+                    .offset(x = (-10).dp, y = (-100).dp)
+                    .clickable { onDismiss() }
+                    .background(Color.Transparent)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.collapse_button),
+                    contentDescription = "Collapse Profile",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
