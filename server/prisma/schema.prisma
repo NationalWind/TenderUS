@@ -60,6 +60,8 @@ model Profile {
   longitude Float
   latitude  Float
 
+  location String
+
   identity  String
   interests String[]
   groups    String[]
@@ -85,6 +87,7 @@ model Like {
   likedUsername String
 
   @@index(username)
+  @@unique([username, likedUsername])
 }
 
 model Pass_A {

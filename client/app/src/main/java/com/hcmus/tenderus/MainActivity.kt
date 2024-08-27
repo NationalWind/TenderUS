@@ -3,6 +3,7 @@ package com.hcmus.tenderus
 import android.content.Context
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -45,6 +46,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnCompleteListener
 
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
@@ -97,6 +100,7 @@ class MainActivity : ComponentActivity() {
     private val TAG = "MainAct"
     private lateinit var firebaseSMSAuth: FirebaseSMSAuth
     private lateinit var firebaseEmailAuth: FirebaseEmailAuth
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     // Declare the launcher at the top of your Activity/Fragment:
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -108,6 +112,18 @@ class MainActivity : ComponentActivity() {
         }
     }
     private val REQUEST_CAMERA_PERMISSION = 100
+    private val REQUEST_LOCATION_PERMISSION = 101
+
+    private fun requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted, request it
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+        } else {
+            // Permission is already granted, you can use location services
+            // TODO: Use location services
+        }
+    }
 
     private fun requestCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -141,9 +157,11 @@ class MainActivity : ComponentActivity() {
         askNotificationPermission()
         TokenManager.init(this)
         requestCameraPermission()
+        requestLocationPermission()
         // Input this var in every composable that needs to call Firebase services (sendSMS, confirmAndSync)
         firebaseSMSAuth = FirebaseSMSAuth(this)
         firebaseEmailAuth = FirebaseEmailAuth(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Initialize FCM
         TenderUSPushNotificationService.sharedPref = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
@@ -169,7 +187,7 @@ class MainActivity : ComponentActivity() {
                     composable("onboarding1") { OnboardingScreen1(navController = navController) }
 //                    composable("signin") { LoginScreen(navController = navController) }
                     composable("signup1") { SignUpScreen(navController, firebaseSMSAuth, firebaseEmailAuth) }
-                    composable("profilesetup1") { ProfileDetails1Screen(navController) }
+                    composable("profilesetup1") { ProfileDetails1Screen(navController, fusedLocationClient) }
                     composable("profilesetup2") { ProfileDetails2Screen(navController ) }
                     composable("profilesetup3") { ProfileDetails3Screen(navController ) }
                     composable("filter") { SearchPreferencesScreen(navController) }
@@ -183,7 +201,7 @@ class MainActivity : ComponentActivity() {
                     composable("emailsync") { ExampleEmailSync() }
 //                    composable("smssend") { ExampleSMSSend(firebaseSMSAuth , navController = navController)}
 //                    composable("otpVerification") { OTPVerificationScreen(firebaseSMSAuth , navController = navController) }
-                    composable("main") { MainScreen(firebaseSMSAuth, firebaseEmailAuth, applicationContext) }
+                    composable("main") { MainScreen(firebaseSMSAuth, firebaseEmailAuth, applicationContext, fusedLocationClient) }
 
 //                    composable("emailsend") { ExampleEmailSend(firebaseEmailAuth, navController = navController) }
 //                    composable("emailsync") { ExampleEmailSync(firebaseEmailAuth) }
@@ -191,7 +209,7 @@ class MainActivity : ComponentActivity() {
                     composable("admin") {AdminScreen()}
 
                     composable("explore") { ExploreScreen(navController) }
-                    composable("coffee_date") { CoffeeDateScreen(navController) }
+//                    composable("coffee_date") { CoffeeDateScreen(navController) }
                     composable("discover?customTitle={customTitle}") { backStackEntry ->
                         val customTitle = backStackEntry.arguments?.getString("customTitle")
                         DiscoverScreen(navController = navController, customTitle = customTitle)
@@ -203,10 +221,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-
-
-
 }
 
 @Composable

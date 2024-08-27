@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +22,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -67,6 +70,9 @@ fun SignUpScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf("") }
     var isResendAllowed by remember { mutableStateOf(true) }
+    var progress by remember { mutableStateOf(0f) } // Progress value
+    var isLoading by remember { mutableStateOf(false) }
+    var isSuccess by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -117,6 +123,7 @@ fun SignUpScreen(
             }
         }
     }
+
 
     Box(
         contentAlignment = Alignment.Center,
@@ -169,14 +176,15 @@ fun SignUpScreen(
                                 .clickable { expanded = !expanded }
                                 .padding(16.dp)
                         ) {
-                            Text(text = selectedCountryCode, fontSize = 18.sp)
+                            Text(text = selectedCountryCode, fontSize = 18.sp, color = Color(0xFFB71C1C))
                             Spacer(modifier = Modifier.width(57.dp))
                             Icon(
                                 painter = painterResource(id = R.drawable.drdown),
                                 contentDescription = "Dropdown",
                                 modifier = Modifier
                                     .align(Alignment.CenterEnd)
-                                    .size(20.dp)
+                                    .size(20.dp),
+                                tint = Color(0xFFB71C1C)
                             )
                             DropdownMenu(
                                 expanded = expanded,
@@ -200,7 +208,13 @@ fun SignUpScreen(
                             onValueChange = { phoneNumber = it },
                             placeholder = { Text("Phone Number") },
                             modifier = Modifier
-                                .weight(1f) // Take up the remaining space
+                                .weight(1f), // Take up the remaining space
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = { focusManager.clearFocus() },
+                            )
                         )
                     }
 
@@ -312,7 +326,13 @@ fun SignUpScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(vertical = 16.dp, horizontal = 8.dp)
+                            .padding(vertical = 16.dp, horizontal = 8.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -396,7 +416,13 @@ fun SignUpScreen(
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     if (!isEmailValid) {
                         Text(
@@ -510,19 +536,26 @@ fun SignUpScreen(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    BasicTextField(
+//                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
                         value = username,
                         onValueChange = {
                             username = it
                             isUsernameValid = validateUsername(username)
                         },
+                        label = { Text("Username") },
                         textStyle = TextStyle(fontSize = 18.sp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                            .padding(vertical = 2.dp),
+//                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+//                            .padding(16.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     if (!isUsernameValid) {
                         Text(
@@ -531,7 +564,7 @@ fun SignUpScreen(
                             fontSize = 12.sp
                         )
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         "Create a password",
                         fontSize = 30.sp,
@@ -541,20 +574,27 @@ fun SignUpScreen(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    BasicTextField(
+//                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
                         value = password,
                         onValueChange = {
                             password = it
                             isPasswordValid = validatePassword(password.text)
                         },
+                        label = { Text("Password") },
                         visualTransformation = PasswordVisualTransformation(),
                         textStyle = TextStyle(fontSize = 18.sp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                            .padding(vertical = 2.dp),
+//                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+//                            .padding(16.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     if (!isPasswordValid) {
                         Text(
@@ -563,20 +603,27 @@ fun SignUpScreen(
                             fontSize = 12.sp
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    BasicTextField(
+//                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = {
                             confirmPassword = it
                             doPasswordsMatch = password.text == confirmPassword.text
                         },
+                        label = { Text("Confirm Password") },
                         visualTransformation = PasswordVisualTransformation(),
                         textStyle = TextStyle(fontSize = 18.sp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .padding(16.dp)
+                            .padding(vertical = 2.dp),
+//                            .background(Color.LightGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+//                            .padding(16.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = { focusManager.clearFocus() },
+                        )
                     )
                     if (!doPasswordsMatch) {
                         Text(
@@ -589,43 +636,47 @@ fun SignUpScreen(
                     Button(
                         onClick = {
                             if (isPasswordValid && doPasswordsMatch) {
-                                // Perform signup and navigation
-                                isSignUpSuccessful = true
+                                isLoading = true
+                                isSuccess = false
+                                errorMessage = ""
+                                progress = 0.0f
                                 scope.launch {
+                                    while (progress < 1.0f) {
+                                        progress += 0.1f
+                                        delay(30) // Simulate loading
+                                    }
                                     try {
-                                        // call sync
-                                        errorMessage = GenAuth.syncForSignUp(username, password.text).message
-                                        if (isSignUpSuccessful){
-                                            successMessage = "Account created successfully.\n Please log in to set up your profile."
-                                            delay(3000)
-                                            navController.navigate("signin")
-                                        }
+                                        // Simulate API call
+                                        GenAuth.syncForSignUp(username, password.text)
+                                        isSuccess = true
+//                                        successMessage = "Account created successfully.\n Please log in to set up your profile."
+                                        delay(20)
+                                        navController.navigate("signin")
                                     } catch (e: retrofit2.HttpException) {
                                         Log.d("Signup", e.toString())
                                         errorMessage = "Internal server error. This could be due to a duplicate username or other server issues. Please try again later."
+                                    } catch (e: Exception) {
+                                        errorMessage = "An unexpected error occurred"
+                                        Log.d("Signup", e.toString())
+                                    } finally {
+                                        isLoading = false
                                     }
                                 }
-
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Create an account", color = Color.White)
+                            Text("Create an account", color = Color.White)
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     errorMessage?.let {
-                        Spacer(modifier = Modifier.height(8.dp))
                         Text(text = it, color = Color.Red, fontSize = 14.sp)
                     }
-                    // Display success message
-                    if (successMessage.isNotEmpty()) {
-                        Text(
-                            text = successMessage,
-                            color = Color.Blue,
-                            modifier = Modifier.padding(top = 12.dp)
-                        )
 
-                    }
+
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -651,6 +702,16 @@ fun SignUpScreen(
             }
         }
     }
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+            contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
+        ) {
+            CircularProgressIndicator(color = Color.White)  // White progress indicator
+        }
+    }
 }
 
 // Function to validate the password
@@ -661,4 +722,29 @@ fun validatePassword(password: String): Boolean {
 
 fun validateUsername(username: String): Boolean {
     return username.isNotEmpty() && username.length >= 3
+}
+
+@Composable
+fun CircularProgressWithPercent(
+    progress: Float,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        CircularProgressIndicator(
+            progress = progress,
+            modifier = Modifier.size(100.dp), // Adjust size as needed
+            color = Color(0xFFB71C1C),
+            strokeWidth = 8.dp // Adjust stroke width as needed
+        )
+        Text(
+            text = "${(progress * 100).toInt()}%",
+            color = Color.Black,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
 }

@@ -9,15 +9,15 @@ import { parse } from "dotenv";
 const validGroups = ["Looking for Love", "Free tonight?", "Coffee Date", "Let's be friend", "Like to go drinking", "Movie Lovers", "Creative Lovers", "Love Sports"]
 
 const recommendationController = {
-    // POST /api/recommendation/join { id(username): String, group: String }
+    // POST /api/recommendation/join?group=
     join: async (req: Request, res: Response) => {
         try {
             const username: string = req.body.username;
-            if (!req.body.group || typeof req.body.group !== "string" || !validGroups.includes(req.body.group)) {
+            if (!req.query.group || typeof req.query.group !== "string" || !validGroups.includes(req.query.group)) {
                 res.status(400).json({ message: "Bad request" });
                 return;
             }
-            const group: string = req.body.group;
+            const group: string = req.query.group;
 
 
             await db.profile.update({
@@ -58,6 +58,10 @@ const recommendationController = {
 
             const cur_pref = await db.preference.findUnique({ where: { username: req.body.username } });
             const cur_prof = await db.profile.findUnique({ where: { username: req.body.username } });
+            const cur_likes = await db.like.findMany({
+                where: { username: req.body.username },
+                select: { likedUsername: true }
+            });
 
             if (!cur_prof || !cur_pref) {
                 res.status(404).json({ message: "User requesting not found" });
@@ -69,23 +73,21 @@ const recommendationController = {
                 return
             }
 
-            // Preferences enforcement (haven't excluded matched users yet)
+
+
+            // Preferences enforcement
             const users = await db.profile.findMany({
                 where: {
-                    username: {
-                        not: cur_prof.username
-                    },
                     account: {
                         role: Role.USER
-                    }
+                    },
                 }
             });
-
             const recs: Profile[] = [];
 
             for (const user of users) {
                 const age = getAge(user.birthDate);
-                if (age > cur_pref.ageMax || age < cur_pref.ageMin) continue;
+                if (age > cur_pref.ageMax || age < cur_pref.ageMin || user.username === cur_prof.username || cur_likes.some(obj => obj.likedUsername === user.username)) continue;
                 if (cur_pref.showMe != user.identity && cur_pref.showMe != "Both") continue;
                 if ((cur_prof.longitude - user.longitude) * (cur_prof.longitude - user.longitude) + (cur_prof.latitude - user.latitude) * (cur_prof.latitude - user.latitude) <= cur_pref.maxDist * cur_pref.maxDist) {
                     if (req.query.group) {
@@ -107,8 +109,8 @@ const recommendationController = {
             recs.sort((a: Profile, b: Profile) => {
                 const a_cur = a.interests.filter(value => cur_prof.interests.includes(value));
                 const b_cur = b.interests.filter(value => cur_prof.interests.includes(value));
-                return b_cur.length - a_cur.length;
-            })
+                return b_cur.length + (b.location === cur_prof.location ? 3 : 0) - (a_cur.length + (a.location === cur_prof.location ? 3 : 0));
+            });
 
             if (!cur_pref.recPage) {
                 cur_pref.recPage = 0;
@@ -140,14 +142,37 @@ const recommendationController = {
             res.status(500).json({ message: "Something went wrong" });
         }
     },
-    // getGroups: async (req: Request, res: Response) => {
-    //     try {
-    //         res.status(200).json({ groups: validGroups });
-    //     } catch (error) {
-    //         console.log(error);
-    //         res.status(500).json({ message: "Something went wrong" });
-    //     }
-    // },
+
+    // GET /api/recommendation/join?group=
+    // response: {joined: Boolean}
+    joinedYet: async (req: Request, res: Response) => {
+        try {
+            if (!req.query.group || typeof req.query.group !== "string") {
+                res.status(400).json({ message: "Bad request" });
+                return;
+            }
+            const prof = await db.profile.findUniqueOrThrow({ where: { username: req.body.username } });
+            const groups = prof.groups;
+            res.status(200).json({ joined: groups.includes(req.query.group) });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Something went wrong" });
+        }
+    },
+
+    // GET /api/recommendation/guest
+    //response: {profiles: Profile[]}
+    getGuestRecs: async (req: Request, res: Response) => {
+        try {
+            const count = await db.profile.count({ where: { account: { role: Role.USER } } });
+            const where = count < 10 ? 0 : Math.floor(Math.random() * (count - 9));
+            res.status(200).json({ profiles: await db.profile.findMany({ where: { account: { role: Role.USER } }, skip: where, take: 10 }) });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Something went wrong" });
+        }
+    },
+
 };
 
 export default recommendationController;

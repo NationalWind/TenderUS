@@ -20,6 +20,10 @@ interface DiscoverService {
     @GET("api/recommendation")
     suspend fun getProfiles(@Header("Authorization") token: String, @Query("limit") limit: String): ProfileResponse
 
+    @GET("api/recommendation/guest")
+    suspend fun getProfiles(): ProfileResponse
+
+
     @POST("api/swipe/like")
     suspend fun likeProfile(
         @Header("Authorization") token: String,

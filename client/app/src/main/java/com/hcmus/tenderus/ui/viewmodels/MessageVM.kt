@@ -55,72 +55,75 @@ class MatchListVM: ViewModel() {
     var uiState by mutableStateOf(MessageStatus.LOADING)
 
     init {
-        try {
-            getMatches()
-            uiState = MessageStatus.SUCCESS
-        } catch (e: Exception) {
-            uiState = MessageStatus.FAILED
-        }
-
-        viewModelScope.launch {
-            while (true) {
-                try {
-                    val token = TokenManager.getToken() ?: break
-                    val newMsg =
-                        MessagePollingApi.getNewMessage("Bearer $token")
-                    val idx = matches.indexOfFirst { it.username == newMsg.sender }
-                    if (idx == -1) continue//
-                    if (idx == 0) {
-                        matches[idx].messageArr.add(0, newMsg)
-                    } else {
-                        val match = matches[idx]
-                        matches.removeAt(idx)
-                        match.messageArr.add(0, newMsg)
-                        matches.add(0, match)
-                    }
-                    matches[0].isRead = false
-                    matches[0].isActive = true
-
-                } catch (e: Exception) {
-                    Log.d("MsgPolling", e.toString())
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            while (true) {
-                try {
-                    val token = TokenManager.getToken() ?: break
-                    val newMatch = MatchPollingApi.getNewMatch("Bearer $token")
-                    val idx = matches.indexOfFirst { (it.username == newMatch.username) }
-                    if (idx == -1) {
-                        matches.add(
-                            0,
-                            MatchState(
-                                username = newMatch.username,
-                                avatarIcon = newMatch.avatarIcon,
-                                displayName = newMatch.displayName,
-                                isActive = newMatch.isActive
-                            )
-                        )
-                    }
-                } catch (e: Exception) {
-                    Log.d("MatchPolling", e.toString())
-                }
-            }
-        }
-
-        viewModelScope.launch {
+        if (TokenManager.getRole() == "USER") {
             try {
-                TokenManager.getToken()?.let {
-                    for (match in matches) {
-                        match.isActive = GetActivityStatusApi.get("Bearer $it", match.username).isActive
-                        delay(10000)
-                    }
-
-                }
+                getMatches()
+                uiState = MessageStatus.SUCCESS
             } catch (e: Exception) {
-                Log.d("Active Status", e.toString())
+                uiState = MessageStatus.FAILED
+            }
+
+            viewModelScope.launch {
+                while (true) {
+                    try {
+                        val token = TokenManager.getToken() ?: break
+                        val newMsg =
+                            MessagePollingApi.getNewMessage("Bearer $token")
+                        val idx = matches.indexOfFirst { it.username == newMsg.sender }
+                        if (idx == -1) continue//
+                        if (idx == 0) {
+                            matches[idx].messageArr.add(0, newMsg)
+                        } else {
+                            val match = matches[idx]
+                            matches.removeAt(idx)
+                            match.messageArr.add(0, newMsg)
+                            matches.add(0, match)
+                        }
+                        matches[0].isRead = false
+                        matches[0].isActive = true
+
+                    } catch (e: Exception) {
+                        Log.d("MsgPolling", e.toString())
+                    }
+                }
+            }
+
+            viewModelScope.launch {
+                while (true) {
+                    try {
+                        val token = TokenManager.getToken() ?: break
+                        val newMatch = MatchPollingApi.getNewMatch("Bearer $token")
+                        val idx = matches.indexOfFirst { (it.username == newMatch.username) }
+                        if (idx == -1) {
+                            matches.add(
+                                0,
+                                MatchState(
+                                    username = newMatch.username,
+                                    avatarIcon = newMatch.avatarIcon,
+                                    displayName = newMatch.displayName,
+                                    isActive = newMatch.isActive
+                                )
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Log.d("MatchPolling", e.toString())
+                    }
+                }
+            }
+
+            viewModelScope.launch {
+                try {
+                    TokenManager.getToken()?.let {
+                        for (match in matches) {
+                            match.isActive =
+                                GetActivityStatusApi.get("Bearer $it", match.username).isActive
+                            delay(10000)
+                        }
+
+                    }
+                } catch (e: Exception) {
+                    Log.d("Active Status", e.toString())
+                }
             }
         }
 

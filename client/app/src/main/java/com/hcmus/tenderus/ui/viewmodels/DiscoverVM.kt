@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
 import com.hcmus.tenderus.data.TenderUsRepository
+import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.ReportData
@@ -45,26 +46,31 @@ sealed interface SwipeUiState {
     data object Loading : SwipeUiState
 }
 
-class DiscoverVM(
-    private val discoverService: DiscoverService,
+open class DiscoverVM(
+    protected val discoverService: DiscoverService,
     private val tenderUsRepository: TenderUsRepository
 ) : ViewModel() {
     var discoverUiState by mutableStateOf<DiscoverUiState>(DiscoverUiState.Loading)
-        private set
+        protected set
 
     var swipeUiState by mutableStateOf<SwipeUiState>(SwipeUiState.Loading)
         private set
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    fun getProfiles(token: String, limit: String) {
+    open fun getProfiles(token: String, limit: String) {
         viewModelScope.launch {
             discoverUiState = DiscoverUiState.Loading
             try {
-                val profileResponse = discoverService.getProfiles("Bearer $token", limit)
+                val profileResponse = if (TokenManager.getRole() == "GUEST") discoverService.getProfiles() else discoverService.getProfiles("Bearer $token", limit)
                 discoverUiState = DiscoverUiState.Success(profileResponse.profiles)
             } catch (e: IOException) {
+                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             } catch (e: HttpException) {
+                Log.d("GetProfiles", e.message.toString())
+                discoverUiState = DiscoverUiState.Error
+            } catch (e: Exception) {
+                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             }
         }
@@ -75,11 +81,20 @@ class DiscoverVM(
         viewModelScope.launch {
             swipeUiState = SwipeUiState.Loading
             try {
-                val likeResponse = discoverService.likeProfile("Bearer $token", likeRequest)
-                swipeUiState = SwipeUiState.LikeSuccess(likeResponse.match)
+                if (TokenManager.getRole() == "GUEST") {
+                    swipeUiState = SwipeUiState.LikeSuccess(false)
+                } else {
+                    val likeResponse = discoverService.likeProfile("Bearer $token", likeRequest)
+                    swipeUiState = SwipeUiState.LikeSuccess(likeResponse.match)
+                }
             } catch (e: IOException) {
+                Log.d("LikeProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             } catch (e: HttpException) {
+                Log.d("LikeProfiles", e.message.toString())
+                swipeUiState = SwipeUiState.Error
+            } catch (e: Exception) {
+                Log.d("LikeProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             }
         }
@@ -90,11 +105,18 @@ class DiscoverVM(
         viewModelScope.launch {
             swipeUiState = SwipeUiState.Loading
             try {
-                discoverService.passProfile("Bearer $token", passRequest)
+                if (TokenManager.getRole() != "GUEST") {
+                    discoverService.passProfile("Bearer $token", passRequest)
+                }
                 swipeUiState = SwipeUiState.PassSuccess
             } catch (e: IOException) {
+                Log.d("PassProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             } catch (e: HttpException) {
+                Log.d("PassProfiles", e.message.toString())
+                swipeUiState = SwipeUiState.Error
+            } catch (e: Exception) {
+                Log.d("PassProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             }
         }

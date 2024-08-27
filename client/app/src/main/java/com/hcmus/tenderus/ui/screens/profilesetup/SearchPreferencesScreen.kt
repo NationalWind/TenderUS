@@ -1,5 +1,6 @@
 package com.hcmus.tenderus.ui.screens.profilesetup
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.navigation.NavHostController
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Preference
+import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
@@ -34,8 +36,19 @@ fun SearchPreferencesScreen(navController: NavHostController,
     var endAge by remember { mutableStateOf(28f) }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }
+    var profile by remember { mutableStateOf<Profile?>(null) }
 
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+    }
+
+    LaunchedEffect(profileUiState) {
+        if (profileUiState is ProfileUiState.Success) {
+            profile = (profileUiState as ProfileUiState.Success).profile
+        }
+    }
 
     when (profileUiState) {
         is ProfileUiState.Loading -> {
@@ -64,15 +77,18 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top,
         ) {
+
+            Spacer(modifier = Modifier.height(40.dp))
             Text(
                 text = "Filter Your Search Preferences",
-                fontSize = 40.sp,
+                fontSize = 35.sp,
                 lineHeight = 36.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFB71C1C),
+                modifier = Modifier.padding(top = 24.dp, bottom = 16.dp) // Adjust the top and bottom padding values as needed
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(8.dp))
 
 
 
@@ -88,7 +104,7 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 selectedGender = it
             }
 
-            Spacer(modifier = Modifier.weight(2f))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Location Selection
             Text(
@@ -102,14 +118,14 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 location = it
             }
 
-            Spacer(modifier = Modifier.weight(2f))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Distance Slider
             DistanceSlider(distance) {
                 distance = it
             }
 
-            Spacer(modifier = Modifier.weight(2f))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Custom Age Range Slider
             AgeRangeSlider(
@@ -119,18 +135,21 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 onEndAgeChanged = { endAge = it }
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Continue Button
             Button(
                 onClick = {
                     val preference = Preference(startAge.toInt(), endAge.toInt(), distance, selectedGender)
+                    profile?.let {
+                        val updatedProfile = it.copy(location = location)
+                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                    }
                     profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", preference)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Continue", color = Color.White, modifier = Modifier.weight(1f))
+                Text("Continue", color = Color.White)
             }
             // Clear Button
             Button(
@@ -144,7 +163,7 @@ fun SearchPreferencesScreen(navController: NavHostController,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Clear", color = Color.White, modifier = Modifier.weight(1f))
+                Text("Clear", color = Color.White)
             }
         }
     }
@@ -278,7 +297,7 @@ fun AgeRangeSlider(
             ),
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // End age slider
         Text(text = "Select End Age")
@@ -318,7 +337,7 @@ fun SelectYourGoalsScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Spacer(modifier = Modifier.weight(5f))
+            Spacer(modifier = Modifier.height(50.dp))
 
             Image(
                 painter = painterResource(id = R.drawable.tim),
@@ -334,7 +353,7 @@ fun SelectYourGoalsScreen(navController: NavHostController) {
                 color = Color(0xFFB71C1C),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            Spacer(modifier = Modifier.weight(5f))
+            Spacer(modifier = Modifier.height(50.dp))
             // Goals List
             goals.forEach { goal ->
                 val isSelected = selectedGoals.contains(goal)
@@ -362,7 +381,7 @@ fun SelectYourGoalsScreen(navController: NavHostController) {
                 }
             }
 
-            Spacer(modifier = Modifier.weight(3f))
+            Spacer(modifier = Modifier.height(30.dp))
 
             // Continue Button
             Button(

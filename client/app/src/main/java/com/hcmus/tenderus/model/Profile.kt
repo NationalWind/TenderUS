@@ -6,6 +6,7 @@ data class Profile(
     var avatarIcon: String? = null,
     val pictures: List<String>? = null,
     val description: String? = null,
+    val location: String? = null,
 
     val longitude: Float? = null,
     val latitude: Float? = null,

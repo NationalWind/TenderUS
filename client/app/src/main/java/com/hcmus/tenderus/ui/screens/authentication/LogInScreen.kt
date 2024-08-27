@@ -6,27 +6,40 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.hcmus.tenderus.R
+import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.UserLogin
 import com.hcmus.tenderus.network.LoginOKResponse
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.utils.firebase.GenAuth
 import com.hcmus.tenderus.utils.firebase.TenderUSPushNotificationService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.HttpException
@@ -37,7 +50,12 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var isSuccess by remember { mutableStateOf(false) }
+    var showLoading by remember { mutableStateOf(false) }
+    var progress by remember { mutableFloatStateOf(0.0f) }
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
     TenderUSTheme {
@@ -77,33 +95,42 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                 value = username,
                 onValueChange = { username = it },
                 label = { Text("Username") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { focusManager.clearFocus() },
+                )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
+            PasswordInput(
+                password = password,
+                onPasswordChange = { password = it }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
+                    showLoading = true
+                    isSuccess = false
+                    errorMessage = ""
                     scope.launch {
                         try {
-                            onLoggedIn(GenAuth.login(
+                            onLoggedIn(
+                                GenAuth.login(
                                     UserLogin(
                                         username,
                                         password,
                                         FCMRegToken = TenderUSPushNotificationService.token!!
                                     )
-                            ))
+                                )
+                            )
+                            isSuccess = true
+                            // Navigate to the next screen here
                         } catch (e: HttpException) {
                             val errorBody = e.response()?.errorBody()?.string()
                             val errorJson = errorBody?.let { JSONObject(it) }
@@ -112,6 +139,8 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                         } catch (e: Exception) {
                             errorMessage = "An unexpected error occurred"
                             Log.d("Login", e.toString())
+                        } finally {
+                            showLoading = false
                         }
                     }
                 },
@@ -123,10 +152,18 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
             ) {
                 Text(text = "LOGIN")
             }
+//        if (showLoading) {
+//            CircularProgressIndicator()
+//        }
+
 
 
             Button(
-                onClick = { /* Handle login as guest logic here */ },
+                onClick = {
+                    val res = LoginOKResponse("", "", false, "GUEST")
+                    TokenManager.saveToken(res)
+                    onLoggedIn(res)
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Gray,
                     contentColor = Color.White
@@ -180,4 +217,46 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
             )
         }
     }
+    if (showLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+            contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
+        ) {
+            CircularProgressIndicator(color = Color.White)  // White progress indicator
+        }
+    }
 }
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun PasswordInput(
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    focusManager: FocusManager = LocalFocusManager.current
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        value = password,
+        onValueChange = onPasswordChange,
+        label = { Text("Password") },
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { focusManager.clearFocus() }
+        ),
+        modifier = Modifier.fillMaxWidth(),
+        trailingIcon = {
+            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+            }
+        }
+    )
+}
+

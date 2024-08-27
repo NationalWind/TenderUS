@@ -32,15 +32,17 @@ const profileController = {
     // POST /api/profile/...
     upsertProf: async (req: Request, res: Response) => {
         try {
+            delete req.body.role;
             const data: Omit<Profile, "doc_id"> = req.body;
-            delete req.body.role
-            await db.profile.upsert({
-                where: {
-                    username: req.body.username
-                },
-                create: data,
-                update: data
-            });
+            const check = await db.profile.findUnique({ where: { username: data.username } });
+            if (!check) {
+                await db.profile.create({ data });
+            } else {
+                await db.profile.update({
+                    where: { username: data.username },
+                    data
+                });
+            }
             res.status(200).json({ message: "OK" });
         } catch (error) {
             console.log(error);
@@ -49,15 +51,17 @@ const profileController = {
     },
     upsertPref: async (req: Request, res: Response) => {
         try {
-            const data: Preference = req.body;
-            delete req.body.role
-            await db.preference.upsert({
-                where: {
-                    username: req.body.username
-                },
-                create: data,
-                update: data
-            });
+            delete req.body.role;
+            const data: Omit<Preference, "doc_id"> = req.body;
+            const check = await db.preference.findUnique({ where: { username: data.username } });
+            if (!check) {
+                await db.preference.create({ data });
+            } else {
+                await db.preference.update({
+                    where: { username: data.username },
+                    data
+                });
+            }
             res.status(200).json({ message: "OK" });
         } catch (error) {
             console.log(error);
