@@ -38,6 +38,7 @@ import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.ItsAMatchScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
+import com.hcmus.tenderus.ui.screens.explore.FriendScreen
 import com.hcmus.tenderus.ui.screens.explore.coffe.CoffeeDateScreen
 
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
@@ -174,6 +175,14 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             val backStackEntry =
                                 remember { mainNavController.getBackStackEntry(BottomNavItem.Explore.route) }
                             CoffeeDateScreen(mainNavController, viewModel(viewModelStoreOwner = backStackEntry, factory = ExploreVM.Factory))
+                        }
+                        composable("let's be friend") {
+                            LaunchedEffect(Unit) {
+                                showBar = false
+                            }
+                            val backStackEntry =
+                                remember { mainNavController.getBackStackEntry(BottomNavItem.Explore.route) }
+                            FriendScreen(mainNavController, viewModel(viewModelStoreOwner = backStackEntry, factory = ExploreVM.Factory))
                         }
                         composable(BottomNavItem.Chat.route) {
                             LaunchedEffect(Unit) {
