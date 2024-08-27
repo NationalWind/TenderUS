@@ -34,6 +34,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,6 +74,8 @@ import com.hcmus.tenderus.model.Profile
 import com.hcmus.tenderus.network.LikeRequest
 import com.hcmus.tenderus.network.PassRequest
 import com.hcmus.tenderus.ui.screens.BottomNavItem
+import com.hcmus.tenderus.ui.screens.discover.composable.ReportButton
+import com.hcmus.tenderus.ui.theme.PinkPrimary
 import com.hcmus.tenderus.ui.viewmodels.DiscoverUiState
 import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
 import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
@@ -100,9 +104,12 @@ fun calculateAgeFromDob(dob: String): Int {
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun DiscoverScreen(navController: NavController,customTitle: String?,
-                   profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory),
-                   viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)) {
+fun DiscoverScreen(
+    navController: NavController,
+    customTitle: String?,
+    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory),
+    viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)
+) {
     var location by remember { mutableStateOf("Ho Chi Minh city, VietNam") }
     var expanded by remember { mutableStateOf(false) }
     var selectedGender by remember { mutableStateOf("Female") }
@@ -110,6 +117,13 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
     var startAge by remember { mutableStateOf(20f) }
     var endAge by remember { mutableStateOf(28f) }
     var showNotifications by remember { mutableStateOf(false) }
+
+    // Temporary states to hold the filter values until the user confirms
+    var tempSelectedGender by remember { mutableStateOf(selectedGender) }
+    var tempLocation by remember { mutableStateOf(location) }
+    var tempDistance by remember { mutableStateOf(distance) }
+    var tempStartAge by remember { mutableStateOf(startAge) }
+    var tempEndAge by remember { mutableStateOf(endAge) }
 
     // Observe the state from the ViewModel
     val discoverUiState by remember { derivedStateOf { viewModel.discoverUiState } }
@@ -130,6 +144,7 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
         if (profileUiState is ProfileUiState.Success) {
             profile = (profileUiState as ProfileUiState.Success).profile
             location = profile!!.location!!
+            tempLocation = location // Initialize tempLocation
         }
         if (profileUiState is ProfileUiState.PreferencesSuccess) {
             preference = (profileUiState as ProfileUiState.PreferencesSuccess).preferences
@@ -137,6 +152,12 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
             distance = preference!!.maxDist
             startAge = preference!!.ageMin.toFloat()
             endAge = preference!!.ageMax.toFloat()
+
+            // Initialize temporary states
+            tempSelectedGender = selectedGender
+            tempDistance = distance
+            tempStartAge = startAge
+            tempEndAge = endAge
         }
     }
 
@@ -163,7 +184,7 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                     modifier = Modifier.padding(8.dp)
                 )
                 Spacer(modifier = Modifier.width(105.dp))
-                if (customTitle == "Discover" && TokenManager.getRole()== "USER") {
+                if (customTitle == "Discover" && TokenManager.getRole() == "USER") {
                     Box(
                         modifier = Modifier
                             .size(48.dp)
@@ -216,13 +237,8 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                         fontWeight = FontWeight.Bold,
                     )
 
-                    GenderSelection(selectedGender) {
-                        selectedGender = it
-                        preference?.let { preference1 ->
-                            val updatedPreference = preference1.copy(showMe = selectedGender)
-                            profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
-                            viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
-                        }
+                    GenderSelection(tempSelectedGender) {
+                        tempSelectedGender = it
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -235,50 +251,68 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
                         fontWeight = FontWeight.Bold
                     )
 
-                    LocationSelection(location) {
-                        location = it
-                        profile?.let { profile1 ->
-                            val updatedProfile = profile1.copy(location = location)
-                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                            viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
-                        }
+                    LocationSelection(tempLocation) {
+                        tempLocation = it
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Distance Slider
-                    DistanceSlider(distance) {
-                        distance = it
-                        preference?.let { preference1 ->
-                            val updatedPreference = preference1.copy(maxDist = distance)
-                            profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
-                            viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
-                        }
+                    DistanceSlider(tempDistance) {
+                        tempDistance = it
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Custom Age Range Slider
                     AgeRangeSlider(
-                        startAge = startAge,
-                        endAge = endAge,
-                        onStartAgeChanged = {
-                            startAge = it
-                            preference?.let { preference1 ->
-                                val updatedPreference = preference1.copy(ageMin = startAge.toInt())
-                                profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
-                                viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
-                            }
-                        },
-                        onEndAgeChanged = {
-                            endAge = it
-                            preference?.let { preference1 ->
-                                val updatedPreference = preference1.copy(ageMax = endAge.toInt())
-                                profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
-                                viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
-                            }
-                        }
+                        startAge = tempStartAge,
+                        endAge = tempEndAge,
+                        onStartAgeChanged = { tempStartAge = it },
+                        onEndAgeChanged = { tempEndAge = it }
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // OK Button to apply changes
+                    Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFBD0D36),
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier.align(Alignment.End),
+                        onClick = {
+                        // Update the actual states only when OK is clicked
+                        selectedGender = tempSelectedGender
+                        location = tempLocation
+                        distance = tempDistance
+                        startAge = tempStartAge
+                        endAge = tempEndAge
+
+                        // Update Profile and Preferences
+                        profile?.let { profile1 ->
+                            val updatedProfile = profile1.copy(location = location)
+                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                        }
+
+                        preference?.let { preference1 ->
+                            val updatedPreference = preference1.copy(
+                                showMe = selectedGender,
+                                maxDist = distance,
+                                ageMin = startAge.toInt(),
+                                ageMax = endAge.toInt()
+                            )
+                            profileVM.upsertUserPreferences(TokenManager.getToken() ?: "", updatedPreference)
+                        }
+
+                        // Refresh profiles
+                        viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+
+                        // Close the filter menu
+                        expanded = false
+                    }) {
+                        Text(text = "OK")
+                    }
                 }
             }
 
@@ -286,22 +320,23 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
 
             when (discoverUiState) {
                 is DiscoverUiState.Loading -> {
-                    // Show a loading spinner or progress indicator
                     CircularProgressIndicator()
                 }
+
                 is DiscoverUiState.Success -> {
                     profiles = (discoverUiState as DiscoverUiState.Success).profiles
                     Log.d("{f", profile.toString())
                     profile?.let { SwipeableProfiles(navController, it, profiles!!, viewModel) }
                 }
+
                 is DiscoverUiState.Error -> {
-                    // Show an error message
                     Text("Failed to load profiles", color = Color.Red)
                 }
             }
         }
     }
 }
+
 
 
 //@Composable
@@ -366,10 +401,12 @@ fun DiscoverScreen(navController: NavController,customTitle: String?,
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun SwipeableProfiles(navController: NavController,
-                      currentProfile: Profile,
-                      profiles: List<Profile>,
-                      viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)) {
+fun SwipeableProfiles(
+    navController: NavController,
+    currentProfile: Profile,
+    profiles: List<Profile>,
+    viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)
+) {
     var currentProfileIndex by remember { mutableStateOf(0) }
     var showProfileDetails by remember { mutableStateOf(false) }
     val offsetX = remember { mutableStateOf(0f) }
@@ -501,6 +538,12 @@ fun SwipeableProfiles(navController: NavController,
                             modifier = Modifier.fillMaxSize()
                         )
                     }
+                    ReportButton(
+                        reported = profile.username,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                    )
                 }
 
                 // Overlay profile information
@@ -552,7 +595,7 @@ fun SwipeableProfiles(navController: NavController,
                     }
                 }
 
-                AnimatedVisibility (
+                AnimatedVisibility(
                     visible = showProfileDetails,
                     enter = slideInVertically(initialOffsetY = { it }),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
@@ -654,6 +697,7 @@ fun SwipeableProfiles(navController: NavController,
                 // Show a loading spinner or progress indicator
 //                CircularProgressIndicator()
             }
+
             is SwipeUiState.LikeSuccess -> {
                 if ((swipeUiState as SwipeUiState.LikeSuccess).match) {
                     (swipeUiState as SwipeUiState.LikeSuccess).match = false
@@ -661,9 +705,11 @@ fun SwipeableProfiles(navController: NavController,
 
                 }
             }
+
             is SwipeUiState.PassSuccess -> {
                 Log.d("Pass", "Passed")
             }
+
             is SwipeUiState.Error -> {
                 // Show an error message
                 Text("Failed to swipe", color = Color.Red)
@@ -807,7 +853,8 @@ fun ItsAMatchScreen(navController: NavController) {
                         }
                         launchSingleTop = true
                         restoreState = true
-                    } },
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White
                 )
@@ -832,7 +879,6 @@ fun ItsAMatchScreen(navController: NavController) {
         }
     }
 }
-
 
 
 @Composable
@@ -981,7 +1027,6 @@ fun AgeRangeSlider(
         )
     }
 }
-
 
 
 @Composable

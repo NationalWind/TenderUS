@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
+import com.hcmus.tenderus.data.TenderUsRepository
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.network.ApiClient.DiscoverService
 import com.hcmus.tenderus.network.ApiClient.ExploreService
@@ -23,9 +24,12 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 
-class ExploreVM(private val exploreService: ExploreService, discoverService: DiscoverService) : DiscoverVM(discoverService) {
+class ExploreVM(
+    private val exploreService: ExploreService,
+    discoverService: DiscoverService,
+    tenderUsRepository: TenderUsRepository
+) : DiscoverVM(discoverService, tenderUsRepository) {
     var group by mutableStateOf<String?>(null)
-
 
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
@@ -45,7 +49,7 @@ class ExploreVM(private val exploreService: ExploreService, discoverService: Dis
             try {
                 val joinStatus =
                     exploreService.getJoinStatus("Bearer " + TokenManager.getToken()!!, group)
-                if (joinStatus.joined == true) {
+                if (joinStatus.joined) {
                     this@ExploreVM.group = group
                 }
                 if (!joinStatus.joined) {
@@ -86,7 +90,8 @@ class ExploreVM(private val exploreService: ExploreService, discoverService: Dis
                 val application = (this[APPLICATION_KEY] as TenderUsApplication)
                 val discoverService = DiscoverService
                 val exploreService = ExploreService
-                ExploreVM(exploreService, discoverService)
+                val tenderUsRepository = application.container.tenderUsRepository
+                ExploreVM(exploreService, discoverService, tenderUsRepository)
             }
         }
     }

@@ -1,7 +1,5 @@
 package com.hcmus.tenderus.model
 
-import java.time.LocalDateTime
-
 enum class Status { PENDING, REVIEWED }
 
 data class Report(
@@ -12,5 +10,11 @@ data class Report(
     val reportedAvatar: String = "",
     val date: String,
     val status: Status = Status.PENDING,
+    val message: String
+)
+
+data class ReportData(
+    val reporter: String,
+    val reported: String,
     val message: String
 )

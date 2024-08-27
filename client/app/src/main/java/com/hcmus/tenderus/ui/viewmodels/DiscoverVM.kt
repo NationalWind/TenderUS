@@ -14,8 +14,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.hcmus.tenderus.TenderUsApplication
+import com.hcmus.tenderus.data.TenderUsRepository
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Profile
+import com.hcmus.tenderus.model.Report
+import com.hcmus.tenderus.model.ReportData
 import com.hcmus.tenderus.network.ApiClient
 import com.hcmus.tenderus.network.ApiClient.DiscoverService
 import com.hcmus.tenderus.network.DiscoverService
@@ -43,7 +46,10 @@ sealed interface SwipeUiState {
     data object Loading : SwipeUiState
 }
 
-open class DiscoverVM(protected val discoverService: DiscoverService) : ViewModel() {
+open class DiscoverVM(
+    protected val discoverService: DiscoverService,
+    private val tenderUsRepository: TenderUsRepository
+) : ViewModel() {
     var discoverUiState by mutableStateOf<DiscoverUiState>(DiscoverUiState.Loading)
         protected set
 
@@ -116,12 +122,26 @@ open class DiscoverVM(protected val discoverService: DiscoverService) : ViewMode
         }
     }
 
+    fun postReport(report: ReportData) {
+        viewModelScope.launch {
+            try {
+                tenderUsRepository.postReport(report)
+            } catch (e: IOException) {
+                Log.d("DiscoverPostReport", e.message.toString())
+            } catch (e: retrofit2.HttpException) {
+                Log.d("DiscoverPostReport", e.message.toString())
+            }
+        }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as TenderUsApplication)
                 val discoverService = DiscoverService
-                DiscoverVM(discoverService)
+                val tenderUsRepository = application.container.tenderUsRepository
+                // Cho nay hoi do, tai co 2 cai service lan =))
+                DiscoverVM(discoverService, tenderUsRepository)
             }
         }
     }

@@ -6,6 +6,7 @@ import com.hcmus.tenderus.model.Account
 import com.hcmus.tenderus.model.AccountAction
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.ReportAction
+import com.hcmus.tenderus.model.ReportData
 import com.hcmus.tenderus.network.LoginOKResponse
 import com.hcmus.tenderus.network.TenderUsApiService
 
@@ -57,6 +58,7 @@ object TokenManager {
 interface TenderUsRepository {
     suspend fun getReportList(): List<Report>
     suspend fun getReportDetail(id: String): Report
+    suspend fun postReport(report: ReportData)
     suspend fun postReportAction(id: String, reportAction: ReportAction)
     suspend fun getAccountList(): List<Account>
     suspend fun getAccountDetail(id: String): Account
@@ -70,6 +72,7 @@ class NetworkTenderUsRepository(
     override suspend fun getReportDetail(id: String): Report =
         tenderUsApiService.getReportDetail(id)
 
+    override suspend fun postReport(report: ReportData) = tenderUsApiService.postReport(report)
     override suspend fun postReportAction(id: String, reportAction: ReportAction) =
         tenderUsApiService.postReportAction(id, reportAction)
 

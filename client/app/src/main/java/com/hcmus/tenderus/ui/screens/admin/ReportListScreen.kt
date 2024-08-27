@@ -167,7 +167,7 @@ fun ReportListPreview() {
             reported = "anotherLongLongLongLongUsername",
             reportedAvatar = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTS3A70DEIYDx1nSsojnhwYSidMrb7YBAtsfeUyLxlQTBcjXapyMLhhv5xE06BHdVH2Tpk",
             date = "2024-12-31T00:00:00.000Z",
-            status = Status.PENDING,
+            status = Status.REVIEWED,
             message = "aLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongMessage"
         )
     )

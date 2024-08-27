@@ -2,7 +2,8 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import db from "../lib/db";
 import { Request, Response } from "express";
 import QuickChart from "quickchart-js";
-import { Event } from "@prisma/client";
+import { Account, Event } from "@prisma/client";
+import jwt from "jsonwebtoken";
 
 const adminController = {
   // GET /api/admin/report
@@ -33,6 +34,34 @@ const adminController = {
           reportedAvatar: report.reported.Profile?.avatarIcon,
         }))
       );
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+  // This should be in a new controller but im too lazy
+  // POST /api/admin/report
+  postReport: async (req: Request, res: Response) => {
+    try {
+      const { reporter, reported, message } = req.body as {
+        [key: string]: string;
+      };
+      const decoded = jwt.decode(reporter) as Account;
+      const reportedAccount = await db.account.findUnique({
+        where: { username: reported },
+      });
+      if (!reportedAccount) {
+        res.status(404).json({ message: "Reported account id not found" });
+        return;
+      }
+      await db.report.create({
+        data: {
+          reporterId: decoded.id,
+          reportedId: reportedAccount.id,
+          message,
+        },
+      });
+      res.status(200).json({ message: "Success" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: error.message });
@@ -222,7 +251,7 @@ const adminController = {
         }
       }
 
-      const title = `${duration} ${event.toLowerCase().replace('_', ' ')}`
+      const title = `${duration} ${event.toLowerCase().replace("_", " ")}`;
       const labels = [];
       const data = [];
       for (let date of dates) {
