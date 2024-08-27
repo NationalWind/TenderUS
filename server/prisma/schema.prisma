@@ -134,7 +134,7 @@ model Report {
   reporter   Account  @relation("reporter", fields: [reporterId], references: [id])
   reportedId String   @db.ObjectId
   reported   Account  @relation("reported", fields: [reportedId], references: [id])
-  date       DateTime
+  date       DateTime @default(now())
   status     Status   @default(PENDING)
   message    String
 }

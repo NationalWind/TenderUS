@@ -5,6 +5,7 @@ const adminRouter = express.Router();
 
 adminRouter.get("/report", adminController.getReportList);
 adminRouter.get("/report/:id", adminController.getReportDetail);
+adminRouter.post("/report", adminController.postReport);
 adminRouter.post("/report/:id", adminController.postReportAction);
 adminRouter.get("/account", adminController.getAccountList);
 adminRouter.get("/account/:id", adminController.getAccountDetail);
