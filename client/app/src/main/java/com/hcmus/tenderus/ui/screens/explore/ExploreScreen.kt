@@ -161,7 +161,7 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
                     exploreVM.getJoinStatus("Free tonight", scope) {
                         exploreVM.join("Free tonight")
                         navController.popBackStack()
-                     }
+                    }
                 }
             )
         }
@@ -183,9 +183,11 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
             CategoryItem(
                 imageRes = R.drawable.let_friend,
                 text = "Let's be\nfriend",
-                onClick = { exploreVM.getJoinStatus("Let's be friend", scope) {
-                    navController.navigate("let's be friend")
-                } }
+                onClick = {
+                    exploreVM.getJoinStatus("Let's be friend", scope) {
+                        navController.navigate("let's be friend")
+                    }
+                }
             )
         }
     }
@@ -281,13 +283,18 @@ fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(
                         exploreVM.join("Like to go drinking")
                         navController.popBackStack()
                     }
-                }  // Thêm onClick rỗng nếu không cần xử lý sự kiện
+                }
             )
             Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.movie,
                 text = "Movie \nLovers",
-                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
+                onClick = {
+                    exploreVM.getJoinStatus("Movie Lovers", scope) {
+                        exploreVM.join("Movie Lovers")
+                        navController.popBackStack()
+                    }
+                }
             )
         }
         Spacer(modifier = Modifier.height(16.dp)) // Increase space between rows
@@ -298,13 +305,23 @@ fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(
             CategoryItem(
                 imageRes = R.drawable.creative,
                 text = "Creative \nLovers",
-                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
+                onClick = {
+                    exploreVM.getJoinStatus("Creative Lovers", scope) {
+                        exploreVM.join("Creative Lovers")
+                        navController.popBackStack()
+                    }
+                }
             )
             Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.sport,
                 text = "Love \nSports",
-                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
+                onClick = {
+                    exploreVM.getJoinStatus("Love Sports", scope) {
+                        exploreVM.join("Love Sports")
+                        navController.popBackStack()
+                    }
+                }
             )
         }
     }
