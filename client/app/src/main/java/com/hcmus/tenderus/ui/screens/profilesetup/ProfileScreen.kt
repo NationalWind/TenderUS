@@ -1024,59 +1024,57 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                                 }
                                 try {
                                     val imageUrls = mutableListOf<String>()
+
+                                    // Filter out new images (those not starting with "http")
                                     val newImageUris = imageUris.filter { uri ->
-                                        // Explicitly track newly selected images
-                                        uri?.let { uri.scheme == "content" && !uri.toString().startsWith("http") } == true
+                                        uri?.let { it.scheme == "content" && !uri.toString().startsWith("http") } == true
                                     }
-                                    Log.d("Add Photos", newImageUris.size.toString())
+
+                                    // Filter out existing images (those starting with "http")
                                     val existingImageUrls = imageUris.filter { uri ->
-                                        uri?.let { it.scheme == "content" && uri.toString().startsWith("http") } == false
+                                        uri?.let { uri.toString().startsWith("http") } == true
                                     }.map { it.toString() }
 
-                                    val totalImages = newImageUris.size + existingImageUrls.size
+                                    Log.d("Add Photos", "New images: ${newImageUris.size}, Existing images: ${existingImageUrls.size}")
+
                                     var uploadCount = 0
 
                                     profile?.let { userProfile ->
-                                        newImageUris.forEach { uri ->
-                                            uri?.let { imageUri ->
-                                                StorageUtil.uploadToStorage(
-                                                    auth = FirebaseAuth.getInstance(),
-                                                    uri = imageUri,
-                                                    context = context,
-                                                    type = "Image"
-                                                ) { downloadUrl ->
-                                                    imageUrls.add(downloadUrl)
-                                                    uploadCount++
+                                        if (newImageUris.isNotEmpty()) {
+                                            newImageUris.forEach { uri ->
+                                                uri?.let { imageUri ->
+                                                    StorageUtil.uploadToStorage(
+                                                        auth = FirebaseAuth.getInstance(),
+                                                        uri = imageUri,
+                                                        context = context,
+                                                        type = "Image"
+                                                    ) { downloadUrl ->
+                                                        imageUrls.add(downloadUrl)
+                                                        uploadCount++
 
-                                                    progress = uploadCount.toFloat() / newImageUris.size.toFloat()
+                                                        progress = uploadCount.toFloat() / newImageUris.size.toFloat()
 
-                                                    if (uploadCount == newImageUris.size) {
-                                                        imageUrls.addAll(existingImageUrls)
-                                                        val updatedProfile =
-                                                            userProfile.copy(pictures = imageUrls)
-                                                        profileVM.upsertUserProfile(
-                                                            TokenManager.getToken() ?: "",
-                                                            updatedProfile
-                                                        )
-                                                        Log.d(
-                                                            "Add Photos",
-                                                            "Profile updated with new images"
-                                                        )
+                                                        // When all new images are uploaded, update the profile
+                                                        if (uploadCount == newImageUris.size) {
+                                                            imageUrls.addAll(existingImageUrls)  // Add existing images last
+                                                            val updatedProfile = userProfile.copy(pictures = imageUrls)
+                                                            profileVM.upsertUserProfile(
+                                                                TokenManager.getToken() ?: "",
+                                                                updatedProfile
+                                                            )
+                                                            Log.d("Add Photos", "Profile updated with new and existing images")
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-
-                                        if (newImageUris.isEmpty()) {
+                                        } else {
+                                            // No new images, directly update the profile with existing images
                                             imageUrls.addAll(existingImageUrls)
                                             val updatedProfile = userProfile.copy(pictures = imageUrls)
                                             profileVM.upsertUserProfile(
                                                 TokenManager.getToken() ?: "", updatedProfile
                                             )
-                                            Log.d(
-                                                "Add Photos",
-                                                "Profile updated with existing images only"
-                                            )
+                                            Log.d("Add Photos", "Profile updated with existing images only")
                                         }
                                     } ?: run {
                                         Log.e("Add Photos", "Profile is null, cannot update.")
