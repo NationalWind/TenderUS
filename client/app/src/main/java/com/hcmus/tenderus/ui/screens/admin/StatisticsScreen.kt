@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,17 +47,20 @@ fun StatisticsScreen(extract: (context: Context) -> Unit, modifier: Modifier = M
         AsyncImage(
             model = "${imageBaseUrl}api/admin/statistics?duration=daily&event=ACCOUNT_CREATED",
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            error = painterResource(id = R.drawable.ic_error),
         )
         AsyncImage(
             model = "${imageBaseUrl}api/admin/statistics?duration=monthly&event=ACCOUNT_CREATED",
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            error = painterResource(id = R.drawable.ic_error)
         )
         AsyncImage(
             model = "${imageBaseUrl}api/admin/statistics?duration=yearly&event=ACCOUNT_CREATED",
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            error = painterResource(id = R.drawable.ic_error)
         )
         Text(
             text = "Account online statistics",
@@ -69,17 +73,20 @@ fun StatisticsScreen(extract: (context: Context) -> Unit, modifier: Modifier = M
         AsyncImage(
             model = "${imageBaseUrl}api/admin/statistics?duration=daily&event=ACCOUNT_ONLINE",
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            error = painterResource(id = R.drawable.ic_error)
         )
         AsyncImage(
             model = "${imageBaseUrl}api/admin/statistics?duration=monthly&event=ACCOUNT_ONLINE",
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            error = painterResource(id = R.drawable.ic_error)
         )
         AsyncImage(
             model = "${imageBaseUrl}api/admin/statistics?duration=yearly&event=ACCOUNT_ONLINE",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth(),
+            error = painterResource(id = R.drawable.ic_error)
         )
         Row(
             horizontalArrangement = Arrangement.Absolute.Center,

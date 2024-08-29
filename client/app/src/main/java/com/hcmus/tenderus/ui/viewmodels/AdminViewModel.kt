@@ -171,10 +171,12 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
                             outputStream?.write(pdf.bytes())
                         }
                     }
-                } catch (e: IOException) {
-                    Log.d("AdminExportStatistic", e.message.toString())
-                } catch (e: HttpException) {
-                    Log.d("AdminExportStatistic", e.message.toString())
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        context,
+                        "Fail to extract data.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             } else {
                 Toast.makeText(
