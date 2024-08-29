@@ -300,7 +300,7 @@ fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(
             horizontalArrangement = Arrangement.Center // Center the images horizontally
         ) {
             CategoryItem(
-                imageRes = R.drawable.creative_icon,
+                imageRes = R.drawable.creative1_icon,
                 text = "Creative \nLovers",
                 onClick = {
                     exploreVM.getJoinStatus("Creative Lovers", scope) {
