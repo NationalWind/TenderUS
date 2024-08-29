@@ -113,18 +113,6 @@ const authController = {
                 return;
             }
 
-            const bannedAccount = await db.account.findFirst({
-                where: {
-                    username: data.username,
-                    penalty: {
-                        some: {
-                            type: 'BAN'
-                        }
-                    }
-                }
-            });
-
-
             if (await db.account.findFirst({
                 where: {
                     username: data.username,
