@@ -149,8 +149,7 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
                 text = "Looking for\nLove",
                 onClick = {
                     exploreVM.getJoinStatus("Looking for Love", scope) {
-                        exploreVM.join("Looking for Love")
-                        navController.popBackStack()
+                        navController.navigate("cate/Looking for Love")
                     }
                 }
             )
@@ -159,9 +158,8 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
                 imageRes = R.drawable.free_tonight,
                 text = "Free \ntonight?",
                 onClick = {
-                    exploreVM.getJoinStatus("Free tonight", scope) {
-                        exploreVM.join("Free tonight")
-                        navController.popBackStack()
+                    exploreVM.getJoinStatus("Free tonight?", scope) {
+                        navController.navigate("cate/Free tonight")
                     }
                 }
             )
@@ -176,7 +174,7 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
                 text = "Coffee\nDate",
                 onClick = {
                     exploreVM.getJoinStatus("Coffee Date", scope) {
-                        navController.navigate("coffee_date")
+                        navController.navigate("cate/Coffee Date")
                     }
                 }
             )
@@ -186,7 +184,7 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
                 text = "Let's be\nfriend",
                 onClick = {
                     exploreVM.getJoinStatus("Let's be friend", scope) {
-                        navController.navigate("let's be friend")
+                        navController.navigate("cate/Let's be friend")
                     }
                 }
             )
@@ -280,9 +278,8 @@ fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(
                 imageRes = R.drawable.drink,
                 text = "Like to go \ndrinking",
                 onClick = {
-                            exploreVM.getJoinStatus("Like to go drinking", scope) {
-                        exploreVM.join("Like to go drinking")
-                        navController.popBackStack()
+                    exploreVM.getJoinStatus("Like to go drinking", scope) {
+                        navController.navigate("cate/Like to go drinking")
                     }
                 }
             )
@@ -292,8 +289,7 @@ fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(
                 text = "Movie \nLovers",
                 onClick = {
                     exploreVM.getJoinStatus("Movie Lovers", scope) {
-                        exploreVM.join("Movie Lovers")
-                        navController.popBackStack()
+                        navController.navigate("cate/Movie Lovers")
                     }
                 }
             )
@@ -308,8 +304,7 @@ fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(
                 text = "Creative \nLovers",
                 onClick = {
                     exploreVM.getJoinStatus("Creative Lovers", scope) {
-                        exploreVM.join("Creative Lovers")
-                        navController.popBackStack()
+                        navController.navigate("cate/Creative Lovers")
                     }
                 }
             )
@@ -319,8 +314,7 @@ fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(
                 text = "Love \nSports",
                 onClick = {
                     exploreVM.getJoinStatus("Love Sports", scope) {
-                        exploreVM.join("Love Sports")
-                        navController.popBackStack()
+                        navController.navigate("cate/Love Sports")
                     }
                 }
             )

@@ -115,17 +115,18 @@ class MatchListVM: ViewModel() {
             }
 
             viewModelScope.launch {
-                try {
-                    TokenManager.getToken()?.let {
+                while (true) {
+                    try {
+                        val token = TokenManager.getToken()?:break
                         for (match in matches) {
                             match.isActive =
-                                GetActivityStatusApi.get("Bearer $it", match.username).isActive
+                                GetActivityStatusApi.get("Bearer $token", match.username).isActive
                             delay(10000)
                         }
 
+                    } catch (e: Exception) {
+                        Log.d("Active Status", e.toString())
                     }
-                } catch (e: Exception) {
-                    Log.d("Active Status", e.toString())
                 }
             }
         }

@@ -113,8 +113,23 @@ const authController = {
                 return;
             }
 
+            if (await db.account.findFirst({
+                where: {
+                    username: data.username,
+                    penalty: {
+                        some: {
+                            type: 'BAN'
+                        }
+                    }
+                }
+            })) {
+                res.status(403).json({ message: "You're banned due to community standard violation" });
+                return;
+            }
+
             const foundAccount = await db.account.findUnique({ where: { username: data.username } });
             if (foundAccount) {
+
                 await db.account.update({ where: { username: data.username }, data: { FCMRegToken: data.FCMRegToken } });
                 const isMatched = await bcrypt.compare(data.password, foundAccount.password);
                 if (isMatched) {
