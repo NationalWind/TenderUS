@@ -1,5 +1,7 @@
 package com.hcmus.tenderus.ui.screens.discover
 
+import android.annotation.SuppressLint
+import android.location.Location
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresExtension
@@ -9,6 +11,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -70,6 +73,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import coil.compose.rememberAsyncImagePainter
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.model.Preference
 import com.hcmus.tenderus.model.Profile
@@ -117,7 +121,8 @@ fun DiscoverScreen(
     navController: NavController,
     customTitle: String?,
     profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory),
-    viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)
+    viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory),
+    fusedLocationProviderClient: FusedLocationProviderClient
 ) {
     var location by remember { mutableStateOf("Ho Chi Minh city, VietNam") }
     var expanded by remember { mutableStateOf(false) }
@@ -335,7 +340,8 @@ fun DiscoverScreen(
                 is DiscoverUiState.Success -> {
                     profiles = (discoverUiState as DiscoverUiState.Success).profiles
                     Log.d("{f", profile.toString())
-                    profile?.let { SwipeableProfiles(navController, it, profiles!!, viewModel) }
+                    profile?.let { SwipeableProfiles(navController, it, profiles!!, viewModel,
+                        fusedLocationProviderClient = fusedLocationProviderClient) }
                 }
 
                 is DiscoverUiState.Error -> {
@@ -414,7 +420,8 @@ fun SwipeableProfiles(
     navController: NavController,
     currentProfile: Profile,
     profiles: List<Profile>,
-    viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)
+    viewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory),
+    fusedLocationProviderClient: FusedLocationProviderClient
 ) {
     var currentProfileIndex by remember { mutableStateOf(0) }
     var showProfileDetails by remember { mutableStateOf(false) }
@@ -609,7 +616,7 @@ fun SwipeableProfiles(
                     enter = slideInVertically(initialOffsetY = { it }),
                     exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
                 ) {
-                    FullProfile(profile) {
+                    FullProfile(profile, fusedLocationProviderClient) {
                         showProfileDetails = false
                     }
                 }
@@ -736,10 +743,22 @@ fun SwipeableProfiles(
     }
 }
 
+@SuppressLint("MissingPermission")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun FullProfile(profile: Profile, onDismiss: () -> Unit) {
+fun FullProfile(profile: Profile,
+                fusedLocationProviderClient: FusedLocationProviderClient,
+                onDismiss: () -> Unit) {
     // Full Profile Information Section
+    var distance by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(fusedLocationProviderClient) {
+        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location: Location? ->
+            val latitude = location?.latitude ?: 0.0
+            val longitude = location?.longitude ?: 0.0
+            distance = calculateDistance(latitude, longitude, profile.latitude!!.toDouble(), profile.longitude!!.toDouble()).roundToInt()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -783,16 +802,33 @@ fun FullProfile(profile: Profile, onDismiss: () -> Unit) {
 
             Text(
                 text = "${profile.displayName!!}, ${calculateAgeFromDob(profile.birthDate!!)}",
-                style = MaterialTheme.typography.headlineLarge
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.ExtraBold
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Location", style = MaterialTheme.typography.headlineSmall)
+            Text("Location", style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold)
             Text(
                 text = profile.location!!,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyMedium
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Distance in a rounded corner box
+            Box(
+                modifier = Modifier
+                    .background(Color(0xFFFDECEE), shape = RoundedCornerShape(16.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "$distance km",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFFBD0D36)
+                )
+            }
 
             Text(
                 profile.description!!,
@@ -802,24 +838,28 @@ fun FullProfile(profile: Profile, onDismiss: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Display profile interests
-            Text("Interests", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                "Interests",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 profile.interests?.forEach { interest ->
                     Box(
                         modifier = Modifier
-                            .background(Color(0xFFE0E0E0), shape = RoundedCornerShape(16.dp))
+                            .background(Color(0xFFFDECEE), shape = RoundedCornerShape(16.dp))
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Text(
                             text = interest ?: "Unknown",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Black
+                            color = Color(0xFFBD0D36)
                         )
                     }
                 }
@@ -844,29 +884,6 @@ fun FullProfile(profile: Profile, onDismiss: () -> Unit) {
                 )
             }
         }
-    }
-}
-
-
-@Composable
-fun MatchOverlay(onAnimationEnd: () -> Unit) {
-    LaunchedEffect(Unit) {
-        delay(1000) // Adjust delay for fade-out duration
-        onAnimationEnd()
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Gray.copy(alpha = 0.75f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "MATCH! MATCH! MATCH!",
-            fontSize = 40.sp, // Adjust font size as needed
-            color = Color.White,
-            fontWeight = FontWeight.Bold
-        )
     }
 }
 

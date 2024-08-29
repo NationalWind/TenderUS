@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.data.TokenManager
 import com.hcmus.tenderus.network.ApiClient
@@ -53,7 +54,7 @@ import kotlin.math.exp
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun ExploreScreen(navController: NavController, exploreVM: ExploreVM = viewModel(factory = ExploreVM.Factory)) {
+fun ExploreScreen(navController: NavController, exploreVM: ExploreVM = viewModel(factory = ExploreVM.Factory), fusedLocationProviderClient: FusedLocationProviderClient) {
     if (TokenManager.getRole() != "USER") {
         Box(
             modifier = Modifier.fillMaxSize().background(Color.White),
@@ -83,7 +84,7 @@ fun ExploreScreen(navController: NavController, exploreVM: ExploreVM = viewModel
 
         if (exploreVM.group != null) {
 
-            DiscoverScreen(navController, exploreVM.group, viewModel = exploreVM)
+            DiscoverScreen(navController, exploreVM.group, viewModel = exploreVM, fusedLocationProviderClient = fusedLocationProviderClient)
 
             Box(
                 modifier = Modifier.fillMaxSize().padding(vertical = 3.dp)

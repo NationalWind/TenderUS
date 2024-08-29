@@ -208,11 +208,12 @@ class MainActivity : ComponentActivity() {
                     composable("exlogin") { ExampleLogin(navController) }
                     composable("admin") {AdminScreen()}
 
-                    composable("explore") { ExploreScreen(navController) }
+                    composable("explore") { ExploreScreen(navController, fusedLocationProviderClient = fusedLocationClient) }
 //                    composable("coffee_date") { CoffeeDateScreen(navController) }
                     composable("discover?customTitle={customTitle}") { backStackEntry ->
                         val customTitle = backStackEntry.arguments?.getString("customTitle")
-                        DiscoverScreen(navController = navController, customTitle = customTitle)
+                        DiscoverScreen(navController = navController, customTitle = customTitle,
+                            fusedLocationProviderClient = fusedLocationClient)
                     }
 //                    composable("onboarding2") { OnboardingScreen2(navController = navController) }
 //                    composable("onboarding3") { OnboardingScreen3(navController = navController) }
