@@ -38,8 +38,8 @@ import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.discover.ItsAMatchScreen
 import com.hcmus.tenderus.ui.screens.discover.MatchesScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
-import com.hcmus.tenderus.ui.screens.explore.FriendScreen
-import com.hcmus.tenderus.ui.screens.explore.coffe.CoffeeDateScreen
+import com.hcmus.tenderus.ui.screens.explore.coffe.CateScreen
+
 
 import com.hcmus.tenderus.ui.screens.message.InChatScreen
 import com.hcmus.tenderus.ui.screens.message.MatchList
@@ -168,21 +168,21 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             }
                             ExploreScreen(mainNavController/*navController*/)
                         }
-                        composable("coffee_date") {
+                        composable("cate/{category}") {
                             LaunchedEffect(Unit) {
                                 showBar = false
                             }
                             val backStackEntry =
                                 remember { mainNavController.getBackStackEntry(BottomNavItem.Explore.route) }
-                            CoffeeDateScreen(mainNavController, viewModel(viewModelStoreOwner = backStackEntry, factory = ExploreVM.Factory))
-                        }
-                        composable("let's be friend") {
-                            LaunchedEffect(Unit) {
-                                showBar = false
+                            val category = it.arguments?.getString("category")
+                            if (category != null) {
+                                Log.d("category", category)
                             }
-                            val backStackEntry =
-                                remember { mainNavController.getBackStackEntry(BottomNavItem.Explore.route) }
-                            FriendScreen(mainNavController, viewModel(viewModelStoreOwner = backStackEntry, factory = ExploreVM.Factory))
+
+                            category?.let { cate ->
+                                CateScreen(mainNavController, viewModel(viewModelStoreOwner = backStackEntry, factory = ExploreVM.Factory), cate)
+                            }
+
                         }
                         composable(BottomNavItem.Chat.route) {
                             LaunchedEffect(Unit) {
@@ -305,12 +305,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 firstTime = false
                             }
                         }
-//                        composable("main") {
-//                            LaunchedEffect(Unit) {
-//                                showBar = true
-//                            }
-//                            MainScreen(firebaseSMSAuth, firebaseEmailAuth, context)
-//                        }
+
                     }
 
                 }

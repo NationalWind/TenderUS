@@ -6,7 +6,7 @@ import { firebaseFCM } from "../lib/firebase";
 import { parse } from "dotenv";
 
 
-const validGroups = ["Looking for Love", "Free tonight?", "Coffee Date", "Let's be friend", "Like to go drinking", "Movie Lovers", "Creative Lovers", "Love Sports"]
+const validGroups = ["Looking for Love", "Free tonight", "Coffee Date", "Let's be friend", "Like to go drinking", "Movie Lovers", "Creative Lovers", "Love Sports"]
 
 const recommendationController = {
     // POST /api/recommendation/join?group=

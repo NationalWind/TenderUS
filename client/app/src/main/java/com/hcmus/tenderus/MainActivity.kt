@@ -78,7 +78,7 @@ import com.hcmus.tenderus.ui.screens.authentication.SignUpScreen
 import com.hcmus.tenderus.ui.screens.discover.DiscoverScreen
 import com.hcmus.tenderus.ui.screens.explore.ExploreScreen
 
-import com.hcmus.tenderus.ui.screens.explore.coffe.CoffeeDateScreen
+import com.hcmus.tenderus.ui.screens.explore.coffe.CateScreen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails1Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails2Screen
 import com.hcmus.tenderus.ui.screens.profilesetup.ProfileDetails3Screen
