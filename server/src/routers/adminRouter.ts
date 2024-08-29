@@ -11,5 +11,6 @@ adminRouter.get("/account", adminController.getAccountList);
 adminRouter.get("/account/:id", adminController.getAccountDetail);
 adminRouter.post("/account/:id", adminController.postAccountAction);
 adminRouter.get("/statistics", adminController.getStatistics);
+adminRouter.get("/export", adminController.getExportStatistic);
 
 export default adminRouter;

@@ -4,6 +4,8 @@ import { Request, Response } from "express";
 import QuickChart from "quickchart-js";
 import { Account, Event } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import axios from "axios";
+import PDFDocument from "pdfkit";
 
 const adminController = {
   // GET /api/admin/report
@@ -309,6 +311,42 @@ const adminController = {
         console.log(error);
         res.status(500).json({ message: error.message });
       }
+    }
+  },
+  getExportStatistic: async (req: Request, res: Response) => {
+    console.log("Vo day");
+    try {
+      const urls = [
+        "http://localhost:8001/api/admin/statistics?duration=daily&event=ACCOUNT_CREATED",
+        "http://localhost:8001/api/admin/statistics?duration=monthly&event=ACCOUNT_CREATED",
+        "http://localhost:8001/api/admin/statistics?duration=yearly&event=ACCOUNT_CREATED",
+        "http://localhost:8001/api/admin/statistics?duration=daily&event=ACCOUNT_ONLINE",
+        "http://localhost:8001/api/admin/statistics?duration=monthly&event=ACCOUNT_ONLINE",
+        "http://localhost:8001/api/admin/statistics?duration=yearly&event=ACCOUNT_ONLINE",
+      ];
+
+      const doc = new PDFDocument({ bufferPages: true });
+
+      for (let i = 0; i < urls.length; i++) {
+        const image = await axios({
+          url: urls[i],
+          responseType: "arraybuffer",
+        });
+        const width = doc.page.width - 100;
+        const height = (600 * (doc.page.width - 100)) / 1000;
+        doc.image(image.data, 50, (height + 50) * (i % 2) + 50, {
+          width,
+          height,
+        });
+        if (i % 2 && i !== urls.length - 1) doc.addPage();
+      }
+      doc.end();
+
+      res.setHeader("Content-Type", "application/pdf");
+      doc.pipe(res);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: error.message });
     }
   },
 };
