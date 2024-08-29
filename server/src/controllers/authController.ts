@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import db from "../lib/db";
 import { Account, Role } from "@prisma/client";
 import { AdmGetAuth } from "../lib/firebase";
+import { History, Event } from "@prisma/client"
 
 
 const authController = {
@@ -76,7 +77,13 @@ const authController = {
                     role: Role.USER,
                 }
 
-                await db.account.create({ data });
+                const cAccount = await db.account.create({ data });
+                await db.history.create({
+                    data: {
+                        event: Event.ACCOUNT_CREATED,
+                        accountId: cAccount.id,
+                    }
+                });
                 res.status(200).json({ message: "OK" });
             } else {
                 res.status(403).json({ message: "Invalid token" });

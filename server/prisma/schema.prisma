@@ -153,7 +153,7 @@ enum Event {
 model History {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   event     Event
-  time      DateTime
+  time      DateTime @default(now())
   accountId String   @db.ObjectId
   account   Account  @relation(fields: [accountId], references: [id])
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import db from "../lib/db";
-import { Account, Role, Like, Match, Profile } from "@prisma/client";
+import { Account, Role, Like, Match, Profile, Event } from "@prisma/client";
 import { firebaseFCM } from "../lib/firebase";
 
 
@@ -103,7 +103,20 @@ const swipeController = {
 
 
             }
-
+            await db.history.create({
+                data: {
+                    event: Event.PROFILE_VIEW,
+                    accountId: req.params.id
+                }
+            });
+            if (match) {
+                await db.history.create({
+                    data: {
+                        event: Event.MATCH_MADE,
+                        accountId: req.params.id
+                    }
+                });
+            }
             res.status(200).json({ match });
         } catch (error) {
             console.log(error);
