@@ -6,10 +6,12 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -567,14 +569,13 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
         }
     }
 
-    if (matchListVM.uiState == MatchListVM.MessageStatus.LOADING) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
+    var showError by remember { mutableStateOf(false) }
+
+    if (matchListVM.uiState == MatchListVM.MessageStatus.FAILED) {
+        LaunchedEffect(Unit) {
+            Toast.makeText(context, "An error occurred. Try again", Toast.LENGTH_SHORT).show()
         }
     }
-
 }
+
 

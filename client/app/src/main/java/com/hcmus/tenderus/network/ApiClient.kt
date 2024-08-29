@@ -21,7 +21,7 @@ object ApiClient {
         .addInterceptor(loggingInterceptor)
         .build()
 
-    private val retrofit = Retrofit.Builder()
+    val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
         .client(getUnsafeOkHttpClient()!!)
         .addConverterFactory(GsonConverterFactory.create())

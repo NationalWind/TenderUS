@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.hcmus.tenderus.R
-import com.hcmus.tenderus.data.baseUrl
+import com.hcmus.tenderus.data.imageBaseUrl
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 
 @Composable
@@ -39,17 +39,17 @@ fun StatisticsScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth()
         )
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=daily&event=ACCOUNT_CREATED",
+            model = "${imageBaseUrl}api/admin/statistics?duration=daily&event=ACCOUNT_CREATED",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth()
         )
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=monthly&event=ACCOUNT_CREATED",
+            model = "${imageBaseUrl}api/admin/statistics?duration=monthly&event=ACCOUNT_CREATED",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth()
         )
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=yearly&event=ACCOUNT_CREATED",
+            model = "${imageBaseUrl}api/admin/statistics?duration=yearly&event=ACCOUNT_CREATED",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth()
         )
@@ -62,17 +62,17 @@ fun StatisticsScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth()
         )
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=daily&event=ACCOUNT_ONLINE",
+            model = "${imageBaseUrl}api/admin/statistics?duration=daily&event=ACCOUNT_ONLINE",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth()
         )
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=monthly&event=ACCOUNT_ONLINE",
+            model = "${imageBaseUrl}api/admin/statistics?duration=monthly&event=ACCOUNT_ONLINE",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth()
         )
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=yearly&event=ACCOUNT_ONLINE",
+            model = "${imageBaseUrl}api/admin/statistics?duration=yearly&event=ACCOUNT_ONLINE",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth(),
         )

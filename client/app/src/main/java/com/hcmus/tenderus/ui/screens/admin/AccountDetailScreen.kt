@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.hcmus.tenderus.R
-import com.hcmus.tenderus.data.baseUrl
+import com.hcmus.tenderus.data.imageBaseUrl
 import com.hcmus.tenderus.model.Account
 import com.hcmus.tenderus.model.AccountAction
 import com.hcmus.tenderus.model.Penalty
@@ -179,19 +179,19 @@ fun AccountAnalytics(account: Account, modifier: Modifier = Modifier) {
         )
         Text(text = "Messages sent")
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=MESSAGE_SENT&accountId=${account.id}",
+            model = "${imageBaseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=MESSAGE_SENT&accountId=${account.id}",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth()
         )
         Text(text = "Matches made")
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=MATCH_MADE&accountId=${account.id}",
+            model = "${imageBaseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=MATCH_MADE&accountId=${account.id}",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth()
         )
         Text(text = "Profile views")
         AsyncImage(
-            model = "${baseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=PROFILE_VIEW&accountId=${account.id}",
+            model = "${imageBaseUrl}api/admin/statistics?duration=${selectedDuration.lowercase(Locale.getDefault())}&event=PROFILE_VIEW&accountId=${account.id}",
             contentDescription = null,
             modifier = Modifier.fillMaxWidth()
         )

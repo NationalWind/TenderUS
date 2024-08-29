@@ -242,6 +242,7 @@ class MatchListVM: ViewModel() {
                 curProfile = GetMatchesApi.getMatchProfile("Bearer " + TokenManager.getToken()!!, curReceiver)
                 uiState = MessageStatus.SUCCESS
             } catch (e: Exception) {
+                uiState = MessageStatus.FAILED
                 Log.d("GetProfile", e.toString())
             }
         }

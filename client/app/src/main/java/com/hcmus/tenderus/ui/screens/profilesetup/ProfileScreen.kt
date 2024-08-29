@@ -149,12 +149,14 @@ fun ProfileButtons(navController: NavController, onSignedOut: () -> Unit) {
 
             }
         )
-        ProfileButton(
-            text = "About Us",
-            icon = Icons.Default.Info,
-            isPrimary = false,
-            onClick = { navController.navigate("about_us") }
-        )
+        if (TokenManager.getRole() == "USER") {
+            ProfileButton(
+                text = "About Us",
+                icon = Icons.Default.Info,
+                isPrimary = false,
+                onClick = { navController.navigate("about_us") }
+            )
+        }
     }
 
 }
