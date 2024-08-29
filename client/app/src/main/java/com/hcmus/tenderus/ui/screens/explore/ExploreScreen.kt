@@ -180,7 +180,7 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
             )
             Spacer(modifier = Modifier.width(16.dp))
             CategoryItem(
-                imageRes = R.drawable.let_friend,
+                imageRes = R.drawable.let_friend_icon,
                 text = "Let's be\nfriend",
                 onClick = {
                     exploreVM.getJoinStatus("Let's be friend", scope) {
