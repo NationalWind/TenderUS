@@ -3,6 +3,7 @@ package com.hcmus.tenderus.ui.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 
 import android.os.Build
 import android.util.Log
@@ -60,9 +61,10 @@ import com.hcmus.tenderus.ui.viewmodels.ProfileVM
 import com.hcmus.tenderus.utils.ActivityStatusService
 import com.hcmus.tenderus.utils.firebase.FirebaseEmailAuth
 import com.hcmus.tenderus.utils.firebase.FirebaseSMSAuth
+import kotlinx.coroutines.launch
 
 
-@SuppressLint("UnrememberedGetBackStackEntry")
+@SuppressLint("UnrememberedGetBackStackEntry", "MissingPermission")
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmailAuth, context: Context, fusedLocationClient: FusedLocationProviderClient) {
@@ -104,12 +106,19 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
             var showBar by remember { mutableStateOf(true) }
             LaunchedEffect(Unit) {
                 try {
-                    TokenManager.getToken()?.let {token ->
-                        if (token != "") {
-                            ProcessProfile.upsertUserProfile(
-                                "Bearer $token",
-                                profile = Profile(isActive = true)
-                            )
+                    TokenManager.getToken()?.let { token ->
+                        if (token.isNotEmpty()) {
+                            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                                val latitude = location?.latitude ?: 0.0
+                                val longitude = location?.longitude ?: 0.0
+
+                                launch {
+                                    ProcessProfile.upsertUserProfile(
+                                        "Bearer $token",
+                                        profile = Profile(isActive = true, latitude = latitude.toFloat(), longitude = longitude.toFloat())
+                                    )
+                                }
+                            }
                             val intent = Intent(context, ActivityStatusService::class.java)
                             context.startService(intent)
                         }
@@ -117,7 +126,6 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                 } catch (e: Exception) {
                     Log.d("Profile", "Activity Status Update Failed")
                 }
-
             }
             Scaffold(
                 bottomBar = {
@@ -153,7 +161,8 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             LaunchedEffect(Unit) {
                                 showBar = true
                             }
-                            DiscoverScreen(mainNavController/*navController*/,"Discover")
+                            DiscoverScreen(mainNavController/*navController*/,"Discover",
+                                fusedLocationProviderClient = fusedLocationClient)
                         }
                         composable("itsamatch") {
                             LaunchedEffect(Unit) {
@@ -166,7 +175,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             LaunchedEffect(Unit) {
                                 showBar = true
                             }
-                            ExploreScreen(mainNavController/*navController*/)
+                            ExploreScreen(mainNavController/*navController*/, fusedLocationProviderClient = fusedLocationClient)
                         }
                         composable("cate/{category}") {
                             LaunchedEffect(Unit) {
@@ -199,7 +208,8 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                             InChatScreen(
                                 navController = mainNavController,
                                 context,
-                                viewModel(loginBackStackEntry)
+                                viewModel(loginBackStackEntry),
+                                fusedLocationClient
                             )
                         }
                         //                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}

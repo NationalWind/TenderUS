@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
@@ -220,7 +221,7 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit) {
 }
 
 @Composable
-fun InChatScreen(navController: NavController, context: Context, matchListVM: MatchListVM) {
+fun InChatScreen(navController: NavController, context: Context, matchListVM: MatchListVM, fusedLocationProviderClient: FusedLocationProviderClient) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var messageTexting by remember { mutableStateOf("") }
@@ -534,7 +535,7 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
     ) {
         matchListVM.curProfile?.let {
-            FullProfile(it) {
+            FullProfile(it, fusedLocationProviderClient) {
                 showProfileDetails = false
             }
         }
