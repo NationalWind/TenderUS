@@ -107,7 +107,7 @@ private fun Illustration(category: String) {
         "Looking for Love" -> R.drawable.love_icon
         "Free tonight" -> R.drawable.drink_icon
         "Coffee Date" -> R.drawable.coffe_icon
-        "Let's be friend" -> R.drawable.friend
+        "Let's be friend" -> R.drawable.friend_icon
         "Like to go drinking" -> R.drawable.drink_icon
         "Movie Lovers" -> R.drawable.free_tonight_icon
         "Creative Lovers" -> R.drawable.creative_icon
