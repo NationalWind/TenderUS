@@ -823,324 +823,277 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun Add_Photos(
-        navController: NavController,
-        profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
-    ) {
-        var imageUris by remember { mutableStateOf(listOf<Uri?>()) }
-        val context = LocalContext.current
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Add_Photos(
+    navController: NavController,
+    profileVM: ProfileVM = viewModel(factory = ProfileVM.Factory)
+) {
+    var imageUris by remember { mutableStateOf(listOf<Uri?>()) }
+    val context = LocalContext.current
 
-        var showDialog by remember { mutableStateOf(false) }
-        var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
-        var successMessage by remember { mutableStateOf("") }
-        var isLoading by remember { mutableStateOf(false) }
-        var progress by remember { mutableStateOf(0f) }
-        var errorMessage by remember { mutableStateOf("") }
-        val coroutineScope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    var successMessage by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
-        val imageUriLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent(),
-            onResult = { uri ->
-                uri?.let {
+    val imageUriLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                imageUris = imageUris.toMutableList().apply { add(uri) }
+            }
+        }
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) {
+                cameraImageUri?.let { uri ->
                     imageUris = imageUris.toMutableList().apply { add(uri) }
                 }
             }
-        )
-
-        val cameraLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.TakePicture(),
-            onResult = { success ->
-                if (success) {
-                    cameraImageUri?.let { uri ->
-                        imageUris = imageUris.toMutableList().apply { add(uri) }
-                    }
-                }
-            }
-        )
-
-        var profile by remember { mutableStateOf<Profile?>(null) }
-        var loading by remember { mutableStateOf(false) }
-        var error by remember { mutableStateOf(false) }
-        var uploadError by remember { mutableStateOf(false) }
-
-        LaunchedEffect(Unit) {
-            profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-            Log.d("Photos", "Profile fetched")
         }
+    )
 
-        val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
-        val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
+    var profile by remember { mutableStateOf<Profile?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
+    var uploadError by remember { mutableStateOf(false) }
 
-        // Handle profile data and errors
-        when (profileUiState) {
+    LaunchedEffect(Unit) {
+        profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
+        Log.d("Photos", "Profile fetched")
+    }
+
+    val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
+    val updateProfileState by remember { derivedStateOf { profileVM.updateProfileState } }
+
+    // Handle profile data and errors
+    when (profileUiState) {
+        is ProfileUiState.Success -> {
+            profile = (profileUiState as ProfileUiState.Success).profile
+            profile?.pictures?.let { urls ->
+                val uris = urls.map { url -> Uri.parse(url) }
+                imageUris = uris
+            }
+        }
+        is ProfileUiState.Error -> {
+            error = true
+        }
+        is ProfileUiState.Loading -> {
+            loading = true
+        }
+        else -> Unit
+    }
+
+    // Observe update status
+    LaunchedEffect(updateProfileState) {
+        when (updateProfileState) {
             is ProfileUiState.Success -> {
-                profile = (profileUiState as ProfileUiState.Success).profile
-                profile?.pictures?.let { urls ->
-                    val uris = urls.map { url -> Uri.parse(url) }
-                    imageUris = uris
-                }
+                successMessage = "Profile updated successfully!"
+                loading = false
             }
-
             is ProfileUiState.Error -> {
-                error = true
+                uploadError = true
+                loading = false
             }
-
-            is ProfileUiState.Loading -> {
-                loading = true
-            }
-
             else -> Unit
         }
+    }
 
-        // Observe update status
-        LaunchedEffect(updateProfileState) {
-            when (updateProfileState) {
-                is ProfileUiState.Success -> {
-                    successMessage = "Profile updated successfully!"
-                    loading = false
-                }
-
-                is ProfileUiState.Error -> {
-                    uploadError = true
-                    loading = false
-                }
-
-                else -> Unit
-            }
-        }
-
-        Scaffold(
-            contentWindowInsets = WindowInsets(
-                top = 0.dp,
-                bottom = 0.dp
-            ),
-            topBar = {
-                TopAppBar(
-                    windowInsets = WindowInsets(
-                        top = 0.dp,
-                        bottom = 0.dp
-                    ),
-                    title = {
-                        Text("Add Photos", color = Color(0xFFB71C1C))
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(
-                                Icons.Default.ArrowBack,
-                                contentDescription = "Back",
-                                tint = Color(0xFFB71C1C)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = Color.White
-                    )
+    Scaffold(
+        contentWindowInsets = WindowInsets(
+            top =  0.dp,
+            bottom = 0.dp
+        ),
+        topBar = {
+            TopAppBar(
+                windowInsets = WindowInsets(
+                    top =  0.dp,
+                    bottom = 0.dp
+                ),
+                title = {
+                    Text("Add Photos", color = Color(0xFFB71C1C))
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color(0xFFB71C1C))
+                    }
+                },
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = Color.White
                 )
-            }
-        ) { paddingValues ->
-            Box(
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(paddingValues)
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White)
-                    .padding(paddingValues)
+                    .padding(top = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
             ) {
+                Text(
+                    text = "Add Photos",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB71C1C)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Add at least 2 photos to continue",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
+                val gridModifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 30.dp)
+                Spacer(modifier = Modifier.height(24.dp))
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 16.dp),
+                    modifier = gridModifier,
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = "Add Photos",
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFB71C1C)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Add at least 2 photos to continue",
-                        fontSize = 16.sp,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
-
-                    val gridModifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 30.dp)
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Column(
-                        modifier = gridModifier,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            for (i in 0 until 3) {
-                                PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
-                                    if (imageUris.getOrNull(i) != null) {
-                                        imageUris = imageUris.toMutableList().apply { removeAt(i) }
-                                    } else {
-                                        showDialog = true
-                                    }
-                                })
-                            }
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            for (i in 3 until 6) {
-                                PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
-                                    if (imageUris.getOrNull(i) != null) {
-                                        imageUris = imageUris.toMutableList().apply { removeAt(i) }
-                                    } else {
-                                        showDialog = true
-                                    }
-                                })
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    Button(
-                        onClick = {
-                            isLoading = true
-                            errorMessage = ""
-                            successMessage = ""
-                            progress = 0f
-
-                            coroutineScope.launch {
-                                while (progress < 1.0f) {
-                                    progress += 0.1f
-                                    delay(20) // Simulate loading
-                                }
-                                try {
-                                    val imageUrls = mutableListOf<String>()
-                                    val newImageUris = imageUris.filter { it?.scheme == "content" }
-                                    val existingImageUrls =
-                                        imageUris.filter { it?.scheme != "content" }
-                                            .map { it.toString() }
-
-                                    val totalImages = newImageUris.size + existingImageUrls.size
-                                    var uploadCount = 0
-
-                                    profile?.let { userProfile ->
-                                        newImageUris.forEach { uri ->
-                                            uri?.let { imageUri ->
-                                                StorageUtil.uploadToStorage(
-                                                    auth = FirebaseAuth.getInstance(),
-                                                    uri = imageUri,
-                                                    context = context,
-                                                    type = "Image"
-                                                ) { downloadUrl ->
-                                                    imageUrls.add(downloadUrl)
-                                                    uploadCount++
-
-                                                    progress =
-                                                        uploadCount.toFloat() / newImageUris.size.toFloat()
-
-                                                    if (uploadCount == newImageUris.size) {
-                                                        imageUrls.addAll(existingImageUrls)
-                                                        val updatedProfile =
-                                                            userProfile.copy(pictures = imageUrls)
-                                                        profileVM.upsertUserProfile(
-                                                            TokenManager.getToken() ?: "",
-                                                            updatedProfile
-                                                        )
-                                                        Log.d(
-                                                            "Add Photos",
-                                                            "Profile updated with new images"
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        if (newImageUris.isEmpty()) {
-                                            imageUrls.addAll(existingImageUrls)
-                                            val updatedProfile =
-                                                userProfile.copy(pictures = imageUrls)
-                                            profileVM.upsertUserProfile(
-                                                TokenManager.getToken() ?: "", updatedProfile
-                                            )
-                                            Log.d(
-                                                "Add Photos",
-                                                "Profile updated with existing images only"
-                                            )
-                                        }
-                                    } ?: run {
-                                        Log.e("Add Photos", "Profile is null, cannot update.")
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e("Add Photos", "Error updating profile", e)
-                                    errorMessage = "Failed to update profile. Please try again."
-                                } finally {
-                                    isLoading = false
-                                }
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
-                        enabled = imageUris.size >= 2 && !isLoading,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("Save", color = Color.White)
+                        for (i in 0 until 3) {
+                            PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
+                                if (imageUris.getOrNull(i) != null) {
+                                    imageUris = imageUris.toMutableList().apply { removeAt(i) }
+                                } else {
+                                    showDialog = true
+                                }
+                            })
+                        }
                     }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        for (i in 3 until 6) {
+                            PhotoBox(imageUri = imageUris.getOrNull(i), onClick = {
+                                if (imageUris.getOrNull(i) != null) {
+                                    imageUris = imageUris.toMutableList().apply { removeAt(i) }
+                                } else {
+                                    showDialog = true
+                                }
+                            })
+                        }
+                    }
+                }
 
-                    if (error) {
-                        Text(
-                            text = "An error occurred. Please try again.",
-                            color = Color.Red,
-                        )
-                    }
+                Spacer(modifier = Modifier.height(32.dp))
 
-                    if (uploadError) {
-                        Text(
-                            text = "An error occurred while uploading images.",
-                            color = Color.Red,
-                        )
-                    }
+                Button(
+                    onClick = {
+                        isLoading = true  // Start loading
+                        val imageUrls = mutableListOf<String>()
+                        val newImageUris = imageUris.filter { it?.scheme == "content" }
+                        val existingImageUrls = imageUris.filter { it?.scheme != "content" }.map { it.toString() }
+
+                        var uploadCount = 0
+
+                        profile?.let { userProfile ->
+                            newImageUris.forEach { uri ->
+                                uri?.let { imageUri ->
+                                    StorageUtil.uploadToStorage(
+                                        auth = FirebaseAuth.getInstance(),
+                                        uri = imageUri,
+                                        context = context,
+                                        type = "Image"
+                                    ) { downloadUrl ->
+                                        imageUrls.add(downloadUrl)
+                                        uploadCount++
+
+                                        if (uploadCount == newImageUris.size) {
+                                            imageUrls.addAll(existingImageUrls)
+                                            val updatedProfile = userProfile.copy(pictures = imageUrls)
+                                            profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                            Log.d("Add Photos", "Profile updated with new images")
+                                            isLoading = false  // End loading
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (newImageUris.isEmpty()) {
+                                imageUrls.addAll(existingImageUrls)
+                                val updatedProfile = userProfile.copy(pictures = imageUrls)
+                                profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                Log.d("Add Photos", "Profile updated with existing images only")
+                                isLoading = false  // End loading
+                            }
+                        } ?: run {
+                            Log.e("Add Photos", "Profile is null, cannot update.")
+                            isLoading = false  // End loading
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
+                    enabled = imageUris.size >= 2,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                ) {
+                    Text("Save", color = Color.White)
+                }
+            }
+
+            if (error) {
+                Text(
+                    text = "An error occurred. Please try again.",
+                    color = Color.Red,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            if (uploadError) {
+                Text(
+                    text = "An error occurred while uploading images.",
+                    color = Color.Red,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
 
 //            if (successMessage.isNotEmpty()) {
 //                Text(
 //                    text = successMessage,
 //                    color = Color.Blue,
+//                    modifier = Modifier.align(Alignment.BottomCenter)
 //                )
 //            }
-                }
+        }
 
-                if (showDialog) {
-                    ChooseImageSourceDialog(
-                        onDismiss = { showDialog = false },
-                        onGalleryClick = {
-                            showDialog = false
-                            imageUriLauncher.launch("image/*")
-                        },
-                        onCameraClick = {
-                            showDialog = false
-                            val photoFile = File(context.cacheDir, "camera_image.jpg")
-                            val photoUri = FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.provider",
-                                photoFile
-                            )
-                            cameraImageUri = photoUri
-                            cameraLauncher.launch(photoUri)
-                        }
-                    )
+        if (showDialog) {
+            ChooseImageSourceDialog(
+                onDismiss = { showDialog = false },
+                onGalleryClick = {
+                    showDialog = false
+                    imageUriLauncher.launch("image/*")
+                },
+                onCameraClick = {
+                    showDialog = false
+                    val photoFile = File(context.cacheDir, "camera_image.jpg")
+                    val photoUri = FileProvider.getUriForFile(context, "${context.packageName}.provider", photoFile)
+                    cameraImageUri = photoUri
+                    cameraLauncher.launch(photoUri)
                 }
-            }
+            )
         }
         if (isLoading) {
             Box(
@@ -1151,8 +1104,9 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
             ) {
                 CircularProgressIndicator(color = Color.White)  // White progress indicator
             }
-        }
     }
+}
+}
 
 //@Composable
 //@Preview(showBackground = true)

@@ -27,7 +27,7 @@ import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.DiscoverVM
 
 @Composable
-fun ReportButton(reported: String?, modifier: Modifier = Modifier) {
+fun ReportButton(reported: String?, modifier: Modifier = Modifier, message: String = "") {
     var isOpen by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
     val discoverViewModel: DiscoverVM = viewModel(factory = DiscoverVM.Factory)
@@ -71,7 +71,7 @@ fun ReportButton(reported: String?, modifier: Modifier = Modifier) {
             val reportData = ReportData(
                 reporter = TokenManager.getToken() ?: "",
                 reported = reported,
-                message = selectedOption!!
+                message = "$selectedOption $message"
             )
             discoverViewModel.postReport(reportData)
         }

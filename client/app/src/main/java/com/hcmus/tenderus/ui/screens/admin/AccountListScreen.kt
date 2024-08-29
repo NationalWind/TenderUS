@@ -14,14 +14,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +48,7 @@ import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.UiState
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AccountListScreen(
     accountListUiState: UiState<List<Account>>,
@@ -55,12 +63,26 @@ fun AccountListScreen(
             modifier = modifier.fillMaxSize(), retryAction
         )
 
-        is UiState.Success -> AccountList(
-            accountList = accountListUiState.data,
-            detailNavigate = detailNavigate,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 8.dp)
-        )
+        is UiState.Success -> {
+            var isRefreshing by remember { mutableStateOf(false) }
+            val pullRefreshState = rememberPullRefreshState(
+                refreshing = isRefreshing,
+                onRefresh = {
+                    isRefreshing = true
+                    retryAction()
+                    isRefreshing = false
+                }
+            )
+
+            AccountList(
+                accountList = accountListUiState.data,
+                detailNavigate = detailNavigate,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pullRefresh(pullRefreshState),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            )
+        }
     }
 }
 

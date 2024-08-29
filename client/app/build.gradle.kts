@@ -97,4 +97,6 @@ dependencies {
 
     // Image
     implementation(libs.coil.compose)
+
+    implementation("androidx.compose.material:material:1.6.8")
 }

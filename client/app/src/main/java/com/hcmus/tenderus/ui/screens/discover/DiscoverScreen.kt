@@ -15,6 +15,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -85,21 +87,28 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
-import kotlin.math.roundToInt
+import kotlin.math.*
 
 fun calculateAgeFromDob(dob: String): Int {
-    // Extract the year from the last 4 characters of the date of birth string
     val yearStr = dob.take(4)
 
-    // Convert extracted year to integer
     val yearOfBirth = yearStr.toIntOrNull() ?: return -1 // Return -1 for invalid year format
 
-    // Create LocalDate with the extracted year and default month and day
     val today = LocalDate.now()
     val birthday = LocalDate.of(yearOfBirth, today.month, today.dayOfMonth)
 
-    // Calculate age
     return Period.between(birthday, today).years
+}
+
+fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    val R = 6371.0 // Radius of the Earth in kilometers
+    val latDistance = Math.toRadians(lat2 - lat1)
+    val lonDistance = Math.toRadians(lon2 - lon1)
+    val a = sin(latDistance / 2) * sin(latDistance / 2) +
+            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
+            sin(lonDistance / 2) * sin(lonDistance / 2)
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
 }
 
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
@@ -727,16 +736,17 @@ fun SwipeableProfiles(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FullProfile(profile: Profile, onDismiss: () -> Unit) {
     // Full Profile Information Section
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
-
     ) {
         Column(
             modifier = Modifier
@@ -771,13 +781,49 @@ fun FullProfile(profile: Profile, onDismiss: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(profile.displayName!!, style = MaterialTheme.typography.headlineSmall)
-            Text("Age: ${calculateAgeFromDob(profile.birthDate!!)}", style = MaterialTheme.typography.bodyLarge)
-            Text("Location: Ho Chi Minh city, VietNam", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = "${profile.displayName!!}, ${calculateAgeFromDob(profile.birthDate!!)}",
+                style = MaterialTheme.typography.headlineLarge
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text("Location", style = MaterialTheme.typography.headlineSmall)
+            Text(
+                text = profile.location!!,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
             Text(
                 profile.description!!,
                 style = MaterialTheme.typography.bodyMedium
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display profile interests
+            Text("Interests", style = MaterialTheme.typography.headlineSmall)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                profile.interests?.forEach { interest ->
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFE0E0E0), shape = RoundedCornerShape(16.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = interest ?: "Unknown",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -800,6 +846,7 @@ fun FullProfile(profile: Profile, onDismiss: () -> Unit) {
         }
     }
 }
+
 
 @Composable
 fun MatchOverlay(onAnimationEnd: () -> Unit) {

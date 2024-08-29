@@ -77,7 +77,7 @@ fun ExploreScreen(navController: NavController, exploreVM: ExploreVM = viewModel
                 WelcomeSection()
                 CategorySection(navController)
                 WelcomeJointopic()
-                TopicSection()
+                TopicSection(navController)
             }
         }
 
@@ -130,6 +130,7 @@ fun WelcomeSection() {
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewModel(factory = ExploreVM.Factory)) {
     val scope = rememberCoroutineScope()
@@ -146,14 +147,22 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
                 imageRes = R.drawable.looking_for_love,
                 text = "Looking for\nLove",
                 onClick = {
-                    navController.navigate("discover?customTitle=Looking for Love")
+                    exploreVM.getJoinStatus("Looking for Love", scope) {
+                        exploreVM.join("Looking for Love")
+                        navController.popBackStack()
+                    }
                 }
             )
             Spacer(modifier = Modifier.width(16.dp))
             CategoryItem(
                 imageRes = R.drawable.free_tonight,
                 text = "Free \ntonight?",
-                onClick = { navController.navigate("discover?customTitle=Free tonight?") }
+                onClick = {
+                    exploreVM.getJoinStatus("Free tonight", scope) {
+                        exploreVM.join("Free tonight")
+                        navController.popBackStack()
+                    }
+                }
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -174,7 +183,11 @@ fun CategorySection(navController: NavController, exploreVM: ExploreVM = viewMod
             CategoryItem(
                 imageRes = R.drawable.let_friend,
                 text = "Let's be\nfriend",
-                onClick = { /* Hành động hoặc điều hướng khác */ }
+                onClick = {
+                    exploreVM.getJoinStatus("Let's be friend", scope) {
+                        navController.navigate("let's be friend")
+                    }
+                }
             )
         }
     }
@@ -249,8 +262,10 @@ fun WelcomeJointopic() {
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
-fun TopicSection() {
+fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(factory = ExploreVM.Factory)) {
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -263,13 +278,23 @@ fun TopicSection() {
             CategoryItem(
                 imageRes = R.drawable.drink,
                 text = "Like to go \ndrinking",
-                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
+                onClick = {
+                            exploreVM.getJoinStatus("Like to go drinking", scope) {
+                        exploreVM.join("Like to go drinking")
+                        navController.popBackStack()
+                    }
+                }
             )
             Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.movie,
                 text = "Movie \nLovers",
-                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
+                onClick = {
+                    exploreVM.getJoinStatus("Movie Lovers", scope) {
+                        exploreVM.join("Movie Lovers")
+                        navController.popBackStack()
+                    }
+                }
             )
         }
         Spacer(modifier = Modifier.height(16.dp)) // Increase space between rows
@@ -280,13 +305,23 @@ fun TopicSection() {
             CategoryItem(
                 imageRes = R.drawable.creative,
                 text = "Creative \nLovers",
-                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
+                onClick = {
+                    exploreVM.getJoinStatus("Creative Lovers", scope) {
+                        exploreVM.join("Creative Lovers")
+                        navController.popBackStack()
+                    }
+                }
             )
             Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
                 imageRes = R.drawable.sport,
                 text = "Love \nSports",
-                onClick = {}  // Thêm onClick rỗng nếu không cần xử lý sự kiện
+                onClick = {
+                    exploreVM.getJoinStatus("Love Sports", scope) {
+                        exploreVM.join("Love Sports")
+                        navController.popBackStack()
+                    }
+                }
             )
         }
     }

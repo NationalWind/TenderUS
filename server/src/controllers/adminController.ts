@@ -58,7 +58,7 @@ const adminController = {
         data: {
           reporterId: decoded.id,
           reportedId: reportedAccount.id,
-          message,
+          message: message.trim(),
         },
       });
       res.status(200).json({ message: "Success" });

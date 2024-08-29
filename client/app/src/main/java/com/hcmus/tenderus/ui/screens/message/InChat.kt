@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -15,18 +14,15 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,10 +31,8 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -62,9 +56,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
-
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -73,12 +64,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.hcmus.tenderus.R
 import com.hcmus.tenderus.network.MessageSendingRequest
 import com.hcmus.tenderus.ui.screens.discover.FullProfile
+import com.hcmus.tenderus.ui.screens.discover.composable.ReportButton
 import com.hcmus.tenderus.ui.theme.Typography
 import com.hcmus.tenderus.ui.viewmodels.MatchListVM
 import com.hcmus.tenderus.ui.viewmodels.MatchState
@@ -93,7 +84,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
 fun ImageMessage(
     url: String,
@@ -188,7 +179,7 @@ fun VoiceMessage(audioUrl: String, isSender: Boolean) {
 
 
 
-        var sliderColors = if (isSender) SliderDefaults.colors(thumbColor = Color(0xFFE94057), activeTrackColor = Color(0xFFE94057), inactiveTrackColor = Color(0xFFEFB8C8)) else SliderDefaults.colors(thumbColor = Color(0xFF333333), activeTrackColor = Color(0xFF333333), inactiveTrackColor = Color(0xFF747474))
+        val sliderColors = if (isSender) SliderDefaults.colors(thumbColor = Color(0xFFE94057), activeTrackColor = Color(0xFFE94057), inactiveTrackColor = Color(0xFFEFB8C8)) else SliderDefaults.colors(thumbColor = Color(0xFF333333), activeTrackColor = Color(0xFF333333), inactiveTrackColor = Color(0xFF747474))
         Spacer(modifier = Modifier.weight(0.2f))
         Slider(
             value = currentValue,
@@ -228,7 +219,6 @@ fun InChatTopBar(match: MatchState, onclick: () -> Unit) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InChatScreen(navController: NavController, context: Context, matchListVM: MatchListVM) {
     val listState = rememberLazyListState()
@@ -456,6 +446,8 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                                         .padding(16.dp),
                                     horizontalArrangement = if (matches[idx].messageArr[msgIdx].sender != usernameInChat) Arrangement.End else Arrangement.Start
                                 ) {
+                                    var showReport by remember { mutableStateOf(false) }
+
                                     if (matches[idx].messageArr[msgIdx].msgType == "Image") {
                                         ImageMessage(
                                             url = matches[idx].messageArr[msgIdx].content,
@@ -474,11 +466,15 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                                                     ) else Color.LightGray
                                                 )
                                                 .padding(16.dp)
+                                                .clickable { showReport = !showReport }
+                                                .pointerInput(Unit) {
+                                                    detectTapGestures(onLongPress = {showReport = !showReport})
+                                                }
                                         ) {
                                             if (matches[idx].messageArr[msgIdx].msgType == "Text") {
                                                 Text(
                                                     text = matches[idx].messageArr[msgIdx].content,
-                                                    style = Typography.bodyMedium
+                                                    style = Typography.bodyMedium,
                                                 )
                                             } else if (matches[idx].messageArr[msgIdx].msgType == "Audio") {
                                                 VoiceMessage(
@@ -487,6 +483,10 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                                                 )
                                             }
                                         }
+                                    }
+
+                                    if (showReport && matches[idx].messageArr[msgIdx].sender == usernameInChat) {
+                                        ReportButton(reported = matches[idx].messageArr[msgIdx].sender, message = matches[idx].messageArr[msgIdx].content)
                                     }
                                 }
                             }
@@ -542,13 +542,17 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
 
     if (heldImage != "") {
         Box(
-            modifier = Modifier.fillMaxSize().clickable {
-                heldImage = ""
-            },
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable {
+                    heldImage = ""
+                },
             contentAlignment = Alignment.Center
         ) {
             Box(
-                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f))
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
             )
             AsyncImage(
                 model = heldImage,

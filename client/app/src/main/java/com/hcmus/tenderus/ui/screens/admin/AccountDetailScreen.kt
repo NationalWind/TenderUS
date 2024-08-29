@@ -16,12 +16,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -61,6 +64,7 @@ import com.hcmus.tenderus.ui.theme.TenderUSTheme
 import com.hcmus.tenderus.ui.viewmodels.UiState
 import java.util.Locale
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AccountDetailScreen(
     accountDetailUiState: UiState<Account>,
@@ -76,12 +80,26 @@ fun AccountDetailScreen(
             modifier = modifier.fillMaxSize(), retryAction
         )
 
-        is UiState.Success -> AccountDetail(
-            account = accountDetailUiState.data,
-            backAction = backAction,
-            saveAction = saveAction,
-            modifier = Modifier.fillMaxSize(),
-        )
+        is UiState.Success -> {
+            var isRefreshing by remember { mutableStateOf(false) }
+            val pullRefreshState = rememberPullRefreshState(
+                refreshing = isRefreshing,
+                onRefresh = {
+                    isRefreshing = true
+                    retryAction()
+                    isRefreshing = false
+                }
+            )
+
+            AccountDetail(
+                account = accountDetailUiState.data,
+                backAction = backAction,
+                saveAction = saveAction,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pullRefresh(pullRefreshState),
+            )
+        }
     }
 }
 
