@@ -313,8 +313,7 @@ const adminController = {
       }
     }
   },
-  getExportStatistic: async (req: Request, res: Response) => {
-    console.log("Vo day");
+  getExportStatistic: async (_req: Request, res: Response) => {
     try {
       const urls = [
         "http://localhost:8001/api/admin/statistics?duration=daily&event=ACCOUNT_CREATED",

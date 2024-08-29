@@ -35,7 +35,7 @@ fun AdminScreen(onSignedOut: () -> Unit = {}) {
             modifier = Modifier.padding(contentPadding)
         ) {
             composable(BottomNav.Analytics.route) {
-                StatisticsScreen()
+                StatisticsScreen(extract = adminViewModel::extractStatistic)
             }
             composable(BottomNav.Reports.route) {
                 ReportListScreen(

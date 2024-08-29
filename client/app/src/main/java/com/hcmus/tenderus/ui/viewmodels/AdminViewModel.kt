@@ -1,6 +1,12 @@
 package com.hcmus.tenderus.ui.viewmodels
 
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -48,8 +54,7 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminReportList", e.message.toString())
                 UiState.Error
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.d("AdminReportList", e.message.toString())
                 UiState.Error
             }
@@ -67,8 +72,7 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminReportDetail", e.message.toString())
                 UiState.Error
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.d("AdminReportDetail", e.message.toString())
                 UiState.Error
             }
@@ -86,8 +90,7 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminReportAction", e.message.toString())
                 reportDetailUiState = UiState.Error
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.d("AdminReportAction", e.message.toString())
                 reportDetailUiState = UiState.Error
             }
@@ -105,8 +108,7 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminAccountList", e.message.toString())
                 UiState.Error
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.d("AdminAccountList", e.message.toString())
                 UiState.Error
             }
@@ -124,8 +126,7 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminAccountDetail", e.message.toString())
                 UiState.Error
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.d("AdminAccountDetail", e.message.toString())
                 UiState.Error
             }
@@ -143,11 +144,46 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             } catch (e: HttpException) {
                 Log.d("AdminAccountAction", e.message.toString())
                 reportDetailUiState = UiState.Error
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.d("AdminAccountAction", e.message.toString())
                 reportDetailUiState = UiState.Error
             }
+        }
+    }
+
+    fun extractStatistic(context: Context) {
+        viewModelScope.launch {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    val pdf = tenderUsRepository.getExportStatistic()
+                    val values = ContentValues().apply {
+                        put(MediaStore.Downloads.DISPLAY_NAME, "statistics.pdf")
+                        put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
+                        put(MediaStore.Downloads.RELATIVE_PATH, "Download/")
+                    }
+
+                    val resolver = context.contentResolver
+                    val uri: Uri? =
+                        resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+
+                    uri?.let {
+                        resolver.openOutputStream(uri).use { outputStream ->
+                            outputStream?.write(pdf.bytes())
+                        }
+                    }
+                } catch (e: IOException) {
+                    Log.d("AdminExportStatistic", e.message.toString())
+                } catch (e: HttpException) {
+                    Log.d("AdminExportStatistic", e.message.toString())
+                }
+            } else {
+                Toast.makeText(
+                    context,
+                    "This action is not supported on your device.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
         }
     }
 

@@ -1,15 +1,19 @@
 package com.hcmus.tenderus.ui.screens.admin
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,7 +26,8 @@ import com.hcmus.tenderus.data.imageBaseUrl
 import com.hcmus.tenderus.ui.theme.TenderUSTheme
 
 @Composable
-fun StatisticsScreen(modifier: Modifier = Modifier) {
+fun StatisticsScreen(extract: (context: Context) -> Unit, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
@@ -76,6 +81,14 @@ fun StatisticsScreen(modifier: Modifier = Modifier) {
             contentDescription = null,
             modifier = Modifier.fillMaxWidth(),
         )
+        Row(
+            horizontalArrangement = Arrangement.Absolute.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Button(onClick = { extract(context) }) {
+                Text(text = "Export pdf")
+            }
+        }
     }
 }
 
@@ -83,6 +96,6 @@ fun StatisticsScreen(modifier: Modifier = Modifier) {
 @Composable
 fun StatisticsScreenPreview() {
     TenderUSTheme {
-        StatisticsScreen()
+        StatisticsScreen(extract = {})
     }
 }

@@ -16,7 +16,6 @@
 
     <application
         android:name=".TenderUsApplication"
-        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -25,6 +24,7 @@
         android:roundIcon="@mipmap/ic_launcher_tenderus"
         android:supportsRtl="true"
         android:theme="@style/Theme.TenderUS"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
@@ -45,7 +45,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".utils.ActivityStatusService"/>
+        <service android:name=".utils.ActivityStatusService" />
 
 
         <provider

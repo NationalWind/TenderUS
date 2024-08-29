@@ -9,6 +9,7 @@ import com.hcmus.tenderus.model.ReportAction
 import com.hcmus.tenderus.model.ReportData
 import com.hcmus.tenderus.network.LoginOKResponse
 import com.hcmus.tenderus.network.TenderUsApiService
+import okhttp3.ResponseBody
 
 object TokenManager {
 
@@ -63,6 +64,7 @@ interface TenderUsRepository {
     suspend fun getAccountList(): List<Account>
     suspend fun getAccountDetail(id: String): Account
     suspend fun postAccountAction(id: String, accountAction: AccountAction)
+    suspend fun getExportStatistic(): ResponseBody
 }
 
 class NetworkTenderUsRepository(
@@ -82,4 +84,6 @@ class NetworkTenderUsRepository(
 
     override suspend fun postAccountAction(id: String, accountAction: AccountAction) =
         tenderUsApiService.postAccountAction(id, accountAction)
+
+    override suspend fun getExportStatistic(): ResponseBody = tenderUsApiService.getExportStatistic()
 }

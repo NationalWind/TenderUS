@@ -5,6 +5,7 @@ import com.hcmus.tenderus.model.AccountAction
 import com.hcmus.tenderus.model.Report
 import com.hcmus.tenderus.model.ReportAction
 import com.hcmus.tenderus.model.ReportData
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -31,4 +32,7 @@ interface TenderUsApiService {
 
     @POST("api/admin/account/{id}")
     suspend fun postAccountAction(@Path("id") id: String, @Body accountAction: AccountAction)
+
+    @GET("api/admin/export")
+    suspend fun getExportStatistic(): ResponseBody
 }
