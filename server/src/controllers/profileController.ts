@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import db from "../lib/db";
-import { Account, Role, Like, Match, Profile, Preference } from "@prisma/client";
+import { Account, Role, Like, Match, Profile, Preference, Event } from "@prisma/client";
 import { firebaseFCM } from "../lib/firebase";
 
 
@@ -41,6 +41,14 @@ const profileController = {
                 await db.profile.update({
                     where: { username: data.username },
                     data
+                });
+            }
+            if (data.isActive) {
+                await db.history.create({
+                    data: {
+                        event: Event.ACCOUNT_ONLINE,
+                        accountId: req.params.id
+                    }
                 });
             }
             res.status(200).json({ message: "OK" });

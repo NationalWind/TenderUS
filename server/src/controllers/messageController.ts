@@ -3,6 +3,7 @@ import db from "../lib/db";
 import { Account, Role, Message } from "@prisma/client";
 import { firebaseFCM } from "../lib/firebase";
 import { parse } from "dotenv";
+import { History, Event } from "@prisma/client"
 
 const FCMPendingMessage = async (data: Omit<Message, "doc_id">) => {
     const foundAccount = await db.account.findUnique({ where: { username: data.receiver } });
@@ -259,6 +260,12 @@ const messageController = {
                 delete messagePollers[data.receiver];
             }
 
+            await db.history.create({
+                data: {
+                    event: Event.MESSAGE_SENT,
+                    accountId: req.params.id
+                }
+            });
             res.status(200).json(data);
 
         } catch (error) {
