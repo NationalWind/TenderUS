@@ -285,7 +285,7 @@ fun TopicSection(navController: NavController, exploreVM: ExploreVM = viewModel(
             )
             Spacer(modifier = Modifier.width(16.dp)) // Increase space between items
             CategoryItem(
-                imageRes = R.drawable.movie,
+                imageRes = R.drawable.movie_icon,
                 text = "Movie \nLovers",
                 onClick = {
                     exploreVM.getJoinStatus("Movie Lovers", scope) {
