@@ -82,8 +82,10 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
         val mainNavController = rememberNavController()
         NavHost(
             navController = mainNavController,
-            startDestination = "signin"
+            startDestination = "splash"
         ) {
+            composable("splash") { SplashScreen(navController = mainNavController) }
+            composable("onboarding1") { OnboardingScreen1(navController = mainNavController)}
             composable("signin") {
                 LoginScreen(navController = mainNavController) {
                     isLoggedIn = true
@@ -156,7 +158,6 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         startDestination = if (firstTime) "profilesetup1" else BottomNavItem.Discover.route
 
                     ) {
-
                         composable(BottomNavItem.Discover.route) {
                             LaunchedEffect(Unit) {
                                 showBar = true
@@ -212,7 +213,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 fusedLocationClient
                             )
                         }
-                        //                    composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
+//                                            composable(BottomNavItem.Chat.route) { MessageScreen(navController)}
                         composable(BottomNavItem.Profile.route) {
                             LaunchedEffect(Unit) {
                                 showBar = true

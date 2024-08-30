@@ -9,14 +9,21 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.hcmus.tenderus.TenderUsApplication
 import com.hcmus.tenderus.data.TokenManager
 
 import com.hcmus.tenderus.model.Match
 import com.hcmus.tenderus.model.Message
 import com.hcmus.tenderus.model.Profile
+import com.hcmus.tenderus.network.ApiClient.DiscoverService
+import com.hcmus.tenderus.network.ApiClient.ExploreService
 import com.hcmus.tenderus.network.ApiClient.GetActivityStatusApi
 import com.hcmus.tenderus.network.ApiClient.GetMatchesApi
 import com.hcmus.tenderus.network.ApiClient.HaveReadMessageApi
@@ -58,7 +65,7 @@ class MatchListVM: ViewModel() {
     var uiState by mutableStateOf(MessageStatus.LOADING)
 
     init {
-        if (TokenManager.getRole() == "USER") {
+//        if (TokenManager.getRole() == "USER") {
             try {
                 getMatches()
                 uiState = MessageStatus.SUCCESS
@@ -67,7 +74,7 @@ class MatchListVM: ViewModel() {
             }
 
             viewModelScope.launch {
-                while (true) {
+                for (i in 1..10) {
                     try {
                         val token = TokenManager.getToken() ?: break
                         val newMsg =
@@ -92,7 +99,7 @@ class MatchListVM: ViewModel() {
             }
 
             viewModelScope.launch {
-                while (true) {
+                for (i in 1..10) {
                     try {
                         val token = TokenManager.getToken() ?: break
                         val newMatch = MatchPollingApi.getNewMatch("Bearer $token")
@@ -111,11 +118,11 @@ class MatchListVM: ViewModel() {
                     } catch (e: Exception) {
                         Log.d("MatchPolling", e.toString())
                     }
-                }
+//                }
             }
 
             viewModelScope.launch {
-                while (true) {
+                for (i in 1..10) {
                     try {
                         val token = TokenManager.getToken()?:break
                         for (match in matches) {
@@ -245,6 +252,14 @@ class MatchListVM: ViewModel() {
             } catch (e: Exception) {
                 uiState = MessageStatus.FAILED
                 Log.d("GetProfile", e.toString())
+            }
+        }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                MatchListVM()
             }
         }
     }

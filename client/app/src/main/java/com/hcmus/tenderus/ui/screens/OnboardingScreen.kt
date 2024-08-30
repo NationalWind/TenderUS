@@ -62,7 +62,6 @@ fun OnboardingScreen1(navController: NavController) {
                     text = "Create an account",
                     color = Color.White,
                     fontSize = 23.sp,
-                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 5.dp) // Add vertical padding inside the button
 
                 )

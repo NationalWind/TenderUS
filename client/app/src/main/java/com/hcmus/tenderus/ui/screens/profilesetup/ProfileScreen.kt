@@ -55,11 +55,13 @@ import com.hcmus.tenderus.ui.viewmodels.ProfileUiState
 import com.hcmus.tenderus.ui.viewmodels.ProfileVM
 import com.hcmus.tenderus.utils.firebase.StorageUtil
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.util.Collections
+import kotlin.coroutines.resume
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -460,7 +462,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                     onDone = { focusManager.clearFocus() },
                 )
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(16f))
 
             Button(
                 onClick = { navController.navigate("interest") },
@@ -513,73 +515,68 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
             }
 
             val coroutineScope = rememberCoroutineScope()
-            Spacer(modifier = Modifier.weight(50f))
+            Spacer(modifier = Modifier.weight(40f))
 
             Button(
                 onClick = {
                     isLoading = true
                     errorMessage = ""
                     successMessage = ""
-
+                    // Validate fields
+                    if (name.text.isEmpty()) {
+                        errorMessage = "Full Name is required."
+                        isLoading = false
+                        return@Button
+                    }
+                    if (birthdate.text.isEmpty()) {
+                        errorMessage = "Birthdate is required."
+                        isLoading = false
+                        return@Button
+                    }
                     coroutineScope.launch {
-                        try {
-                            // Simulate a task that updates progress over time
-                            while (progress < 1.0f) {
-                                progress += 0.1f
-                                delay(20) // Adjust the delay for a smooth progress increment
-                            }
+                        // Check if the profileImageUri is valid
+                        if (newImageSelected) {
+                            try {
+                                // Log the URI for debugging
+                                Log.d("EditProfileScreen", "Uploading image with URI: ${profileImageUri.toString()}")
 
-                            // Check if the profileImageUri is valid
-                            if (newImageSelected) {
-                                try {
-                                    Log.d(
-                                        "EditProfileScreen",
-                                        "Uploading image with URI: ${profileImageUri.toString()}"
-                                    )
-
-                                    StorageUtil.uploadToStorage(
-                                        auth = FirebaseAuth.getInstance(),
-                                        uri = profileImageUri!!,
-                                        context = context,
-                                        type = "Image"
-                                    ) { downloadUrl ->
-                                        profile?.let { profileData ->
-                                            val updatedProfile = profileData.copy(
-                                                displayName = name.text,
-                                                birthDate = birthdate.text,
-                                                identity = gender,
-                                                avatarIcon = downloadUrl // Update with the new URL
-                                            )
-                                            profileVM.upsertUserProfile(
-                                                TokenManager.getToken() ?: "", updatedProfile
-                                            )
-                                            successMessage = "Profile updated successfully!"
-                                        }
+                                // Proceed with uploading the image
+                                StorageUtil.uploadToStorage(
+                                    auth = FirebaseAuth.getInstance(),
+                                    uri = profileImageUri!!,
+                                    context = context,
+                                    type = "Image"
+                                ) { downloadUrl ->
+                                    profile?.let { profileData ->
+                                        val updatedProfile = profileData.copy(
+                                            displayName = name.text,
+                                            birthDate = birthdate.text,
+                                            identity = gender,
+                                            avatarIcon = downloadUrl // Update with the new URL
+                                        )
+                                        profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                        successMessage = "Profile updated successfully!"
+                                        isLoading = false
                                     }
-                                } catch (e: Exception) {
-                                    Log.e("EditProfileScreen", "Error uploading image", e)
-                                    errorMessage = "Failed to upload image. Please try again."
                                 }
-                            } else {
-                                // No image to upload, just update the profile info
-                                profile?.let { profileData ->
-                                    val updatedProfile = profileData.copy(
-                                        displayName = name.text,
-                                        birthDate = birthdate.text,
-                                        identity = gender
-                                    )
-                                    profileVM.upsertUserProfile(
-                                        TokenManager.getToken() ?: "",
-                                        updatedProfile
-                                    )
-                                    successMessage = "Profile updated successfully!"
-                                }
+                            } catch (e: Exception) {
+                                Log.e("EditProfileScreen", "Error uploading image", e)
+                                // Handle or show an error message if needed
+                                isLoading = false
                             }
-                        } catch (e: Exception) {
-                            Log.e("EditProfileScreen", "Error during operation", e)
-                            errorMessage = "Failed to update profile. Please try again."
-                        } finally {
-                            isLoading = false // Ensure isLoading is set to false after completion
+                        } else {
+                            // No image to upload, just update the profile info
+                            profile?.let { profileData ->
+                                val updatedProfile = profileData.copy(
+                                    displayName = name.text,
+                                    birthDate = birthdate.text,
+                                    identity = gender
+                                )
+                                profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
+                                successMessage = "Profile updated successfully!"
+                                delay(1000)
+                                isLoading = false
+                            }
                         }
                     }
                 },
@@ -903,6 +900,17 @@ fun Add_Photos(
         }
     }
 
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.3f)),  // Semi-transparent black overlay
+            contentAlignment = Alignment.Center  // Center the CircularProgressIndicator
+        ) {
+            CircularProgressIndicator(color = Color.White)  // White progress indicator
+        }
+    }
+
     Scaffold(
         contentWindowInsets = WindowInsets(
             top =  0.dp,
@@ -1104,7 +1112,7 @@ fun Add_Photos(
             ) {
                 CircularProgressIndicator(color = Color.White)  // White progress indicator
             }
-    }
+        }
 }
 }
 

@@ -84,21 +84,35 @@ fun AvatarIcon(match: MatchState) {
 
 @Composable
 fun MatchItem(match: MatchState, onclick: () -> Unit) {
-    Row (
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onclick)
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         AvatarIcon(match)
         Column(
-            modifier = Modifier.padding(15.dp).weight(5f)
+            modifier = Modifier
+                .padding(15.dp)
+                .weight(5f)
         ) {
-            Text(text = match.displayName, style = Typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            val msg = if (match.messageArr.first().msgType == "Text") match.messageArr.first().content else match.messageArr.first().msgType
+            Text(
+                text = match.displayName,
+                style = Typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            val msg =
+                if (match.messageArr.first().msgType == "Text") match.messageArr.first().content else match.messageArr.first().msgType
             if (match.messageArr.first().receiver == match.username) {
-                Text(text = "You: $msg", style = Typography.bodyMedium.copy(color = Color.Gray), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = "You: $msg",
+                    style = Typography.bodyMedium.copy(color = Color.Gray),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             } else {
 
                 Text(
@@ -122,9 +136,11 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
         } else {
             str = (diff / 60 / 24).toString() + " days"
         }
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f))
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
         Text(text = str, maxLines = 1)
     }
 
@@ -132,34 +148,38 @@ fun MatchItem(match: MatchState, onclick: () -> Unit) {
 
 @Composable
 fun NewMatchItem(match: MatchState, onClick: () -> Unit) {
-    Column (
+    Column(
         modifier = Modifier
             .clickable(onClick = onClick)
             .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         AvatarIcon(match)
-        Text(text = match.displayName, modifier = Modifier
-            .padding(5.dp)
-            .fillMaxWidth(),
-            overflow = TextOverflow.Ellipsis)
+        Text(
+            text = match.displayName, modifier = Modifier
+                .padding(5.dp)
+                .fillMaxWidth(),
+            overflow = TextOverflow.Ellipsis
+        )
     }
 
 }
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MatchList(navController: NavController, matchListVM: MatchListVM = viewModel()) {
+fun MatchList(navController: NavController) {
     if (TokenManager.getRole() != "USER") {
         Box(
-            modifier = Modifier.fillMaxSize().background(Color.White),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
             Text(text = "You have to log in as user to chat", textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
         }
     } else {
+        val matchListVM: MatchListVM = viewModel(factory = MatchListVM.Factory)
         val matches = matchListVM.matches
         var searchText by remember { mutableStateOf("") }
 

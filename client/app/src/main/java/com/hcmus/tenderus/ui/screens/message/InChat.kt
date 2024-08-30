@@ -467,7 +467,7 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                                                     ) else Color.LightGray
                                                 )
                                                 .padding(16.dp)
-                                                .clickable { showReport = !showReport }
+//                                                .clickable { showReport = !showReport }
                                                 .pointerInput(Unit) {
                                                     detectTapGestures(onLongPress = {showReport = !showReport})
                                                 }
