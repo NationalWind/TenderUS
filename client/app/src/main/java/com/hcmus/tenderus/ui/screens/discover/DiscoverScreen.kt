@@ -235,8 +235,7 @@ fun DiscoverScreen(
                 color = Color.Gray,
                 modifier = Modifier
                     .align(Alignment.Start)
-                    .padding(start = 16.dp)
-            )
+                    .padding(start = 16.dp)            )
 
             DropdownMenu(
                 expanded = expanded,
@@ -444,6 +443,11 @@ fun SwipeableProfiles(
         isDislikeButtonActive = false
     }
 
+    if (currentProfileIndex == profiles.size - 1) {
+        LaunchedEffect(Unit) {
+            viewModel.getProfiles(TokenManager.getToken() ?: "", "10")
+        }
+    }
     if (profiles.isNotEmpty()) {
         Box(
             modifier = Modifier

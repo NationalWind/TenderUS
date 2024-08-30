@@ -74,7 +74,7 @@ class MatchListVM: ViewModel() {
             }
 
             viewModelScope.launch {
-                for (i in 1..10) {
+                while (true) {
                     try {
                         val token = TokenManager.getToken() ?: break
                         val newMsg =
@@ -95,11 +95,12 @@ class MatchListVM: ViewModel() {
                     } catch (e: Exception) {
                         Log.d("MsgPolling", e.toString())
                     }
+                    delay(10000)
                 }
             }
 
             viewModelScope.launch {
-                for (i in 1..10) {
+                while (true) {
                     try {
                         val token = TokenManager.getToken() ?: break
                         val newMatch = MatchPollingApi.getNewMatch("Bearer $token")
@@ -118,11 +119,12 @@ class MatchListVM: ViewModel() {
                     } catch (e: Exception) {
                         Log.d("MatchPolling", e.toString())
                     }
+                    delay(10000)
 //                }
             }
 
             viewModelScope.launch {
-                for (i in 1..10) {
+                while (true) {
                     try {
                         val token = TokenManager.getToken()?:break
                         for (match in matches) {
