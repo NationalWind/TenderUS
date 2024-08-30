@@ -218,7 +218,7 @@ fun ProfileDetails1Screen(
                                         isActive = true
                                     )
                                     profileVM.upsertUserProfile(TokenManager.getToken() ?: "", profile)
-                                    Log.d("ProfileDetails1Screen", "profile created")
+//                                    Log.d("ProfileDetails1Screen", "profile created")
                                     isButtonClicked = true
                                 }
                             }
@@ -242,7 +242,7 @@ fun ProfileDetails1Screen(
                                 isActive = true
                             )
                             profileVM.upsertUserProfile(TokenManager.getToken() ?: "", profile)
-                            Log.d("ProfileDetails1Screen", "profile created")
+//                            Log.d("ProfileDetails1Screen", "profile created")
                             isButtonClicked = true
                         }
                     }
@@ -287,7 +287,7 @@ fun ProfileDetails2Screen(
     when (profileUiState) {
         is ProfileUiState.Success -> {
             profile = (profileUiState as ProfileUiState.Success).profile
-            Log.d("ProfileDetails2Screen", "Profile fetched: $profile")
+//            Log.d("ProfileDetails2Screen", "Profile fetched: $profile")
         }
         is ProfileUiState.Error -> {
             error = true
@@ -379,7 +379,7 @@ fun ProfileDetails2Screen(
                     if (profile != null) {
                         val updatedProfile = profile!!.copy(identity = selectedGender)
                         profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                        Log.d("ProfileDetails2Screen", "profile updated")
+//                        Log.d("ProfileDetails2Screen", "profile updated")
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -525,7 +525,7 @@ fun ProfileDetails3Screen(
                         profile?.let {
                             val updatedProfile = it.copy(interests = selectedInterests.toList())
                             profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                            Log.d("ProfileDetails3Screen", "profile updated")
+//                            Log.d("ProfileDetails3Screen", "profile updated")
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB71C1C)),
@@ -580,7 +580,7 @@ fun ProfileDetails4Screen(
 
     LaunchedEffect(Unit) {
         profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-        Log.d("Photos", "profile Fetched")
+//        Log.d("Photos", "profile Fetched")
     }
 
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
@@ -711,7 +711,7 @@ fun ProfileDetails4Screen(
                                     profile?.let {
                                         val updatedProfile = it.copy(pictures = imageUrls)
                                         profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                        Log.d("ProfileDetails4Screen", "profile updated")
+//                                        Log.d("ProfileDetails4Screen", "profile updated")
                                     }
                                 }
                             }

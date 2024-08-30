@@ -395,7 +395,7 @@ fun InChatScreen(navController: NavController, context: Context, matchListVM: Ma
                 .fillMaxSize()
                 .padding(it)
         ) {
-            Log.d("d", it.toString())
+//            Log.d("d", it.toString())
             if (matches[idx].messageArr.isEmpty()) {
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     Text(

@@ -135,10 +135,10 @@ fun LoginScreen(navController: NavController, onLoggedIn: (res: LoginOKResponse)
                             val errorBody = e.response()?.errorBody()?.string()
                             val errorJson = errorBody?.let { JSONObject(it) }
                             errorMessage = errorJson?.optString("message") ?: "An error occurred"
-                            Log.d("Login", e.toString())
+//                            Log.d("Login", e.toString())
                         } catch (e: Exception) {
                             errorMessage = "An unexpected error occurred"
-                            Log.d("Login", e.toString())
+//                            Log.d("Login", e.toString())
                         } finally {
                             showLoading = false
                         }

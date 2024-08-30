@@ -126,7 +126,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         }
                     }
                 } catch (e: Exception) {
-                    Log.d("Profile", "Activity Status Update Failed")
+//                    Log.d("Profile", "Activity Status Update Failed")
                 }
             }
             Scaffold(
@@ -151,7 +151,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 .size(30.dp) // Adjust size as needed
                         )
                     }
-                    Log.d("dsoiegh", TokenManager.getToken() ?: "")
+//                    Log.d("dsoiegh", TokenManager.getToken() ?: "")
                     // Main content (NavHost)
                     NavHost(
                         navController = mainNavController,
@@ -186,7 +186,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                                 remember { mainNavController.getBackStackEntry(BottomNavItem.Explore.route) }
                             val category = it.arguments?.getString("category")
                             if (category != null) {
-                                Log.d("category", category)
+//                                Log.d("category", category)
                             }
 
                             category?.let { cate ->
@@ -228,7 +228,7 @@ fun MainScreen(firebaseSMSAuth: FirebaseSMSAuth, firebaseEmailAuth: FirebaseEmai
                         composable("profilesetup1") {
                             LaunchedEffect(Unit) {
                                 showBar = false
-                                Log.d("firstTime", firstTime.toString())
+//                                Log.d("firstTime", firstTime.toString())
                             }
                             ProfileDetails1Screen(mainNavController, fusedLocationClient)
 

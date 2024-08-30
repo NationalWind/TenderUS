@@ -338,7 +338,7 @@ fun DiscoverScreen(
 
                 is DiscoverUiState.Success -> {
                     profiles = (discoverUiState as DiscoverUiState.Success).profiles
-                    Log.d("{f", profile.toString())
+//                    Log.d("{f", profile.toString())
                     profile?.let { SwipeableProfiles(navController, it, profiles!!, viewModel,
                         fusedLocationProviderClient = fusedLocationProviderClient) }
                 }
@@ -436,7 +436,7 @@ fun SwipeableProfiles(
     }
 
     val swipeUiState by remember { derivedStateOf { viewModel.swipeUiState } }
-    Log.d("H", "HOWIEGHWEG")
+//    Log.d("H", "HOWIEGHWEG")
     // Reset button states when the profile changes
     LaunchedEffect(currentProfileIndex) {
         isLikeButtonActive = false
@@ -727,7 +727,7 @@ fun SwipeableProfiles(
             }
 
             is SwipeUiState.PassSuccess -> {
-                Log.d("Pass", "Passed")
+//                Log.d("Pass", "Passed")
             }
 
             is SwipeUiState.Error -> {

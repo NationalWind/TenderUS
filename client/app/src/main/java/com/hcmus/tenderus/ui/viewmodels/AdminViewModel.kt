@@ -49,13 +49,13 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             reportListUiState = try {
                 UiState.Success(tenderUsRepository.getReportList())
             } catch (e: IOException) {
-                Log.d("AdminReportList", e.message.toString())
+//                Log.d("AdminReportList", e.message.toString())
                 UiState.Error
             } catch (e: HttpException) {
-                Log.d("AdminReportList", e.message.toString())
+//                Log.d("AdminReportList", e.message.toString())
                 UiState.Error
             } catch (e: Exception) {
-                Log.d("AdminReportList", e.message.toString())
+//                Log.d("AdminReportList", e.message.toString())
                 UiState.Error
             }
         }
@@ -67,13 +67,13 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             reportDetailUiState = try {
                 UiState.Success(tenderUsRepository.getReportDetail(id))
             } catch (e: IOException) {
-                Log.d("AdminReportDetail", e.message.toString())
+//                Log.d("AdminReportDetail", e.message.toString())
                 UiState.Error
             } catch (e: HttpException) {
-                Log.d("AdminReportDetail", e.message.toString())
+//                Log.d("AdminReportDetail", e.message.toString())
                 UiState.Error
             } catch (e: Exception) {
-                Log.d("AdminReportDetail", e.message.toString())
+//                Log.d("AdminReportDetail", e.message.toString())
                 UiState.Error
             }
         }
@@ -85,13 +85,13 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             try {
                 tenderUsRepository.postReportAction(id, reportAction)
             } catch (e: IOException) {
-                Log.d("AdminReportAction", e.message.toString())
+//                Log.d("AdminReportAction", e.message.toString())
                 reportDetailUiState = UiState.Error
             } catch (e: HttpException) {
-                Log.d("AdminReportAction", e.message.toString())
+//                Log.d("AdminReportAction", e.message.toString())
                 reportDetailUiState = UiState.Error
             } catch (e: Exception) {
-                Log.d("AdminReportAction", e.message.toString())
+//                Log.d("AdminReportAction", e.message.toString())
                 reportDetailUiState = UiState.Error
             }
         }
@@ -103,13 +103,13 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             accountListUiState = try {
                 UiState.Success(tenderUsRepository.getAccountList())
             } catch (e: IOException) {
-                Log.d("AdminAccountList", e.message.toString())
+//                Log.d("AdminAccountList", e.message.toString())
                 UiState.Error
             } catch (e: HttpException) {
-                Log.d("AdminAccountList", e.message.toString())
+//                Log.d("AdminAccountList", e.message.toString())
                 UiState.Error
             } catch (e: Exception) {
-                Log.d("AdminAccountList", e.message.toString())
+//                Log.d("AdminAccountList", e.message.toString())
                 UiState.Error
             }
         }
@@ -121,13 +121,13 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             accountDetailUiState = try {
                 UiState.Success(tenderUsRepository.getAccountDetail(id))
             } catch (e: IOException) {
-                Log.d("AdminAccountDetail", e.message.toString())
+//                Log.d("AdminAccountDetail", e.message.toString())
                 UiState.Error
             } catch (e: HttpException) {
-                Log.d("AdminAccountDetail", e.message.toString())
+//                Log.d("AdminAccountDetail", e.message.toString())
                 UiState.Error
             } catch (e: Exception) {
-                Log.d("AdminAccountDetail", e.message.toString())
+//                Log.d("AdminAccountDetail", e.message.toString())
                 UiState.Error
             }
         }
@@ -139,13 +139,13 @@ class AdminViewModel(private val tenderUsRepository: TenderUsRepository) : ViewM
             try {
                 tenderUsRepository.postAccountAction(id, accountAction)
             } catch (e: IOException) {
-                Log.d("AdminAccountAction", e.message.toString())
+//                Log.d("AdminAccountAction", e.message.toString())
                 reportDetailUiState = UiState.Error
             } catch (e: HttpException) {
-                Log.d("AdminAccountAction", e.message.toString())
+//                Log.d("AdminAccountAction", e.message.toString())
                 reportDetailUiState = UiState.Error
             } catch (e: Exception) {
-                Log.d("AdminAccountAction", e.message.toString())
+//                Log.d("AdminAccountAction", e.message.toString())
                 reportDetailUiState = UiState.Error
             }
         }

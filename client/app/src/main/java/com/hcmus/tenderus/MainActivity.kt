@@ -171,9 +171,9 @@ class MainActivity : ComponentActivity() {
                 return@OnCompleteListener
             }
             TenderUSPushNotificationService.token = task.result
-            Log.d(TAG, "Token: ${task.result}")
+//            Log.d(TAG, "Token: ${task.result}")
         })
-        Log.d(TAG, "Init")
+//        Log.d(TAG, "Init")
 
         enableEdgeToEdge()
         setContent {
@@ -233,7 +233,7 @@ fun ExampleLogin(navController: NavController) {
             try {
                 LoginApi.login(userLogin)
             } catch (e: Exception) {
-                Log.d("Login", e.toString())
+//                Log.d("Login", e.toString())
             }
         }
     }) {
@@ -254,7 +254,7 @@ fun ExampleEmailSend(firebaseEmailAuth: FirebaseEmailAuth, navController: NavCon
                     firebaseEmailAuth.sendEmail("maiamtinhthuong8@gmail.com")
                     navController.navigate("emailconfirm")
                 } catch (e: Exception) {
-                    Log.d("EmailSend", e.toString())
+//                    Log.d("EmailSend", e.toString())
                 }
             }
         }) {
@@ -276,7 +276,7 @@ fun ExampleEmailConfirm(firebaseEmailAuth: FirebaseEmailAuth, navController: Nav
             firebaseEmailAuth.confirm()
             navController.navigate("emailsync")
         } catch (e: Exception) {
-            Log.d("emailConfirm", e.toString())
+//            Log.d("emailConfirm", e.toString())
         }
     }
 }
@@ -292,7 +292,7 @@ fun ExampleEmailSync() {
             GenAuth.syncForSignUp("abcdxyz", "abcdxyz")
             text = "Sign up Successfully!!!"
         } catch (e: Exception) {
-            Log.d("EmailSync", e.toString())
+//            Log.d("EmailSync", e.toString())
         }
     }
 }

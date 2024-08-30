@@ -283,7 +283,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
     // Fetch profile data
     LaunchedEffect(Unit) {
         profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-        Log.d("Profile", "Profile fetched")
+//        Log.d("Profile", "Profile fetched")
     }
 
     // Handle profile data and errors
@@ -538,7 +538,7 @@ fun EditProfileScreen(navController: NavController, profileVM: ProfileVM = viewM
                         if (newImageSelected) {
                             try {
                                 // Log the URI for debugging
-                                Log.d("EditProfileScreen", "Uploading image with URI: ${profileImageUri.toString()}")
+//                                Log.d("EditProfileScreen", "Uploading image with URI: ${profileImageUri.toString()}")
 
                                 // Proceed with uploading the image
                                 StorageUtil.uploadToStorage(
@@ -861,7 +861,7 @@ fun Add_Photos(
 
     LaunchedEffect(Unit) {
         profileVM.getCurrentUserProfile(TokenManager.getToken() ?: "")
-        Log.d("Photos", "Profile fetched")
+//        Log.d("Photos", "Profile fetched")
     }
 
     val profileUiState by remember { derivedStateOf { profileVM.profileUiState } }
@@ -1033,7 +1033,7 @@ fun Add_Photos(
                                             imageUrls.addAll(existingImageUrls)
                                             val updatedProfile = userProfile.copy(pictures = imageUrls)
                                             profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                            Log.d("Add Photos", "Profile updated with new images")
+//                                            Log.d("Add Photos", "Profile updated with new images")
                                             isLoading = false  // End loading
                                         }
                                     }
@@ -1044,7 +1044,7 @@ fun Add_Photos(
                                 imageUrls.addAll(existingImageUrls)
                                 val updatedProfile = userProfile.copy(pictures = imageUrls)
                                 profileVM.upsertUserProfile(TokenManager.getToken() ?: "", updatedProfile)
-                                Log.d("Add Photos", "Profile updated with existing images only")
+//                                Log.d("Add Photos", "Profile updated with existing images only")
                                 isLoading = false  // End loading
                             }
                         } ?: run {

@@ -39,7 +39,7 @@ class ExploreVM(
                 exploreService.join("Bearer " + TokenManager.getToken()!!, group)
                 this@ExploreVM.group = group
             } catch (e: Exception) {
-                Log.d("Join", e.toString())
+//                Log.d("Join", e.toString())
             }
         }
     }
@@ -56,7 +56,7 @@ class ExploreVM(
                     onNotJoin()
                 }
             } catch (e: Exception) {
-                Log.d("Join", e.toString())
+//                Log.d("Join", e.toString())
             }
         }
 
@@ -72,13 +72,13 @@ class ExploreVM(
                     discoverUiState = DiscoverUiState.Success(profileResponse.profiles)
                 }
             } catch (e: IOException) {
-                Log.d("GetProfiles", e.message.toString())
+//                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             } catch (e: HttpException) {
-                Log.d("GetProfiles", e.message.toString())
+//                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             } catch (e: Exception) {
-                Log.d("GetProfiles", e.message.toString())
+//                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             }
         }

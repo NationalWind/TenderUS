@@ -241,7 +241,7 @@ fun SignUpScreen(
                                 isSendingSMS = true
                                 scope.launch {
                                     try {
-                                        Log.d("SignUp", "Sending SMS to $fullPhoneNumber")
+//                                        Log.d("SignUp", "Sending SMS to $fullPhoneNumber")
                                         firebaseSMSAuth.sendSMS(fullPhoneNumber)
                                         step = 2
                                     } catch (e: Exception) {
@@ -363,7 +363,7 @@ fun SignUpScreen(
                                     firebaseSMSAuth.confirm(verificationCode)
                                     step = 5
                                 } catch (e: Exception) {
-                                    Log.d("SMSSend", e.toString())
+//                                    Log.d("SMSSend", e.toString())
                                 }
                             }
                         },
@@ -441,7 +441,7 @@ fun SignUpScreen(
                                         step = 4
                                     } catch (e: Exception) {
                                         errorMessage = "Failed to send email: ${e.message}"
-                                        Log.d("EmailSend", e.toString())
+//                                        Log.d("EmailSend", e.toString())
                                     }
                                 }
                             } else {
@@ -653,11 +653,11 @@ fun SignUpScreen(
                                         delay(20)
                                         navController.navigate("signin")
                                     } catch (e: retrofit2.HttpException) {
-                                        Log.d("Signup", e.toString())
+//                                        Log.d("Signup", e.toString())
                                         errorMessage = "Internal server error. This could be due to a duplicate username or other server issues. Please try again later."
                                     } catch (e: Exception) {
                                         errorMessage = "An unexpected error occurred"
-                                        Log.d("Signup", e.toString())
+//                                        Log.d("Signup", e.toString())
                                     } finally {
                                         isLoading = false
                                     }

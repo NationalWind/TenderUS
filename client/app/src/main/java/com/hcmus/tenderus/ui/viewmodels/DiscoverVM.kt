@@ -64,13 +64,13 @@ open class DiscoverVM(
                 val profileResponse = if (TokenManager.getRole() == "GUEST") discoverService.getProfiles() else discoverService.getProfiles("Bearer $token", limit)
                 discoverUiState = DiscoverUiState.Success(profileResponse.profiles)
             } catch (e: IOException) {
-                Log.d("GetProfiles", e.message.toString())
+//                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             } catch (e: HttpException) {
-                Log.d("GetProfiles", e.message.toString())
+//                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             } catch (e: Exception) {
-                Log.d("GetProfiles", e.message.toString())
+//                Log.d("GetProfiles", e.message.toString())
                 discoverUiState = DiscoverUiState.Error
             }
         }
@@ -88,13 +88,13 @@ open class DiscoverVM(
                     swipeUiState = SwipeUiState.LikeSuccess(likeResponse.match)
                 }
             } catch (e: IOException) {
-                Log.d("LikeProfiles", e.message.toString())
+//                Log.d("LikeProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             } catch (e: HttpException) {
-                Log.d("LikeProfiles", e.message.toString())
+//                Log.d("LikeProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             } catch (e: Exception) {
-                Log.d("LikeProfiles", e.message.toString())
+//                Log.d("LikeProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             }
         }
@@ -110,13 +110,13 @@ open class DiscoverVM(
                 }
                 swipeUiState = SwipeUiState.PassSuccess
             } catch (e: IOException) {
-                Log.d("PassProfiles", e.message.toString())
+//                Log.d("PassProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             } catch (e: HttpException) {
-                Log.d("PassProfiles", e.message.toString())
+//                Log.d("PassProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             } catch (e: Exception) {
-                Log.d("PassProfiles", e.message.toString())
+//                Log.d("PassProfiles", e.message.toString())
                 swipeUiState = SwipeUiState.Error
             }
         }
@@ -127,9 +127,9 @@ open class DiscoverVM(
             try {
                 tenderUsRepository.postReport(report)
             } catch (e: IOException) {
-                Log.d("DiscoverPostReport", e.message.toString())
+//                Log.d("DiscoverPostReport", e.message.toString())
             } catch (e: retrofit2.HttpException) {
-                Log.d("DiscoverPostReport", e.message.toString())
+//                Log.d("DiscoverPostReport", e.message.toString())
             }
         }
     }

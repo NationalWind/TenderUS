@@ -93,7 +93,7 @@ class MatchListVM: ViewModel() {
                         matches[0].isActive = true
 
                     } catch (e: Exception) {
-                        Log.d("MsgPolling", e.toString())
+//                        Log.d("MsgPolling", e.toString())
                     }
                     delay(10000)
                 }
@@ -117,7 +117,7 @@ class MatchListVM: ViewModel() {
                             )
                         }
                     } catch (e: Exception) {
-                        Log.d("MatchPolling", e.toString())
+//                        Log.d("MatchPolling", e.toString())
                     }
                     delay(10000)
 //                }
@@ -134,7 +134,7 @@ class MatchListVM: ViewModel() {
                         }
 
                     } catch (e: Exception) {
-                        Log.d("Active Status", e.toString())
+//                        Log.d("Active Status", e.toString())
                     }
                 }
             }
@@ -190,7 +190,7 @@ class MatchListVM: ViewModel() {
                 }
             } catch (e: Exception) {
                 uiState = MessageStatus.FAILED
-                Log.d("GetMatches", e.toString())
+//                Log.d("GetMatches", e.toString())
             }
         }
     }
@@ -211,7 +211,7 @@ class MatchListVM: ViewModel() {
                 uiState = MessageStatus.SUCCESS
 
             } catch (e: Exception) {
-                Log.d("MsgSending", e.toString())
+//                Log.d("MsgSending", e.toString())
                 uiState = MessageStatus.FAILED
             }
         }
@@ -229,7 +229,7 @@ class MatchListVM: ViewModel() {
                 uiState = MessageStatus.SUCCESS
             } catch (e: Exception) {
                 uiState = MessageStatus.FAILED
-                Log.d("MsgLoading", e.toString())
+//                Log.d("MsgLoading", e.toString())
             }
         }
 
@@ -240,7 +240,7 @@ class MatchListVM: ViewModel() {
             try {
                 HaveReadMessageApi.update("Bearer " + TokenManager.getToken()!!, HaveReadMessageRequest(conversationID))
             } catch (e: Exception) {
-                Log.d("MsgBeRead", e.toString())
+//                Log.d("MsgBeRead", e.toString())
             }
         }
     }
@@ -253,7 +253,7 @@ class MatchListVM: ViewModel() {
                 uiState = MessageStatus.SUCCESS
             } catch (e: Exception) {
                 uiState = MessageStatus.FAILED
-                Log.d("GetProfile", e.toString())
+//                Log.d("GetProfile", e.toString())
             }
         }
     }
